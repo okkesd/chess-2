@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brown-rgb: rgb(92, 82, 42);
+  --color-chess-dark: rgb(181,136,99);
+  --color-chess-light: rgb(240,217,181);
+  --color-chess-highlight: #829769;
+  --color-chess-highlight-dark: #6B7748;
+  --color-light-brown-rgb: rgb(176, 183, 124);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: rgb(181, 136, 99);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
