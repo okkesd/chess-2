@@ -1,6 +1,6 @@
 "use client"
 
-import { React, useState, createContext } from "react"
+import { React, useState, createContext, useEffect } from "react"
 const BOARD_SIZE = 8
 
 let initBoard = [
@@ -3130,13 +3130,15 @@ function drawPossibleMoves(
 }
 
 
-// NOTE: Check if move is makeable
-function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch, setSelectedPiece: React.Dispatch, selectedPiece: Piece){
+// NOTE: Check if move is makeable - if it's drawn, it's makeable
+function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch | null, selectedPiece: Piece,
+                   wsInstance: WebSocket|null){
 
     // first clear the board
-    setDrawState(initDrawState);
+    if (setDrawState != null) { // if it's null, it means we're doing the opponent's move
+        setDrawState(initDrawState);
+    }
     console.log("makeMove: col: ", col_id, "row: ", row_id)
-
 
     // move the piece, remove from one square, add to another square
     let selected_col = selectedPiece.col
@@ -3153,6 +3155,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch, 
 
             obj[key] = selectedPiece.name
             //console.log("make Move - add piece:", obj[key])
+            
 
         }
         if (Number(String(key)[1]) == selected_row){
@@ -3188,10 +3191,20 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch, 
         }
     }
 
+    let move_msg: Move = {
+        type: "Move",
+        from_col: selected_col,
+        from_row: selected_row,
+        piece_name: selectedPiece.name,
+        to_col: col_id,
+        to_row: row_id
+    }
 
+    if (setDrawState != null){
+        sendMoveToServer(wsInstance, move_msg);
+    }
     
     
-
     return updated_piece;
 }
 
@@ -3212,10 +3225,13 @@ function clearBoard(setDrawState: React.Dispatch){
 
 // after take piece, we should remove it from initboards cause later in the game there are dead pieces that actually blocks checks etc
 
-function takePiece(col_id: number, row_id: number, selectedPiece: Piece){
+function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInstance: WebSocket|null){
     /*
         Function that runs when a piece is taken, col_id, row_id is the location of the eaten piece, selected piece is the one that eats
     */
+
+    let from_row = selectedPiece.row
+    let from_col = selectedPiece.col
 
     let piece_eaten = getPiece(col_id, row_id, true)
     let init_board_len1 = initBoard.length
@@ -3234,9 +3250,6 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece){
         }
     }
 
-    
-
-    
 
     let second_obj = boardInverse[col_id]
 
@@ -3259,6 +3272,18 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece){
     }
 
     isCheckCondition(col_id, row_id)
+
+    let move_msg: Move = {
+        type: "Move",
+        from_col: from_col,
+        from_row: from_row,
+        piece_name: selectedPiece.name,
+        to_col: col_id,
+        to_row: row_id
+    }
+
+    if (wsInstance != null) {sendMoveToServer(wsInstance, move_msg);}
+
     return updated_piece
 }
 
@@ -3877,18 +3902,24 @@ function isCheckCondition(col_id: number, row_id: number){
       - pawn goes to other pieces (a selection required)
       - rook move O-O O-O-O
 
+      - implement after makeMove function protocols
+
       --- later ? (after backend in rust)
       - piece move by mouse hold
 */
 function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispatch, allDrawState: boolean[][], 
                        setSelectedPiece: React.Dispatch, selectedPiece: Piece, turn: string, setTurn: React.Dispatch,
                        setIsCheck: React.Dispatch, isCheck: boolean, checkingPiece: Piece, setCheckingPiece: React.Dispatch,
-                       colsAndRows: null|{row: number, col:number}[], setColsAndRows: React.Dispatch){
+                       colsAndRows: null|{row: number, col:number}[], setColsAndRows: React.Dispatch, wsInstance: WebSocket|null,
+                       playerTurn: string){
     /*
         Onclick handler on squares. It draws the possible moves, and should handle the move
         Notes: could be two separate function -> draw possible moves and leave, handle the move
     */
-   console.log("onclickSquare :")
+    console.log("onclickSquare :")
+    if (playerTurn != turn){
+        return;
+    }
 
     let piece = getPiece(col_id, row_id, true)
     console.log("destination is : ", piece)
@@ -3902,7 +3933,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
             console.log("we make move to empty place")
             console.log("selected piece is (before makeMove): ", selectedPiece)
 
-            let updated_piece = makeMove(col_id, row_id, setDrawState, setSelectedPiece, selectedPiece); 
+            let updated_piece = makeMove(col_id, row_id, setDrawState, selectedPiece, wsInstance); 
             
             
             let is_check_local = isCheckCondition(col_id, row_id) // check if the piece in the given location can thread the opponent king
@@ -3926,6 +3957,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
             setTurn((old: string) => {
                 return old == "white" ? "black" : "white" // just flip the turn
             })
+
             // console.log(selectedPiece)
             return;
         }
@@ -3956,7 +3988,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
 
             if (allDrawState[col_id][row_id] == true) {
 
-                let updated_piece = takePiece(col_id, row_id, selectedPiece);
+                let updated_piece = takePiece(col_id, row_id, selectedPiece, wsInstance);
                 
                 clearBoard(setDrawState);
 
@@ -3978,6 +4010,9 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
                 setTurn((old: string) => {
                     return old == "white" ? "black" : "white" // just flip the turn
                 })
+
+                // send the move to the server
+                sendMoveToServer(wsInstance, "")
                 console.log("take piece")
             }
             else {
@@ -4014,13 +4049,113 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
     }    
 }
 
+interface Move {
+    type: string
+    from_col: number
+    from_row: number
+    piece_name: string
+    to_col: number
+    to_row: number
+}
+
+/*
+    Funtion to realize moves coming from server, receiving
+*/
+function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPiece: React.Dispatch, setColsAndRows: React.Dispatch,
+                            setTurn: React.Dispatch, turn: string){
+
+                                  /*let custom_selected_piece: Piece = {
+        col: move.from_col,
+        row: move.from_row,
+        name: move.piece_name,
+        kind: "not important",
+        color: "not important",
+        has_moved: true,
+        moveable: true
+    }*/
+    console.log("OK now we need to do the move: ", move)
+  
+
+    let piece = getPiece(move.from_col, move.from_row, true)
+    console.log("Looking for ", move.from_col, move.from_row)
+    console.log("Piece found is ", piece)
+
+    let piece_in = null
+    for (let key in initBoard){ // key is just index here
+        
+        if (Object.keys(initBoard[key])[0] == piece){
+            
+            piece_in = initBoard[key]
+            console.log("piece_in here: ",piece_in)
+            break;
+        }
+    }
+    if (piece_in == null) {console.log("There should be an ERROR"); return;}
+    let custom_selected_piece = {...Object.values(piece_in)[0]}
+    console.log("For opponent custom selected piece is: ", custom_selected_piece)
+
+    let updated_piece = makeMove(move.to_col, move.to_row, null, custom_selected_piece, null)
+    
+    let is_check_local = isCheckCondition(move.to_col, move.to_row) // check if the piece in the given location can thread the opponent king
+    setIsCheck(is_check_local)
+    
+    if (is_check_local) {
+        
+        setCheckingPiece({...updated_piece})
+        console.log("check came by: ", updated_piece)
+        let cols_and_rows = setMoveablePieces(turn, updated_piece, setColsAndRows)
+        console.log("real cols and rows: ", cols_and_rows)
+        setColsAndRows([...cols_and_rows])
+    } else {
+        setColsAndRows(null)
+    }
+    
+    
+    setTurn((old: string) => {
+        return old == "white" ? "black" : "white" // just flip the turn
+    })
+
+
+    console.log("Opponent move is done")
+
+    // - implement after makeMove function protocols
+}
+
+/*
+    Function to send the given message to the server
+*/
+function sendMoveToServer(wsInstance: WebSocket|null, msg: Move){
+    if (wsInstance) {
+
+        wsInstance.send(JSON.stringify(msg));
+
+    } else {
+        throw new Error("websocket connection is not found")
+    }
+}
+
 const COLORS = {
     WHITE: "white",
     BLACK: "black"
 }
 
+// Source - https://stackoverflow.com/a/3710226
+// Posted by Gumbo, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-06-26, License - CC BY-SA 4.0
+
+function isJsonString(str: string) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+
 export default function Board(){
 
+    const [isGameReady, setIsGameReady] = useState(false);
     const [boardState, setBoardState] = useState()
 
     const [drawState, setDrawState] = useState(
@@ -4028,10 +4163,83 @@ export default function Board(){
     ) // initial state of possible moves
 
     const [selectedPiece, setSelectedPiece] = useState<Piece>({...nullPiece});
+
     const [turn, setTurn] = useState<string>("white")
+    const [playerTurn, setPlayerTurn] = useState<string>("white") 
+    // NOTE: We need to and these two when clicking to a piece
+
     const [isCheck, setIsCheck] = useState<boolean>(false)
     const [checkingPiece, setCheckingPiece] = useState<Piece>({...nullPiece})
     const [colsAndRows, setColsAndRows] = useState<null|{row:number, col: number}[]>(null)
+
+    const isBrowser = typeof window !== "undefined";
+    const [wsInstance, setWsInstance] = useState<WebSocket | null>(null)
+
+    // do the web socket connection
+    useEffect(() => {
+        console.log(`My turn is ${playerTurn}`)
+        if (isBrowser && !isGameReady && !wsInstance) {
+            const ws = new WebSocket("ws://localhost:4000")
+            setWsInstance(ws)
+            
+            console.log("websocket is connected")
+        } else {
+            console.log("not a browser, weird")
+        }
+    }, [isBrowser, 0])
+
+    useEffect(() => {
+
+        // websocket connection event listeners
+        if (wsInstance) {
+    
+            wsInstance.addEventListener("open", () => {
+                console.log("connection created, waiting...")
+            })
+    
+            wsInstance.addEventListener("error", (e) => {
+                console.log("error occured in websocket: ", e)
+            })
+    
+            wsInstance.addEventListener("close", () => {
+                console.log("webscoket connection closed");
+            })
+    
+            wsInstance.addEventListener("message", (e) => {
+                console.log("received message: ", e.data)
+                console.log(e)
+    
+                if (e.data == "GameStarting"){
+                    console.log("game is starting now")
+                    setIsGameReady(true)
+                }
+                 else if (isJsonString(e.data) && JSON.parse(e.data).type == "Move"){
+    
+                    makeOpponentMove(JSON.parse(e.data), setIsCheck, setCheckingPiece, setColsAndRows, setTurn, turn)
+                    console.log("Opponents move: ", e.data)
+                } else if (e.data.includes("opponent")){
+                    if (e.data.includes("white")){
+                        setPlayerTurn("white");
+                        if (!e.data.includes("do_not_sent_back")) {
+                            wsInstance.send("youre black (opponent) do_not_sent_back")
+                        }
+                            
+                    } else {
+                        setPlayerTurn("black")
+                        if (!e.data.includes("do_not_sent_back")) {
+                            wsInstance.send("youre white (opponent) do_not_sent_back")
+                        }
+                    }
+                } else {
+                    console.log(typeof((e.data)))
+    
+                    console.log("Unexpected message: ", e.data)
+                }
+            })
+        }
+    }, [wsInstance])
+    
+
 
     let columns = []
     for (let i = 0; i<BOARD_SIZE; i++){
@@ -4058,6 +4266,8 @@ export default function Board(){
             setCheckingPiece={setCheckingPiece}
             colsAndRows={colsAndRows}
             setColsAndRows={setColsAndRows}
+            wsInstance={wsInstance}
+            playerTurn={playerTurn}
         />)
     })
     
@@ -4065,7 +4275,7 @@ export default function Board(){
     return(
         <>
             <div className="Board flex m-5 ">
-                {displayColumns}
+                {isGameReady ? displayColumns : <div>Game searching ... Wait</div>}
             </div>
         </>
     )
@@ -4086,10 +4296,12 @@ interface ColumnProps {
     setCheckingPiece: React.Dispatch
     colsAndRows: null|{row:number, col:number}[]
     setColsAndRows: React.Dispatch
+    wsInstance: WebSocket | null
+    playerTurn: string
 }
 
 function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck,
-                 isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows} : ColumnProps){
+                 isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn} : ColumnProps){
 
     let squares = Array()
     for (let i = 0; i<BOARD_SIZE; i++){
@@ -4123,6 +4335,8 @@ function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, se
             setCheckingPiece={setCheckingPiece}
             colsAndRows={colsAndRows}
             setColsAndRows={setColsAndRows}
+            wsInstance={wsInstance}
+            playerTurn={playerTurn}
             />
         )
     })
@@ -4155,10 +4369,12 @@ interface SquareProps{
     setCheckingPiece: React.Dispatch
     colsAndRows: null|{row:number, col:number}[]
     setColsAndRows: React.Dispatch
+    wsInstance: WebSocket | null
+    playerTurn: string
 }
 
 function Square({col_id, row_id, color, label_color, setDrawState, drawState, allDrawState, setSelectedPiece, selectedPiece, turn, 
-                 setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows}: SquareProps){
+                 setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn}: SquareProps){
 
     let piece = getPiece(col_id, row_id, false) // piece is like wking.svg
     let piece_name = getPiece(col_id, row_id, true)
@@ -4188,7 +4404,7 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
         <div
           className={`${bgColor} w-25 h-25 relative ${bgHover}`}
           onClick={() => onclickSquare(col_id, row_id, setDrawState, allDrawState, setSelectedPiece, selectedPiece, turn,
-            setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows)}
+            setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn)}
         >
           {/* Şah işareti */}
           {isKingChecked && (
