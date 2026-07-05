@@ -1,11 +1,12 @@
 "use client"
 
-import { React, useState, createContext, useEffect } from "react"
+import { React, useState, createContext, useEffect, useRef, RefObject } from "react"
 const BOARD_SIZE = 8
 
-let initBoard = [
-    {"W_bishop_black" : {"col": 5, "row": 7, "name": "W_bishop_black", "kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
-    {"W_bishop_white" : {"col": 2, "row": 7, "name": "W_bishop_white","kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
+
+let initBoard_fromWhite: {}[] = [
+    {"W_bishop_black" : {"col": 2, "row": 7, "name": "W_bishop_black", "kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
+    {"W_bishop_white" : {"col": 5, "row": 7, "name": "W_bishop_white","kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
     {"W_knight_1" : {"col": 1, "row" : 7, "name": "W_knight_1", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
     {"W_knight_2" : {"col": 6, "row": 7, "name": "W_knight_2", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
     {"W_rook_1" : {"col": 0, "row": 7, "name": "W_rook_1", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}}},
@@ -13,8 +14,8 @@ let initBoard = [
     {"W_queen" : {"col": 3, "row": 7, "name": "W_queen", "kind": "queen", "color": "white", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}}},
     {"W_king" : {"col": 4, "row": 7, "name": "W_king", "kind": "king", "has_moved": false, "color": "white", "moveable": true}},
 
-    {"B_bishop_black" : {"col": 2, "row": 0, "name": "B_bishop_black", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
-    {"B_bishop_white" : {"col": 5, "row": 0, "name": "B_bishop_white", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
+    {"B_bishop_black" : {"col": 5, "row": 0, "name": "B_bishop_black", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
+    {"B_bishop_white" : {"col": 2, "row": 0, "name": "B_bishop_white", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
     {"B_knight_1" : {"col": 1, "row" : 0, "name": "B_knight_1", "kind": "knight", "has_moved": false, "color": "black", "moveable": true}},
     {"B_knight_2" : {"col": 6, "row": 0, "name": "B_knight_2", "kind": "knight", "has_moved": false, "color": "black", "moveable": true}},
     {"B_rook_1" : {"col": 0, "row": 0, "name": "B_rook_1", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}}},
@@ -39,6 +40,44 @@ let initBoard = [
     {"W_pawn_6" : {"col": 5, "row": 6, "name": "W_pawn_6", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
     {"W_pawn_7" : {"col": 6, "row": 6, "name": "W_pawn_7", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
     {"W_pawn_8" : {"col": 7, "row": 6, "name": "W_pawn_8", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+]
+
+let initBoard_fromBlack = [
+    {"W_bishop_black" : {"col": 5, "row": 0, "name": "W_bishop_black", "kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
+    {"W_bishop_white" : {"col": 2, "row": 0, "name": "W_bishop_white","kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
+    {"W_knight_1" : {"col": 1, "row": 0, "name": "W_knight_1", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
+    {"W_knight_2" : {"col": 6, "row": 0, "name": "W_knight_2", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
+    {"W_rook_1" : {"col": 0, "row": 0, "name": "W_rook_1", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}}},
+    {"W_rook_2" : {"col": 7, "row": 0, "name": "W_rook_2", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}}},
+    {"W_queen" : {"col": 4, "row": 0, "name": "W_queen", "kind": "queen", "color": "white", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}}},
+    {"W_king" : {"col": 3, "row": 0, "name": "W_king", "kind": "king", "has_moved": false, "color": "white", "moveable": true}},
+
+    {"B_bishop_black" : {"col": 2, "row": 7, "name": "B_bishop_black", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
+    {"B_bishop_white" : {"col": 5, "row": 7, "name": "B_bishop_white", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
+    {"B_knight_1" : {"col": 1, "row": 7, "name": "B_knight_1", "kind": "knight", "has_moved": false, "color": "black", "moveable": true}},
+    {"B_knight_2" : {"col": 6, "row": 7, "name": "B_knight_2", "kind": "knight", "has_moved": false, "color": "black", "moveable": true}},
+    {"B_rook_1" : {"col": 0, "row": 7, "name": "B_rook_1", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}}},
+    {"B_rook_2" : {"col": 7, "row": 7, "name": "B_rook_2", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}}},
+    {"B_queen" : {"col": 4, "row": 7, "name": "B_queen", "kind": "queen", "color": "black", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}}},
+    {"B_king" : {"col": 3, "row": 7, "name": "B_king", "kind": "king", "has_moved": false, "color": "black", "moveable": true}},
+
+    {"B_pawn_1" : {"col": 0, "row": 6, "name": "B_pawn_1", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"B_pawn_2" : {"col": 1, "row": 6, "name": "B_pawn_2", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"B_pawn_3" : {"col": 2, "row": 6, "name": "B_pawn_3", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"B_pawn_4" : {"col": 3, "row": 6, "name": "B_pawn_4", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"B_pawn_5" : {"col": 4, "row": 6, "name": "B_pawn_5", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"B_pawn_6" : {"col": 5, "row": 6, "name": "B_pawn_6", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"B_pawn_7" : {"col": 6, "row": 6, "name": "B_pawn_7", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"B_pawn_8" : {"col": 7, "row": 6, "name": "B_pawn_8", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+
+    {"W_pawn_1" : {"col": 0, "row": 1, "name": "W_pawn_1", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"W_pawn_2" : {"col": 1, "row": 1, "name": "W_pawn_2", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"W_pawn_3" : {"col": 2, "row": 1, "name": "W_pawn_3", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"W_pawn_4" : {"col": 3, "row": 1, "name": "W_pawn_4", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"W_pawn_5" : {"col": 4, "row": 1, "name": "W_pawn_5", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"W_pawn_6" : {"col": 5, "row": 1, "name": "W_pawn_6", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"W_pawn_7" : {"col": 6, "row": 1, "name": "W_pawn_7", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"W_pawn_8" : {"col": 7, "row": 1, "name": "W_pawn_8", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
 ]
 
 let nameToImage = {
@@ -80,7 +119,7 @@ let nameToImage = {
     "B_pawn_8" : "bP.svg",
 }
 
-let boardInverse = [
+let boardInverse_fromWhite = [
     {
         r0 : "B_rook_1",
         r1 : "B_pawn_1",
@@ -104,14 +143,14 @@ let boardInverse = [
     },
 
     {
-        r0 : "B_bishop_black",
+        r0 : "B_bishop_white",
         r1 : "B_pawn_3",
         r2 : "empty",
         r3 : "empty",
         r4 : "empty",
         r5 : "empty",
         r6 : "W_pawn_3",
-        r7 : "W_bishop_white",
+        r7 : "W_bishop_black",
     },
 
     {
@@ -137,14 +176,14 @@ let boardInverse = [
     },
 
     {
-        r0 : "B_bishop_white",
+        r0 : "B_bishop_black",
         r1 : "B_pawn_6",
         r2 : "empty",
         r3 : "empty",
         r4 : "empty",
         r5 : "empty",
         r6 : "W_pawn_6",
-        r7 : "W_bishop_black",
+        r7 : "W_bishop_white",
     },
 
     {
@@ -170,6 +209,96 @@ let boardInverse = [
     }
 ]
 
+let boardInverse_fromBlack = [
+    {
+        r0 : "W_rook_1",
+        r1 : "W_pawn_1",
+        r2 : "empty",
+        r3 : "empty",
+        r4 : "empty",
+        r5 : "empty",
+        r6 : "B_pawn_1",
+        r7 : "B_rook_1",
+    },
+
+    {
+        r0 : "W_knight_1",
+        r1 : "W_pawn_2",
+        r2 : "empty",
+        r3 : "empty",
+        r4 : "empty",
+        r5 : "empty",
+        r6 : "B_pawn_2",
+        r7 : "B_knight_1",
+    },
+
+    {
+        r0 : "W_bishop_white",
+        r1 : "W_pawn_3",
+        r2 : "empty",
+        r3 : "empty",
+        r4 : "empty",
+        r5 : "empty",
+        r6 : "B_pawn_3",
+        r7 : "B_bishop_black",
+    },
+
+    {
+        r0 : "W_king",
+        r1 : "W_pawn_4",
+        r2 : "empty",
+        r3 : "empty",
+        r4 : "empty",
+        r5 : "empty",
+        r6 : "B_pawn_4",
+        r7 : "B_king",
+    },
+
+    {
+        r0 : "W_queen",
+        r1 : "W_pawn_5",
+        r2 : "empty",
+        r3 : "empty",
+        r4 : "empty",
+        r5 : "empty",
+        r6 : "B_pawn_5",
+        r7 : "B_queen",
+    },
+
+    {
+        r0 : "W_bishop_black",
+        r1 : "W_pawn_6",
+        r2 : "empty",
+        r3 : "empty",
+        r4 : "empty",
+        r5 : "empty",
+        r6 : "B_pawn_6",
+        r7 : "B_bishop_white",
+    },
+
+    {
+        r0 : "W_knight_2",
+        r1 : "W_pawn_7",
+        r2 : "empty",
+        r3 : "empty",
+        r4 : "empty",
+        r5 : "empty",
+        r6 : "B_pawn_7",
+        r7 : "B_knight_2",
+    },
+
+    {
+        r0 : "W_rook_2",
+        r1 : "W_pawn_8",
+        r2 : "empty",
+        r3 : "empty",
+        r4 : "empty",
+        r5 : "empty",
+        r6 : "B_pawn_8",
+        r7 : "B_rook_2",
+    }
+]
+
 let initDrawState = [
             [false, false, false, false, false, false, false, false],
             [false, false, false, false, false, false, false, false],
@@ -183,18 +312,31 @@ let initDrawState = [
 
 let nullPiece = {col: -1, row: -1, name: "null", kind: "null", has_moved: false, color: "null", moveable: false}
 
-function getPiece(col_id: number, row_id: number, get_name: boolean){
+function getPiece(col_id: number, row_id: number, get_name: boolean, boardInverseGeneral: {}[], debug?: Boolean|undefined){
     /*
         Get the piece name or image path by given col_id and row_id
     */
 
-    let obj = boardInverse[col_id]
-    if (get_name){
-        /*console.log("col_id: ", col_id, "row_id: ", row_id)
-console.log("copy in getPiece: ", obj)*/
+    if (debug){
+        console.log("Board inverse in getPiece: ", boardInverseGeneral)
+    }
+
+    let localBoardInverseGeneral = boardInverseGeneral.slice()
+    if (debug){
+        console.log("localBoard INverse in getPiece: ", localBoardInverseGeneral)
+    }
+
+    let obj = localBoardInverseGeneral[col_id]
+    if (debug) {
+        console.log("obj in getPiece: ", obj)
     }
     
+    
     for (let key in obj){
+        if (debug){
+            console.log("key is : ", key)
+            console.log("element is :",obj[key])
+        }
         if (Number(String(key)[1]) == row_id && obj[key] != "empty"){
             let name = obj[key]
             
@@ -215,95 +357,96 @@ interface Piece {
     moveable: any;
 }
 
-function notKingAdjacent(col: number, row: number, turn: string){
+// clear init board
+function notKingAdjacent(col: number, row: number, turn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
     /*
         Helper function to check if given is a opponent king adjacent to prevent drawing that square
         Returns false if it's king adjacent, else true which passes to draw
     */
 
     // right down
-    let piece = getPiece(col+1, row+1, true)
+    let piece = getPiece(col+1, row+1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoard){
-            let value = Object.values(initBoard[key])[0]
-            if (Object.keys(initBoard[key])[0] == piece && value.color != turn && value.kind == "king"){
+        for (let key in initBoardGeneral){
+            let value = Object.values(initBoardGeneral[key])[0]
+            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
     }
 
     // right
-    piece = getPiece(col+1, row, true)
+    piece = getPiece(col+1, row, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoard){
-            let value = Object.values(initBoard[key])[0]
-            if (Object.keys(initBoard[key])[0] == piece && value.color != turn && value.kind == "king"){
+        for (let key in initBoardGeneral){
+            let value = Object.values(initBoardGeneral[key])[0]
+            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
     }
 
     // right up
-    piece = getPiece(col+1, row-1, true)
+    piece = getPiece(col+1, row-1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoard){
-            let value = Object.values(initBoard[key])[0]
-            if (Object.keys(initBoard[key])[0] == piece && value.color != turn && value.kind == "king"){
+        for (let key in initBoardGeneral){
+            let value = Object.values(initBoardGeneral[key])[0]
+            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
     }
 
     // down
-    piece = getPiece(col, row+1, true)
+    piece = getPiece(col, row+1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoard){
-            let value = Object.values(initBoard[key])[0]
-            if (Object.keys(initBoard[key])[0] == piece && value.color != turn && value.kind == "king"){
+        for (let key in initBoardGeneral){
+            let value = Object.values(initBoardGeneral[key])[0]
+            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
     }
 
     // up
-    piece = getPiece(col, row-1, true)
+    piece = getPiece(col, row-1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoard){
-            let value = Object.values(initBoard[key])[0]
-            if (Object.keys(initBoard[key])[0] == piece && value.color != turn && value.kind == "king"){
+        for (let key in initBoardGeneral){
+            let value = Object.values(initBoardGeneral[key])[0]
+            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
     }
 
     // left down
-    piece = getPiece(col-1, row+1, true)
+    piece = getPiece(col-1, row+1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoard){
-            let value = Object.values(initBoard[key])[0]
-            if (Object.keys(initBoard[key])[0] == piece && value.color != turn && value.kind == "king"){
+        for (let key in initBoardGeneral){
+            let value = Object.values(initBoardGeneral[key])[0]
+            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
     }
 
     // left
-    piece = getPiece(col-1, row, true)
+    piece = getPiece(col-1, row, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoard){
-            let value = Object.values(initBoard[key])[0]
-            if (Object.keys(initBoard[key])[0] == piece && value.color != turn && value.kind == "king"){
+        for (let key in initBoardGeneral){
+            let value = Object.values(initBoardGeneral[key])[0]
+            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
     }
 
     // left up
-    piece = getPiece(col-1, row-1, true) 
+    piece = getPiece(col-1, row-1, true, boardInverseGeneral) 
     if (piece != null){
-        for (let key in initBoard){
-            let value = Object.values(initBoard[key])[0]
-            if (Object.keys(initBoard[key])[0] == piece && value.color != turn && value.kind == "king"){
+        for (let key in initBoardGeneral){
+            let value = Object.values(initBoardGeneral[key])[0]
+            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -312,8 +455,9 @@ function notKingAdjacent(col: number, row: number, turn: string){
     return true
 }
 
+// clear init board
 // NOTE: This should be traversing the alive pieces of opponent !Important
-function notEatable(col: number, row: number, turn: string){
+function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
     /*
         Helper function for king to not draw eatable squares
         Returns true if the given square is not Eatable by oppponent, else false which prevents drawing
@@ -325,8 +469,8 @@ function notEatable(col: number, row: number, turn: string){
     let opponent_pieces: string[] = []
 
     // add the opponent pieces (as names)
-    for (let key in initBoard){
-        if (Object.values(initBoard[key])[0].color != turn) opponent_pieces.push(Object.keys(initBoard[key])[0])
+    for (let key in initBoardGeneral){
+        if (Object.values(initBoardGeneral[key])[0].color != turn) opponent_pieces.push(Object.keys(initBoardGeneral[key])[0])
     }
 
     console.log("for col: ", col, " for row: ", row)
@@ -335,12 +479,12 @@ function notEatable(col: number, row: number, turn: string){
         let piece_col_loc
         let piece_row_loc
         let piece: Object = nullPiece // not sure of this
-        for (let key in initBoard){
+        for (let key in initBoardGeneral){
 
-            if (Object.keys(initBoard[key])[0] == opponent_pieces[op_piece]){
-                piece = initBoard[key]
-                piece_col_loc = Object.values(initBoard[key])[0].col
-                piece_row_loc = Object.values(initBoard[key])[0].row
+            if (Object.keys(initBoardGeneral[key])[0] == opponent_pieces[op_piece]){
+                piece = initBoardGeneral[key]
+                piece_col_loc = Object.values(initBoardGeneral[key])[0].col
+                piece_row_loc = Object.values(initBoardGeneral[key])[0].row
                 break
             }
         }
@@ -362,16 +506,16 @@ function notEatable(col: number, row: number, turn: string){
                     if (row_loc >= 0){
 
                         // get piece
-                        let piece = getPiece(col_loc, row_loc, true);
+                        let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
 
                         if (piece == null){
                             //candidates[col_loc][row_loc] = true
                             if (col_loc == col && row_loc == row) return false
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidates[col_loc][row_loc] = true
                                     if (col_loc == col && row_loc == row) return false
                                     break
@@ -389,16 +533,16 @@ function notEatable(col: number, row: number, turn: string){
                     if (row_loc_2 <= 7){
 
                         // get piece
-                        let piece = getPiece(col_loc_2, row_loc_2, true);
+                        let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
 
                         if (piece == null){
                             //candidates[col_loc_2][row_loc_2] = true
                             if (col_loc_2 == col && row_loc_2 == row) return false
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidates[col_loc_2][row_loc_2] = true
                                     if (col_loc_2 == col && row_loc_2 == row) return false
                                     break
@@ -416,16 +560,16 @@ function notEatable(col: number, row: number, turn: string){
                     if (row_loc_3 >= 0){
 
                         // get piece
-                        let piece = getPiece(col_loc_3, row_loc_3, true);
+                        let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
 
                         if (piece == null){
                             //candidates[col_loc_3][row_loc_3] = true
                             if (col_loc_3 == col && row_loc_3 == row) return false
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidates[col_loc_3][row_loc_3] = true
                                     if (col_loc_3 == col && row_loc_3 == row) return false
                                     break
@@ -443,16 +587,16 @@ function notEatable(col: number, row: number, turn: string){
                     if (row_loc_4 <= 7){
 
                         // get piece
-                        let piece = getPiece(col_loc_4, row_loc_4, true);
+                        let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
 
                         if (piece == null){
                             //candidates[col_loc_4][row_loc_4] = true
                             if (col_loc_4 == col && row_loc_4 == row) return false
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidates[col_loc_4][row_loc_4] = true
                                     if (col_loc_4 == col && row_loc_4 == row) return false
                                     break
@@ -475,13 +619,13 @@ function notEatable(col: number, row: number, turn: string){
 
                     if (piece_row_loc +1 <= 7){
 
-                        let piece = getPiece(piece_col_loc-2, piece_row_loc+1, true)
+                        let piece = getPiece(piece_col_loc-2, piece_row_loc+1, true, boardInverseGeneral)
                         if (piece == null){ // there is no piece, you can draw
                             //candidate[col-2][row+1] = true
                             if (piece_col_loc-2 == col && piece_row_loc+1 == row) return false
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidate[col-2][row+1] = true
                                     if (piece_col_loc-2 == col && piece_row_loc+1 == row) return false
                                 }
@@ -492,15 +636,15 @@ function notEatable(col: number, row: number, turn: string){
                     }
                     if (piece_row_loc -1 >= 0){
 
-                        let piece = getPiece(piece_col_loc-2, piece_row_loc-1, true)
+                        let piece = getPiece(piece_col_loc-2, piece_row_loc-1, true, boardInverseGeneral)
                         if (piece == null){ // there is no piece, draw
                             //candidate[col-2][row-1] = true
                             if (piece_col_loc-2 == col && piece_row_loc-1 == row) return false
 
                         } else { // there is a piece, if it's not black -> draw
                     
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidate[col-2][row-1] = true
                                     if (piece_col_loc-2 == col && piece_row_loc-1 == row) return false
                                 }
@@ -513,14 +657,14 @@ function notEatable(col: number, row: number, turn: string){
                 if (piece_col_loc +2 <= 7){
 
                     if (piece_row_loc +1 <= 7){
-                        let piece = getPiece(piece_col_loc+2, piece_row_loc+1, true)
+                        let piece = getPiece(piece_col_loc+2, piece_row_loc+1, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             //candidate[col+2][row+1] = true
                             if (piece_col_loc+2 == col && piece_row_loc+1 == row) return false
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidate[col+2][row+1] = true
                                     if (piece_col_loc+2 == col && piece_row_loc+1 == row) return false
                                 }
@@ -529,14 +673,14 @@ function notEatable(col: number, row: number, turn: string){
                         
                     }
                     if (piece_row_loc -1 >= 0){
-                        let piece = getPiece(piece_col_loc+2, piece_row_loc-1, true)
+                        let piece = getPiece(piece_col_loc+2, piece_row_loc-1, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             //candidate[col+2][row-1] = true
                             if (piece_col_loc+1 == col && piece_row_loc-1 == row) return false
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidate[col+2][row-1] = true
                                     if (piece_col_loc+2 == col && piece_row_loc-1 == row) return false
                                 }
@@ -549,14 +693,14 @@ function notEatable(col: number, row: number, turn: string){
                 if (piece_row_loc +2 <= 7){
 
                     if (piece_col_loc -1 >= 0){
-                        let piece = getPiece(piece_col_loc-1, piece_row_loc+2, true)
+                        let piece = getPiece(piece_col_loc-1, piece_row_loc+2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             //candidate[col-1][row+2] = true
                             if (piece_col_loc-1 == col && piece_row_loc+1 == row) return false
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidate[col-1][row+2] = true
                                     if (piece_col_loc-1 == col && piece_row_loc+2 == row) return false
                                 }
@@ -565,14 +709,14 @@ function notEatable(col: number, row: number, turn: string){
                         
                     }
                     if (piece_col_loc +1 <= 7){
-                        let piece = getPiece(piece_col_loc+1, piece_row_loc+2, true)
+                        let piece = getPiece(piece_col_loc+1, piece_row_loc+2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             //candidate[col+1][row+2] = true
                             if (piece_col_loc+1 == col && piece_row_loc+2 == row) return false
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidate[col+1][row+2] = true
                                     if (piece_col_loc+1 == col && piece_row_loc+2 == row) return false
                                 }
@@ -585,14 +729,14 @@ function notEatable(col: number, row: number, turn: string){
                 if (piece_row_loc -2 >= 0){
 
                     if (piece_col_loc -1 >= 0){
-                        let piece = getPiece(piece_col_loc-1, piece_row_loc-2, true)
+                        let piece = getPiece(piece_col_loc-1, piece_row_loc-2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             //candidate[col-1][row-2] = true
                             if (piece_col_loc-1 == col && piece_row_loc-2 == row) return false
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidate[col-1][row-2] = true
                                     if (piece_col_loc == col-1 && piece_row_loc-2 == row) return false
                                 }
@@ -602,14 +746,14 @@ function notEatable(col: number, row: number, turn: string){
                         
                     }
                     if (piece_col_loc +1 <= 7){
-                        let piece = getPiece(piece_col_loc+1, piece_row_loc-2, true)
+                        let piece = getPiece(piece_col_loc+1, piece_row_loc-2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             //candidate[col+1][row-2] = true
                             if (piece_col_loc+1 == col && piece_row_loc-2 == row) return false
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidate[col+1][row-2] = true
                                     if (piece_col_loc+1 == col && piece_row_loc-2 == row) return false
                                 }
@@ -630,14 +774,14 @@ function notEatable(col: number, row: number, turn: string){
 
             while (row_loc >= 0){ // to the up
                         
-                let piece = getPiece(piece_col_loc, row_loc, true)
+                let piece = getPiece(piece_col_loc, row_loc, true, boardInverseGeneral)
                 if (piece == null){ // empty, draw it
                     
                     if (piece_col_loc == col && row_loc == row) return false;
                 } else {
 
-                    for (let key in initBoard){
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                    for (let key in initBoardGeneral){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (piece_col_loc == col && row_loc == row) return false;
                             break;
@@ -650,12 +794,12 @@ function notEatable(col: number, row: number, turn: string){
 
             while (row_loc_2 <= 7){ // to the down 
                 
-                let piece = getPiece(piece_col_loc, row_loc_2, true);
+                let piece = getPiece(piece_col_loc, row_loc_2, true, boardInverseGeneral);
                 if (piece == null) {
                     if (piece_col_loc == col && row_loc_2 == row) return false;
                 } else {
-                    for (let key in initBoard){
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                    for (let key in initBoardGeneral){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (piece_col_loc == col && row_loc_2 == row) return false;
                             break;
@@ -668,13 +812,13 @@ function notEatable(col: number, row: number, turn: string){
 
             while (col_loc >= 0){ // to the left
                 
-                let piece = getPiece(col_loc, piece_row_loc, true);
+                let piece = getPiece(col_loc, piece_row_loc, true, boardInverseGeneral);
                 if (piece == null) {
                     
                     if (col_loc == col && piece_row_loc == row) return false;
                 } else {
-                    for (let key in initBoard){
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                    for (let key in initBoardGeneral){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             if (col_loc == col && piece_row_loc == row) return false;
                             break;
                         }
@@ -686,13 +830,13 @@ function notEatable(col: number, row: number, turn: string){
 
             while (col_loc_2 <= 7){ // to the right
                 
-                let piece = getPiece(col_loc_2, piece_row_loc, true);
+                let piece = getPiece(col_loc_2, piece_row_loc, true, boardInverseGeneral);
                 if (piece == null) {
                     
                     if (col_loc_2 == col && piece_row_loc == row) return false;
                 } else {
-                    for (let key in initBoard){
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                    for (let key in initBoardGeneral){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (col_loc_2 == col && piece_row_loc == row) return false;
                             break;
@@ -724,16 +868,16 @@ function notEatable(col: number, row: number, turn: string){
 
                 if (row_loc >= 0){
 
-                    let piece = getPiece(col_loc, row_loc, true);
+                    let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
 
                     if (piece == null){
                         
                         if (col_loc == col && row_loc == row) return false
                     } else {
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 
                                 if (col_loc == col && row_loc == row) return false
                                 break
@@ -751,16 +895,16 @@ function notEatable(col: number, row: number, turn: string){
 
                 if (row_loc_2 <= 7){
 
-                    let piece = getPiece(col_loc_2, row_loc_2, true);
+                    let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
 
                     if (piece == null){
                         
                         if (col_loc_2 == col && row_loc_2 == row) return false
                     } else {
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 
                                 if (col_loc_2 == col && row_loc_2 == row) return false
                                 break
@@ -778,16 +922,16 @@ function notEatable(col: number, row: number, turn: string){
 
                 if (row_loc_3 >= 0){
 
-                    let piece = getPiece(col_loc_3, row_loc_3, true);
+                    let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
 
                     if (piece == null){
                         
                         if (col_loc_3 == col && row_loc_3 == row) return false
                     } else {
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 
                                 if (col_loc_3 == col && row_loc_3 == row) return false
                                 break
@@ -805,16 +949,16 @@ function notEatable(col: number, row: number, turn: string){
 
                 if (row_loc_4 <= 7){
 
-                    let piece = getPiece(col_loc_4, row_loc_4, true);
+                    let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
 
                     if (piece == null){
                         
                         if (col_loc_4 == col && row_loc_4 == row) return false
                     } else {
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 
                                 if (col_loc_4 == col && row_loc_4 == row) return false
                                 break
@@ -831,16 +975,16 @@ function notEatable(col: number, row: number, turn: string){
 
             while (col_loc_5 <= 7){ // to right
 
-                let piece = getPiece(col_loc_5, piece_row_loc, true)
+                let piece = getPiece(col_loc_5, piece_row_loc, true, boardInverseGeneral)
                 
                 if (piece == null){
                     
                     if (col_loc_5 == col && piece_row_loc == row) return false
                 } else {
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (col_loc_5 == col && piece_row_loc == row) return false
                             break
@@ -854,16 +998,16 @@ function notEatable(col: number, row: number, turn: string){
 
             while (col_loc_6 >= 0){ // to left
 
-                let piece = getPiece(col_loc_6, piece_row_loc, true)
+                let piece = getPiece(col_loc_6, piece_row_loc, true, boardInverseGeneral)
 
                 if (piece == null){
                     
                     if (col_loc_6 == col && piece_row_loc == row) return false
                 } else {
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (col_loc_6 == col && piece_row_loc == row) return false
                             break
@@ -877,7 +1021,7 @@ function notEatable(col: number, row: number, turn: string){
 
             while (row_loc_5 <= 7){ // to down
 
-                let piece = getPiece(piece_col_loc, row_loc_5, true)
+                let piece = getPiece(piece_col_loc, row_loc_5, true, boardInverseGeneral)
                 
 
                 if (piece == null){
@@ -885,9 +1029,9 @@ function notEatable(col: number, row: number, turn: string){
                     if (piece_col_loc == col && row_loc_5 == row) return false
                 } else {
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (piece_col_loc == col && row_loc_5 == row) return false
                             break
@@ -901,15 +1045,15 @@ function notEatable(col: number, row: number, turn: string){
 
             while (row_loc_6 >= 0){ // to up
 
-                let piece = getPiece(piece_col_loc, row_loc_6, true)
+                let piece = getPiece(piece_col_loc, row_loc_6, true, boardInverseGeneral)
 
                 if (piece == null){
                     if (piece_col_loc == col && row_loc_6 == row) return false
                 } else {
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (piece_col_loc == col && row_loc_6 == row) return false
                             break
@@ -926,25 +1070,25 @@ function notEatable(col: number, row: number, turn: string){
 
             if (piece_col_loc + 1 < 8 && piece_row_loc - 1 >= 0){
                         
-                    let piece = getPiece(piece_col_loc + 1, piece_row_loc - 1, true)
+                    let piece = getPiece(piece_col_loc + 1, piece_row_loc - 1, true, boardInverseGeneral)
                     if (piece == null){
                         if (piece_col_loc +1 == col && piece_row_loc -1 == row) return false
                     }
-                    for (let key in initBoard){ // key is just index here
+                    for (let key in initBoardGeneral){ // key is just index here
     
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (piece_col_loc +1 == col && piece_row_loc -1 == row) return false
                         }
                     }
                 } 
                 if (piece_col_loc - 1 >= 0 && piece_row_loc -1 >= 0){
-                    let piece = getPiece(piece_col_loc - 1, piece_row_loc -1, true)
+                    let piece = getPiece(piece_col_loc - 1, piece_row_loc -1, true, boardInverseGeneral)
                     if (piece == null){
                         if (piece_col_loc-1 == col && piece_row_loc -1 == row) return false
                     }
-                    for (let key in initBoard){ // key is just index here        
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                    for (let key in initBoardGeneral){ // key is just index here        
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
                             if (piece_col_loc-1 == col && piece_row_loc -1 == row) return false
                         }
@@ -957,16 +1101,20 @@ function notEatable(col: number, row: number, turn: string){
     return true
 }
 
-function setMoveablePieces(turn: string, checkingPiece: Piece, setColsAndRows: React.Dispatch){
+// NOTE: In here probably we need to know the playerTurn too in order to get the correct squares between checking piece and our king
+// currently it comes but seems like it inverse, not correct squares. Job for the weekend!!!
+function setMoveablePieces(playerTurn: string, checkingPiece: Piece, setColsAndRows: React.Dispatch, initBoardGeneral: {}[]){
+
+    console.log("LOGS:\nturn:", playerTurn, "checkingPiece.color: ", checkingPiece.color, "\ncheckingPiece:", checkingPiece)
 
     // save the king, we probably need it later
     let turn_king = null
-    for (let key in initBoard){
-        if (Object.values(initBoard[key])[0].kind == "king" && Object.values(initBoard[key])[0].color != turn){
+    for (let key in initBoardGeneral){
+        if (Object.values(initBoardGeneral[key])[0].kind == "king" && Object.values(initBoardGeneral[key])[0].color != checkingPiece.color){
 
                 
-                let unknownKey = Object.keys(initBoard[key])[0]
-                turn_king = initBoard[key][unknownKey]
+                let unknownKey = Object.keys(initBoardGeneral[key])[0]
+                turn_king = initBoardGeneral[key][unknownKey]
                 break;
             }
     }
@@ -1080,33 +1228,46 @@ console.log("king is in right down")
         // for cross of queen
         if (checkingPiece.row > turn_king.row && checkingPiece.col > turn_king.col){ // king is in left-up
 
-            console.log("king is in left-down")
+            console.log("king is in left-down (for black)")
             let king_col = turn_king.col +1
-            let king_row = turn_king.row +1
+            let king_row = turn_king.row -1 // no, there might be a move translation required
             while (king_col < checkingPiece.col && king_row < checkingPiece.row){
 
+                console.log("pushing row: ", king_row, "col: ", king_col)
                 cols_and_rows.push({row:  king_row, col: king_col})
                 king_col++;
                 king_row++;
             }
 
         } else if (checkingPiece.row < turn_king.row && checkingPiece.col > turn_king.col){ // king is in left down
-console.log("king is in left up")
+console.log("king is in left up | king is in left down (for white)")
             let king_col = turn_king.col +1
             let king_row = turn_king.row -1
-            while (king_col > checkingPiece.col && king_row < checkingPiece.row){
 
-                cols_and_rows.push({row:  king_row, col: king_col})
-                king_col--;
-                king_row++;
+            if (playerTurn == "white"){
+                while(king_col < checkingPiece.col && king_row > checkingPiece.row){
+            
+                    console.log("pushing row: ", king_row, "col: ", king_col)
+                    cols_and_rows.push({row:  king_row, col: king_col})
+                    king_col++;
+                    king_row--;
+                }
+            } else {
+                while (king_col > checkingPiece.col && king_row < checkingPiece.row){
+
+                    console.log("pushing row: ", king_row, "col: ", king_col)
+                    cols_and_rows.push({row:  king_row, col: king_col})    
+                    king_col--;
+                    king_row++;   
+                }
             }
 
-        } else if (checkingPiece.row > turn_king.rook && checkingPiece.col < turn_king.col){ // king is in right up
-console.log("king is in right up")
+        } else if (checkingPiece.row > turn_king.row && checkingPiece.col < turn_king.col){ // king is in right up
+console.log("king is in right up (for black)")
             let king_col = turn_king.col -1
             let king_row = turn_king.row +1
             while (king_col < checkingPiece.col && king_row > checkingPiece.row){
-
+                console.log("pushing row: ", king_row, "col: ", king_col)
                 cols_and_rows.push({row:  king_row, col: king_col})
                 king_col++;
                 king_row--;
@@ -1177,7 +1338,10 @@ interface drawPossibleMovesProps extends Piece {
     turn: string
     isCheck: boolean
     colsAndRows: null|{row: number, col:number}[] // {row: number, col:number}[]
+    player_color: string
     is_it_blocked: boolean
+    initBoardGeneral: {}[]
+    boardInverseGeneral: {}[]
 }
 
 // !IMPORTANT
@@ -1205,28 +1369,39 @@ interface drawPossibleMovesProps extends Piece {
 // !IMPORTANT
 
 interface isNotBlockedProps extends Piece {
-    //turn: string
+    turn: string
+    initBoardGeneral: RefObject<{}[]>
+    //setInitBoardGeneral: React.Dispatch
+    boardInverseGeneral: {}[]
 }
 
+// clear board inverse
+// clear init board
 // for now it's working
 function isNotBlocked({col, 
     row, 
     name, 
     kind, 
     has_moved, 
-    color}: isNotBlockedProps){
+    color,
+    moveable,
+    turn,
+    initBoardGeneral,
+    boardInverseGeneral}: isNotBlockedProps){
 
     if (kind == "king") return true
 
     console.log("isNotBlocked: name: ", name, "kind: ", kind, "row,col : ", row, col)
+    console.log("boardInverseLocal in olay mahali but upper: ", boardInverseGeneral)
+
 
     // find the king
     let turn_king
-    for (let key in initBoard){
+    for (let key in initBoardGeneral.current){
 
-        if (Object.values(initBoard[key])[0].color == color && Object.values(initBoard[key])[0].kind == "king"){
-            let unknownKey = Object.keys(initBoard[key])[0]
-            turn_king = initBoard[key][unknownKey]
+        if (Object.values(initBoardGeneral.current[key])[0].color == color && Object.values(initBoardGeneral.current[key])[0].kind == "king"){
+            let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+            turn_king = initBoardGeneral.current[key][unknownKey]
             break;
         }
     }
@@ -1241,7 +1416,7 @@ function isNotBlocked({col,
         if (row < turn_king.row){ // piece is in up
 
             let piece_row = row+1
-            let obj = boardInverse[col]
+            let obj = boardInverseGeneral[col]
 
             // for king
             while (piece_row < turn_king.row){
@@ -1268,12 +1443,12 @@ function isNotBlocked({col,
 
                         if (obj[key] != "empty") {
 
-                            let piece_there = getPiece(col, piece_row_2, true)
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece_there){
+                            let piece_there = getPiece(col, piece_row_2, true, boardInverseGeneral)
+                            for (let key in initBoardGeneral.current){
+                                if (Object.keys(initBoardGeneral.current[key])[0] == piece_there){
                                 
-                                    if ((Object.values(initBoard[key])[0].kind == "rook" || Object.values(initBoard[key])[0].kind == "queen")
-                                        && Object.values(initBoard[key])[0].color != color){
+                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "rook" || Object.values(initBoardGeneral.current[key])[0].kind == "queen")
+                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
                                         opponent_exists = true
                                         break
                                     } else {
@@ -1297,7 +1472,7 @@ function isNotBlocked({col,
         } else if (row > turn_king.row){ // piece is in down 
 
             let piece_row = row-1
-            let obj = boardInverse[col]
+            let obj = boardInverseGeneral[col]
 
             while (piece_row > turn_king.row){
 
@@ -1321,12 +1496,12 @@ function isNotBlocked({col,
 
                         if (obj[key] != "empty") {
 
-                            let piece_there = getPiece(col, piece_row_2, true)
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece_there){
+                            let piece_there = getPiece(col, piece_row_2, true, boardInverseGeneral)
+                            for (let key in initBoardGeneral.current){
+                                if (Object.keys(initBoardGeneral.current[key])[0] == piece_there){
                                 
-                                    if ((Object.values(initBoard[key])[0].kind == "rook" || Object.values(initBoard[key])[0].kind == "queen")
-                                        && Object.values(initBoard[key])[0].color != color){
+                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "rook" || Object.values(initBoardGeneral.current[key])[0].kind == "queen")
+                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
                                         opponent_exists = true
                                         break
                                     } else {
@@ -1355,17 +1530,24 @@ function isNotBlocked({col,
 
         if (kind == "pawn"){
 
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
 
                     if (early_return_condition){
-                        initBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
 
                     } else {
-                        initBoard[key][unknownKey].moveable = {leftEat: false, rightEat: false, forward: true}
+                        
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {leftEat: false, rightEat: false, forward: true}
+                        initBoardGeneral.current = [...localInitBoard]
+                        
                         break
                     }
                     
@@ -1373,35 +1555,47 @@ function isNotBlocked({col,
             }
         } else if (kind == "knight"){
         
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
 
                     if (early_return_condition){
-                        initBoard[key][unknownKey].moveable = true
-                        break
+                        
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = true
+                        initBoardGeneral.current = [...localInitBoard]
 
+                        break
                     } else {
 
-                        initBoard[key][unknownKey].moveable = false
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = false
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
                     }
                 }
             }
         } else if (kind == "bishop"){
             
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
                     
                     if (early_return_condition){
-                        initBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                        initBoardGeneral.current = [...localInitBoard]
+                        
                         break
 
                     } else {
-                        initBoard[key][unknownKey].moveable = {leftUp: false, rightUp: false}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {leftUp: false, rightUp: false}
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
                     }
                     
@@ -1409,17 +1603,23 @@ function isNotBlocked({col,
             }
         } else if (kind == "rook"){
 
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
 
                     if (early_return_condition){
-                        initBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
 
                     } else {
-                        initBoard[key][unknownKey].moveable = {upDown: true, leftRight: false}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: false}
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
                     }
                     
@@ -1427,19 +1627,25 @@ function isNotBlocked({col,
             }
         } else if (kind == "queen"){
             
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
 
                     if (early_return_condition){
                         console.log("queen is NOT blocked, only updown allowed!!!")
-                        initBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
 
                     } else {
                         console.log("queen is blocked, only updown allowed!!!")
-                        initBoard[key][unknownKey].moveable = {upDown: true, leftRight: false, leftUp: false, rightUp: false}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: false, leftUp: false, rightUp: false}
+                        initBoardGeneral.current = [...localInitBoard]
+                        
                         break
                     }
                     
@@ -1460,14 +1666,14 @@ function isNotBlocked({col,
 
             let piece_row = row
             let piece_col = col+1
-            let obj = boardInverse[col]
+            let obj = boardInverseGeneral[col]
 
             // for king
             while (piece_col < turn_king.col){
 
-                for (let key in boardInverse[piece_col]){
+                for (let key in boardInverseGeneral[piece_col]){
 
-                    if (Number(String(key)[1]) == piece_row && boardInverse[piece_col][key] != "empty"){ // if there is another piece between make false
+                    if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                         no_piece_king = false
                         break
                         
@@ -1481,20 +1687,20 @@ function isNotBlocked({col,
             let piece_col_2 = col-1
             while (piece_col_2 >= 0){
 
-                for (let key in boardInverse[piece_col_2]){
+                for (let key in boardInverseGeneral[piece_col_2]){
 
                     if (Number(String(key)[1]) == piece_row){
                         console.log("something found in row,col: ", piece_row, piece_col_2)
-                        if (boardInverse[piece_col_2][key] != "empty") {
+                        if (boardInverseGeneral[piece_col_2][key] != "empty") {
 
-                            let piece_there = getPiece(piece_col_2, piece_row, true)
+                            let piece_there = getPiece(piece_col_2, piece_row, true, boardInverseGeneral)
                             console.log(piece_there)
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece_there){
+                            for (let key in initBoardGeneral.current){
+                                if (Object.keys(initBoardGeneral.current[key])[0] == piece_there){
                                 console.log("a piece found: ", piece_there)
 
-                                    if ((Object.values(initBoard[key])[0].kind == "rook" || Object.values(initBoard[key])[0].kind == "queen")
-                                        && Object.values(initBoard[key])[0].color != color){
+                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "rook" || Object.values(initBoardGeneral.current[key])[0].kind == "queen")
+                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
 
                                         opponent_exists = true
                                         break
@@ -1522,9 +1728,9 @@ function isNotBlocked({col,
             // for king
             while (piece_col > turn_king.col){
 
-                for (let key in boardInverse[piece_col]){
+                for (let key in boardInverseGeneral[piece_col]){
 
-                    if (Number(String(key)[1]) == piece_row && boardInverse[piece_col][key] != "empty"){ // if there is another piece between make false
+                    if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                         no_piece_king = false
                         break
                         
@@ -1538,20 +1744,20 @@ function isNotBlocked({col,
             let piece_col_2 = col+1
             while (piece_col_2 <= 7){
 
-                for (let key in boardInverse[piece_col_2]){
+                for (let key in boardInverseGeneral[piece_col_2]){
 
                     if (Number(String(key)[1]) == piece_row){
                         console.log("something found in row,col: ", piece_row, piece_col_2)
-                        if (boardInverse[piece_col_2][key] != "empty") {
+                        if (boardInverseGeneral[piece_col_2][key] != "empty") {
 
-                            let piece_there = getPiece(piece_col_2, piece_row, true)
+                            let piece_there = getPiece(piece_col_2, piece_row, true, boardInverseGeneral)
                             console.log(piece_there)
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece_there){
+                            for (let key in initBoardGeneral.current){
+                                if (Object.keys(initBoardGeneral.current[key])[0] == piece_there){
                                 console.log("a piece found: ", piece_there)
 
-                                    if ((Object.values(initBoard[key])[0].kind == "rook" || Object.values(initBoard[key])[0].kind == "queen")
-                                        && Object.values(initBoard[key])[0].color != color){
+                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "rook" || Object.values(initBoardGeneral.current[key])[0].kind == "queen")
+                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
 
                                         opponent_exists = true
                                         break
@@ -1581,17 +1787,23 @@ function isNotBlocked({col,
 
         if (kind == "pawn"){
 
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
 
                     if (early_return_condition){
-                        initBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
 
                     } else {
-                        initBoard[key][unknownKey].moveable = {leftEat: false, rightEat: false, forward: false}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {leftEat: false, rightEat: false, forward: false}
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
                     }
                     
@@ -1599,35 +1811,47 @@ function isNotBlocked({col,
             }
         } else if (kind == "knight"){
         
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
 
                     if (early_return_condition){
-                        initBoard[key][unknownKey].moveable = true
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = true
+                        initBoardGeneral.current = [...localInitBoard]
+                        
                         break
 
                     } else {
 
-                        initBoard[key][unknownKey].moveable = false
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = false
+                        initBoardGeneral.current = [...localInitBoard]
+                        
                         break
                     }
                 }
             }
         } else if (kind == "bishop"){
             
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
                     
                     if (early_return_condition){
-                        initBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
 
                     } else {
-                        initBoard[key][unknownKey].moveable = {leftUp: false, rightUp: false}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {leftUp: false, rightUp: false}
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
                     }
                     
@@ -1635,17 +1859,23 @@ function isNotBlocked({col,
             }
         } else if (kind == "rook"){
 
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
 
                     if (early_return_condition){
-                        initBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                        initBoardGeneral.current = [...localInitBoard]
+                        
                         break
 
                     } else {
-                        initBoard[key][unknownKey].moveable = {upDown: false, leftRight: true}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: true}
+                        initBoardGeneral.current = [...localInitBoard]
+                        
                         break
                     }
                     
@@ -1653,19 +1883,25 @@ function isNotBlocked({col,
             }
         } else if (kind == "queen"){
             
-            for (let key in initBoard){
+            for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoard[key])[0] == name){
-                    let unknownKey = Object.keys(initBoard[key])[0]
+                if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
 
                     if (early_return_condition){
                         console.log("queen is NOT blocked, only updown allowed!!!")
-                        initBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                        initBoardGeneral.current = [...localInitBoard]
+
                         break
 
                     } else {
                         console.log("queen is blocked, only updown allowed!!!")
-                        initBoard[key][unknownKey].moveable = {upDown: false, leftRight: true, leftUp: false, rightUp: false}
+                        let localInitBoard = [...initBoardGeneral.current]
+                        localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: true, leftUp: false, rightUp: false}
+                        initBoardGeneral.current = [...localInitBoard]
+                        
                         break
                     }
                     
@@ -1691,9 +1927,9 @@ function isNotBlocked({col,
 
                 while (piece_col < turn_king.col){
 
-                    for (let key in boardInverse[piece_col]){
+                    for (let key in boardInverseGeneral[piece_col]){
 
-                        if (Number(String(key)[1]) == piece_row && boardInverse[piece_col][key] != "empty"){ // if there is another piece between make false
+                        if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                             no_piece_king = false
                             break
                         
@@ -1708,23 +1944,25 @@ function isNotBlocked({col,
                 let piece_col_2 = col -1
                 let piece_row_2 = row -1
 
+                console.log("boardInverseLocal in olay mahali: ", boardInverseGeneral)
+
                 while (piece_col_2 >= 0 && piece_row_2 >= 0){
 
-                    for (let key in boardInverse[piece_col_2]){
+                    for (let key in boardInverseGeneral[piece_col_2]){
 
-                        if (Number(String(key)[1]) == piece_row_2 && boardInverse[piece_col_2][key] != "empty"){
-                            let piece = getPiece(piece_col_2, piece_row_2, true)
+                        if (Number(String(key)[1]) == piece_row_2 && boardInverseGeneral[piece_col_2][key] != "empty"){
+                            let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
                             
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral.current){
                                 
-                                if (Object.keys(initBoard[key])[0] == piece){
+                                if (Object.keys(initBoardGeneral.current[key])[0] == piece){
 
-                                    console.log("keys : ", Object.keys(initBoard[key])[0])
-                                    console.log("info: ", Object.values(initBoard[key])[0])
+                                    console.log("keys : ", Object.keys(initBoardGeneral.current[key])[0])
+                                    console.log("info: ", Object.values(initBoardGeneral.current[key])[0])
                                     console.log("piece: ", piece)
 
-                                    if ((Object.values(initBoard[key])[0].kind == "queen" || Object.values(initBoard[key])[0].kind == "bishop") 
-                                        && Object.values(initBoard[key])[0].color != color){
+                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "queen" || Object.values(initBoardGeneral.current[key])[0].kind == "bishop") 
+                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
                                     
                                         opponent_exists = true
                                         break
@@ -1751,9 +1989,9 @@ function isNotBlocked({col,
 
                 while (piece_col > turn_king.col){
 
-                    for (let key in boardInverse[piece_col]){
+                    for (let key in boardInverseGeneral[piece_col]){
 
-                        if (Number(String(key)[1]) == piece_row && boardInverse[piece_col][key] != "empty"){ // if there is another piece between make false
+                        if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                             no_piece_king = false
                             break
                         
@@ -1772,17 +2010,17 @@ function isNotBlocked({col,
 
                 while (piece_col_2 <= 7){
 
-                    for (let key in boardInverse[piece_col_2]){
+                    for (let key in boardInverseGeneral[piece_col_2]){
 
-                        if (Number(String(key)[1]) == piece_row && boardInverse[piece_col_2][key] != "empty"){
-                            let piece = getPiece(piece_col_2, piece_row_2, true)
+                        if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col_2][key] != "empty"){
+                            let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
                             
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral.current){
                                 
-                                if (Object.keys(initBoard[key])[0] == piece){
+                                if (Object.keys(initBoardGeneral.current[key])[0] == piece){
 
-                                    if ((Object.values(initBoard[key])[0].kind == "queen" || Object.values(initBoard[key])[0].kind == "bishop") 
-                                        && Object.values(initBoard[key])[0].color != color){
+                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "queen" || Object.values(initBoardGeneral.current[key])[0].kind == "bishop") 
+                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
                                     
                                         opponent_exists = true
                                         break
@@ -1812,17 +2050,23 @@ function isNotBlocked({col,
 
             if (kind == "pawn"){
 
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
     
                         if (early_return_condition){
-                            initBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
     
                         } else {
-                            initBoard[key][unknownKey].moveable = {leftEat: true, rightEat: false, forward: false}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: false, forward: false}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
                         }
                         
@@ -1830,35 +2074,47 @@ function isNotBlocked({col,
                 }
             } else if (kind == "knight"){
             
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
     
                         if (early_return_condition){
-                            initBoard[key][unknownKey].moveable = true
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = true
+                            initBoardGeneral.current = [...localInitBoard]
+                            
                             break
     
                         } else {
     
-                            initBoard[key][unknownKey].moveable = false
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = false
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
                         }
                     }
                 }
             } else if (kind == "bishop"){
                 
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
                         
                         if (early_return_condition){
-                            initBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
     
                         } else {
-                            initBoard[key][unknownKey].moveable = {leftUp: true, rightUp: false}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: false}
+                            initBoardGeneral.current = [...localInitBoard]
+                                
                             break
                         }
                         
@@ -1866,17 +2122,24 @@ function isNotBlocked({col,
                 }
             } else if (kind == "rook"){
     
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
     
                         if (early_return_condition){
-                            initBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                            
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                            initBoardGeneral.current = [...localInitBoard]
+                                
                             break
     
                         } else {
-                            initBoard[key][unknownKey].moveable = {upDown: false, leftRight: false}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: false}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
                         }
                         
@@ -1884,19 +2147,25 @@ function isNotBlocked({col,
                 }
             } else if (kind == "queen"){
                 
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
     
                         if (early_return_condition){
                             console.log("queen is NOT blocked, only updown allowed!!!")
-                            initBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
     
                         } else {
                             console.log("queen is blocked, only updown allowed!!!")
-                            initBoard[key][unknownKey].moveable = {upDown: false, leftRight: false, leftUp: true, rightUp: false}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: false, leftUp: true, rightUp: false}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
                         }
                         
@@ -1920,9 +2189,9 @@ function isNotBlocked({col,
 
                 while (piece_col > turn_king.col && piece_row < turn_king.row){
 
-                    for (let key in boardInverse[piece_col]){
+                    for (let key in boardInverseGeneral[piece_col]){
 
-                        if (Number(String(key)[1]) == piece_row && boardInverse[piece_col][key] != "empty"){ // if there is another piece between make false
+                        if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                             no_piece_king = false
                             break
                         
@@ -1940,21 +2209,21 @@ function isNotBlocked({col,
 
                 while (piece_col_2 <= 7 && piece_row_2 >= 0){
 
-                    for (let key in boardInverse[piece_col_2]){
+                    for (let key in boardInverseGeneral[piece_col_2]){
                         console.log("piece_row_2: ", piece_row_2, "piece_col_2", piece_col_2)
 
-                        if (Number(String(key)[1]) == piece_row_2 && boardInverse[piece_col_2][key] != "empty"){
-                            let piece = getPiece(piece_col_2, piece_row_2, true)
+                        if (Number(String(key)[1]) == piece_row_2 && boardInverseGeneral[piece_col_2][key] != "empty"){
+                            let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
                             
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral.current){
                                 
-                                if (Object.keys(initBoard[key])[0] == piece){
-                                    console.log("keys : ", Object.keys(initBoard[key])[0])
-                                    console.log("info: ", Object.values(initBoard[key])[0])
+                                if (Object.keys(initBoardGeneral.current[key])[0] == piece){
+                                    console.log("keys : ", Object.keys(initBoardGeneral.current[key])[0])
+                                    console.log("info: ", Object.values(initBoardGeneral.current[key])[0])
                                     console.log("piece: ", piece)
 
-                                    if ((Object.values(initBoard[key])[0].kind == "queen" || Object.values(initBoard[key])[0].kind == "bishop") 
-                                        && Object.values(initBoard[key])[0].color != color){
+                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "queen" || Object.values(initBoardGeneral.current[key])[0].kind == "bishop") 
+                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
                                     
                                         opponent_exists = true
                                         break
@@ -1984,9 +2253,9 @@ function isNotBlocked({col,
 
                 while (piece_col < turn_king.col && piece_row > turn_king.row){
 
-                    for (let key in boardInverse[piece_col]){
+                    for (let key in boardInverseGeneral[piece_col]){
 
-                        if (Number(String(key)[1]) == piece_row && boardInverse[piece_col][key] != "empty"){ // if there is another piece between make false
+                        if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                             no_piece_king = false
                             break
                         
@@ -2004,16 +2273,16 @@ function isNotBlocked({col,
 
                 while (piece_col_2 >= 0 && piece_row_2 <= 7){
 
-                    for (let key in boardInverse[piece_col_2]){
+                    for (let key in boardInverseGeneral[piece_col_2]){
 
-                        if (Number(String(key)[1]) == piece_row && boardInverse[piece_col_2][key] != "empty"){
-                            let piece = getPiece(piece_col_2, piece_row_2, true)
+                        if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col_2][key] != "empty"){
+                            let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
                             
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral.current){
                                 
-                                if (Object.keys(initBoard[key])[0] == piece){
-                                    if ((Object.values(initBoard[key])[0].kind == "queen" || Object.values(initBoard[key])[0].kind == "bishop") 
-                                        && Object.values(initBoard[key])[0].color != color){
+                                if (Object.keys(initBoardGeneral.current[key])[0] == piece){
+                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "queen" || Object.values(initBoardGeneral.current[key])[0].kind == "bishop") 
+                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
                                     
                                         opponent_exists = true
                                         break
@@ -2044,17 +2313,23 @@ function isNotBlocked({col,
 
             if (kind == "pawn"){
 
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
     
                         if (early_return_condition){
-                            initBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
     
                         } else {
-                            initBoard[key][unknownKey].moveable = {leftEat: false, rightEat: true, forward: false}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {leftEat: false, rightEat: true, forward: false}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
                         }
                         
@@ -2062,35 +2337,47 @@ function isNotBlocked({col,
                 }
             } else if (kind == "knight"){
             
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
     
                         if (early_return_condition){
-                            initBoard[key][unknownKey].moveable = true
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = true
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
     
                         } else {
     
-                            initBoard[key][unknownKey].moveable = false
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = false
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
                         }
                     }
                 }
             } else if (kind == "bishop"){
                 
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
                         
                         if (early_return_condition){
-                            initBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
     
                         } else {
-                            initBoard[key][unknownKey].moveable = {leftUp: false, rightUp: true}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {leftUp: false, rightUp: true}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
                         }
                         
@@ -2098,17 +2385,23 @@ function isNotBlocked({col,
                 }
             } else if (kind == "rook"){
     
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
     
                         if (early_return_condition){
-                            initBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
     
                         } else {
-                            initBoard[key][unknownKey].moveable = {upDown: false, leftRight: false}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: false}
+                            initBoardGeneral.current = [...localInitBoard]
+
                             break
                         }
                         
@@ -2116,19 +2409,27 @@ function isNotBlocked({col,
                 }
             } else if (kind == "queen"){
                 
-                for (let key in initBoard){
+                for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoard[key])[0] == name){
-                        let unknownKey = Object.keys(initBoard[key])[0]
+                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
+                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
     
                         if (early_return_condition){
                             console.log("queen is NOT blocked, only updown allowed!!!")
-                            initBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                            initBoardGeneral.current = [...localInitBoard]
+                                
+                            
                             break
     
                         } else {
                             console.log("queen is blocked, only updown allowed!!!")
-                            initBoard[key][unknownKey].moveable = {upDown: false, leftRight: false, leftUp: false, rightUp: true}
+                            let localInitBoard = [...initBoardGeneral.current]
+                            localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: false, leftUp: false, rightUp: true}
+                            initBoardGeneral.current = [...localInitBoard]
+                                
+                            
                             break
                         }
                         
@@ -2139,12 +2440,13 @@ function isNotBlocked({col,
     }
 }
 
+/*
+    Helper function to check if the given row and col is in cols_and_rows
+    Used for after check situation to draw only blocking/eating the checking piece
+    Return true if it's in, else false
+*/
 function isIn(col: number, row: number, cols_and_rows: null|{row: number, col: number}[]){
-    /*
-        Helper function to check if the given row and col is in cols_and_rows
-        Used for after check situation to draw only blocking/eating the checking piece
-        Return true if it's in, else false
-    */
+    
 
     if (cols_and_rows == null) return true
 
@@ -2161,18 +2463,24 @@ function fireGameOver(turn: string){
 
 }
 
+// clean init board
+// we're gonna change the if conditions to include also player_color when deciding inc or dec
+// we're gonna also change the initial setup for the different player_color s
 function drawPossibleMoves(
     {col, 
     row, 
     name, 
     kind, 
     has_moved, 
-    color, 
+    color,        // piece color
     moveable,
     setDrawState,
     turn,
     isCheck,
     colsAndRows,
+    player_color, // player's color
+    initBoardGeneral,
+    boardInverseGeneral,
     is_it_blocked} : drawPossibleMovesProps
 ){
     /*
@@ -2180,13 +2488,14 @@ function drawPossibleMoves(
     */
 
     console.log("drawPossibleMoves : isCheck: ", isCheck, "cols_and_rows: ", colsAndRows, "moveable: ", moveable)
+    console.log("kind is :", kind)
     if (kind == "pawn"){
 
         if (has_moved == true){ // draw 1 square
 
             let col_inc
             let row_inc
-            if (color == "black"){ // draw in decendant order of rows
+            if ((color == "black" && player_color == "white") || (color == "white" && player_color == "black")){ // draw in decendant order of rows
 
                 col_inc = 1
                 row_inc = 1   
@@ -2197,15 +2506,16 @@ function drawPossibleMoves(
                 row_inc = -1
             }
 
-            
+            console.log("kind is pawn, can you see that")
 
             setDrawState( (old: boolean[][]) => {
                     let candidate = [...old];
                     candidate[col][row] = true;
                     
+                    let piece = getPiece(col, row + row_inc, true, boardInverseGeneral)
+                    
                     if (row + row_inc < 8 && moveable.forward){ // draw only if the next square is empty
-                        let piece = getPiece(col, row + row_inc, true)
-                        //console.log("get piece for col: ", col, "row: ", row + row_inc)
+                        
                         
                         if (piece == null){ 
                             isIn(col, row+row_inc, colsAndRows) ? candidate[col][row+row_inc] = true : undefined;
@@ -2213,12 +2523,16 @@ function drawPossibleMoves(
                     }
                     
                     if (col + col_inc < 8 && row + row_inc < 8 && moveable.rightEat){
+                        console.log("col and col_inc: ", col, col_inc)
+                        
                         console.log("get piece for col: ", col + col_inc, "row: ", row + row_inc)
-                        let piece = getPiece(col + col_inc, row + row_inc, true)
+                        let piece = getPiece(col + col_inc, row + row_inc, true, boardInverseGeneral)
+                        console.log("current initBoardGeneral in drawPossibleMoves: ", initBoardGeneral)
 
-                        for (let key in initBoard){ // key is just index here
+                        for (let key in initBoardGeneral){ // key is just index here
         
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                console.log("ok checking is in")
 
                                 isIn(col+col_inc, row+row_inc, colsAndRows) ? candidate[col + col_inc][row+row_inc] = true: undefined;
                             }
@@ -2228,11 +2542,11 @@ function drawPossibleMoves(
 
                     if (col - col_inc >= 0 && row +row_inc <= 7 && moveable.leftEat){
                         console.log("get piece for col: ", col - col_inc, "row: ", row + row_inc)
-                        let piece = getPiece(col - col_inc, row + row_inc, true)
+                        let piece = getPiece(col - col_inc, row + row_inc, true, boardInverseGeneral)
 
-                        for (let key in initBoard){ // key is just index here
+                        for (let key in initBoardGeneral){ // key is just index here
         
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
 
                                 isIn(col-col_inc, row+row_inc, colsAndRows) ? candidate[col - col_inc][row + row_inc] = true: undefined;
                             }
@@ -2243,7 +2557,7 @@ function drawPossibleMoves(
         } else { // draw 2 square
 
             let row_inc
-            if (color == "black"){ // draw in decendant order of rows
+            if ((color == "black" && player_color == "white") || (color == "white" && player_color == "black")){ // draw in decendant order of rows
 
                 row_inc = 1
                 
@@ -2252,6 +2566,7 @@ function drawPossibleMoves(
                 row_inc = -1   
             }
 
+
             // NOTE: for the first move of the pawn, you should be able to something !Important
 
             setDrawState( (old: boolean[][]) => {
@@ -2259,13 +2574,15 @@ function drawPossibleMoves(
                     candidate[col][row] = true;
 
                     // 1 square further
-                    let piece = getPiece(col, row+row_inc, true)
+                    let piece = getPiece(col, row+row_inc, true, boardInverseGeneral)
+                    console.log("get piece for col: ", col, "row: ", row + row_inc, "piece: ", piece)
+                    console.log("cols and rows is: ", colsAndRows)
                     if (piece == null && moveable.forward){
 
                         isIn(col, row+row_inc, colsAndRows) ? candidate[col][row+row_inc] = true: undefined;    
 
                         // 2 square further
-                        piece = getPiece(col, row+row_inc*2, true)
+                        piece = getPiece(col, row+row_inc*2, true, boardInverseGeneral)
                         if (piece == null){ 
                             isIn(col, row+row_inc*2, colsAndRows) ? candidate[col][row+row_inc*2] = true: undefined;
                         }
@@ -2274,9 +2591,9 @@ function drawPossibleMoves(
                     // eat in cross square
                     if (col-1 >= 0 && moveable.leftEat){
                         
-                        piece = getPiece(col-1, row+row_inc, true)
-                        for (let key in initBoard){
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        piece = getPiece(col-1, row+row_inc, true, boardInverseGeneral)
+                        for (let key in initBoardGeneral){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 isIn(col-1, row+row_inc, colsAndRows) ? candidate[col-1][row+row_inc] = true : undefined
                                 break
                             }
@@ -2286,9 +2603,9 @@ function drawPossibleMoves(
                     // eat in cross square
                     if (col+1 <= 7 && moveable.rightEat) {
 
-                        piece = getPiece(col+1, row+row_inc, true)
-                        for (let key in initBoard){
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        piece = getPiece(col+1, row+row_inc, true, boardInverseGeneral)
+                        for (let key in initBoardGeneral){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 isIn(col+1, row+row_inc, colsAndRows) ? candidate[col+1][row+row_inc] = true: undefined 
                             }
                         }
@@ -2310,12 +2627,12 @@ function drawPossibleMoves(
 
                     if (row +1 <= 7){ // down
 
-                        let piece = getPiece(col-2, row+1, true)
+                        let piece = getPiece(col-2, row+1, true, boardInverseGeneral)
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col-2, row+1, colsAndRows) ? candidate[col-2][row+1] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col-2, row+1, colsAndRows) ? candidate[col-2][row+1] = true: undefined
                                 }
                             }
@@ -2325,14 +2642,14 @@ function drawPossibleMoves(
                     }
                     if (row -1 >= 0){ // up
 
-                        let piece = getPiece(col-2, row-1, true)
+                        let piece = getPiece(col-2, row-1, true, boardInverseGeneral)
                         if (piece == null){ // there is no piece, draw
                             isIn(col-2, row-2, colsAndRows) ? candidate[col-2][row-1] = true: undefined
 
                         } else { // there is a piece, if it's not black -> draw
                     
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col-2, row-1, colsAndRows) ? candidate[col-2][row-1] = true: undefined
                                 }
                             }
@@ -2344,13 +2661,13 @@ function drawPossibleMoves(
                 if (col +2 <= 7 && moveable){ // right side
 
                     if (row +1 <= 7){
-                        let piece = getPiece(col+2, row+1, true)
+                        let piece = getPiece(col+2, row+1, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col+2, row+1, colsAndRows) ? candidate[col+2][row+1] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col+2, row+1, colsAndRows) ? candidate[col+2][row+1] = true: undefined
                                 }
                             }
@@ -2358,13 +2675,13 @@ function drawPossibleMoves(
                         
                     }
                     if (row -1 >= 0){
-                        let piece = getPiece(col+2, row-1, true)
+                        let piece = getPiece(col+2, row-1, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col+2, row-1, colsAndRows) ? candidate[col+2][row-1] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col+2, row-1, colsAndRows) ? candidate[col+2][row-1] = true: undefined
                                 }
                             }
@@ -2376,13 +2693,13 @@ function drawPossibleMoves(
                 if (row +2 <= 7 && moveable){ // down
 
                     if (col -1 >= 0){
-                        let piece = getPiece(col-1, row+2, true)
+                        let piece = getPiece(col-1, row+2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col-1, row+2, colsAndRows) ? candidate[col-1][row+2] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col-1, row+2, colsAndRows) ? candidate[col-1][row+2] = true: undefined
                                 }
                             }
@@ -2390,13 +2707,13 @@ function drawPossibleMoves(
                         
                     }
                     if (col +1 <= 7){
-                        let piece = getPiece(col+1, row+2, true)
+                        let piece = getPiece(col+1, row+2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col+1, row+2, colsAndRows) ? candidate[col+1][row+2] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col+1, row+2, colsAndRows) ? candidate[col+1][row+2] = true: undefined
                                 }
                             }
@@ -2408,13 +2725,13 @@ function drawPossibleMoves(
                 if (row -2 >= 0 && moveable){ // up
 
                     if (col -1 >= 0){ // up-left
-                        let piece = getPiece(col-1, row-2, true)
+                        let piece = getPiece(col-1, row-2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col-1, row-2, colsAndRows) ? candidate[col-1][row-2] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col-1, row-2, colsAndRows) ? candidate[col-1][row-2] = true: undefined
                                 }
                             }
@@ -2423,13 +2740,13 @@ function drawPossibleMoves(
                         
                     }
                     if (col +1 <= 7){ // up-right
-                        let piece = getPiece(col+1, row-2, true)
+                        let piece = getPiece(col+1, row-2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col+1, row-2, colsAndRows) ? candidate[col+1][row-2] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col+1, row-2, colsAndRows) ? candidate[col+1][row-2] = true : undefined
                                 }
                             }
@@ -2456,13 +2773,13 @@ function drawPossibleMoves(
                     let col_loc_2 = col +1;
                     while (row_loc >= 0 && moveable.upDown){ // to the up
                         
-                        let piece = getPiece(col, row_loc, true)
+                        let piece = getPiece(col, row_loc, true, boardInverseGeneral)
                         if (piece == null){ // empty, draw it
                             isIn(col, row_loc, colsAndRows) ? candidates[col][row_loc] = true: undefined
                         } else {
 
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col, row_loc, colsAndRows) ? candidates[col][row_loc] = true : undefined
                                     break;
                                 }
@@ -2474,14 +2791,14 @@ function drawPossibleMoves(
 
                     while (row_loc_2 <= 7 && moveable.upDown){ // to the down 
                         
-                        let piece = getPiece(col, row_loc_2, true);
+                        let piece = getPiece(col, row_loc_2, true, boardInverseGeneral);
                         if (piece == null) {
                             isIn(col, row_loc_2, colsAndRows) ? candidates[col][row_loc_2] = true: undefined
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col, row_loc_2, colsAndRows) ? candidates[col][row_loc_2] = true : undefined;
                                     break;
                                 }
@@ -2493,14 +2810,14 @@ function drawPossibleMoves(
 
                     while (col_loc >= 0 && moveable.leftRight){ // to the left
                         
-                        let piece = getPiece(col_loc, row, true);
+                        let piece = getPiece(col_loc, row, true, boardInverseGeneral);
                         if (piece == null) {
                             isIn(col_loc, row, colsAndRows) ? candidates[col_loc][row] = true: undefined
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col_loc, row, colsAndRows) ? candidates[col_loc][row] = true: undefined;
                                     break;
                                 }
@@ -2512,14 +2829,14 @@ function drawPossibleMoves(
 
                     while (col_loc_2 <= 7 && moveable.leftRight){ // to the right
                         
-                        let piece = getPiece(col_loc_2, row, true);
+                        let piece = getPiece(col_loc_2, row, true, boardInverseGeneral);
                         if (piece == null) {
                             isIn(col_loc_2, row, colsAndRows) ? candidates[col_loc_2][row] = true: undefined
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col_loc_2, row, colsAndRows) ? candidates[col_loc_2][row] = true: undefined;
                                     break;
                                 }
@@ -2555,15 +2872,15 @@ function drawPossibleMoves(
                     if (row_loc >= 0){
 
                         // get piece
-                        let piece = getPiece(col_loc, row_loc, true);
+                        let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
 
                         if (piece == null){
                             isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true : undefined
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true: undefined
                                     break
                                 }
@@ -2580,15 +2897,15 @@ function drawPossibleMoves(
                     if (row_loc_2 <= 7){
 
                         // get piece
-                        let piece = getPiece(col_loc_2, row_loc_2, true);
+                        let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
 
                         if (piece == null){
                             isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
                                     break
                                 }
@@ -2605,15 +2922,15 @@ function drawPossibleMoves(
                     if (row_loc_3 >= 0){
 
                         // get piece
-                        let piece = getPiece(col_loc_3, row_loc_3, true);
+                        let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
 
                         if (piece == null){
                             isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true : undefined
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true: undefined
                                     break
                                 }
@@ -2630,15 +2947,15 @@ function drawPossibleMoves(
                     if (row_loc_4 <= 7){
 
                         // get piece
-                        let piece = getPiece(col_loc_4, row_loc_4, true);
+                        let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
 
                         if (piece == null){
                             isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true : undefined
                         } else {
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true: undefined
                                     break
                                 }
@@ -2678,15 +2995,15 @@ function drawPossibleMoves(
 
                 if (row_loc >= 0){
 
-                    let piece = getPiece(col_loc, row_loc, true);
+                    let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
 
                     if (piece == null){
                         isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true: undefined
                     } else {
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true : undefined
                                 break
                             }
@@ -2703,15 +3020,15 @@ function drawPossibleMoves(
 
                 if (row_loc_2 <= 7){
 
-                    let piece = getPiece(col_loc_2, row_loc_2, true);
+                    let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
 
                     if (piece == null){
                         isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
                     } else {
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
                                 break
                             }
@@ -2728,15 +3045,15 @@ function drawPossibleMoves(
 
                 if (row_loc_3 >= 0){
 
-                    let piece = getPiece(col_loc_3, row_loc_3, true);
+                    let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
 
                     if (piece == null){
                         isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true : undefined
                     } else {
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true: undefined
                                 break
                             }
@@ -2753,15 +3070,15 @@ function drawPossibleMoves(
 
                 if (row_loc_4 <= 7){
 
-                    let piece = getPiece(col_loc_4, row_loc_4, true);
+                    let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
 
                     if (piece == null){
                         isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true : undefined
                     } else {
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true : undefined
                                 break
                             }
@@ -2777,15 +3094,15 @@ function drawPossibleMoves(
 
             while (col_loc_5 <= 7 && moveable.leftRight){ // to right
 
-                let piece = getPiece(col_loc_5, row, true)
+                let piece = getPiece(col_loc_5, row, true, boardInverseGeneral)
                 console.log("queen right at: ", col_loc_5,row, )
                 if (piece == null){
                     isIn(col_loc_5, row, colsAndRows) ? candidates[col_loc_5][row] = true : undefined
                 } else {
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             isIn(col_loc_5, row, colsAndRows) ? candidates[col_loc_5][row] = true: undefined
                             break
                         }
@@ -2798,15 +3115,15 @@ function drawPossibleMoves(
 
             while (col_loc_6 >= 0 && moveable.leftRight){ // to left
 
-                let piece = getPiece(col_loc_6, row, true)
+                let piece = getPiece(col_loc_6, row, true, boardInverseGeneral)
 
                 if (piece == null){
                     isIn(col_loc_6, row, colsAndRows) ? candidates[col_loc_6][row] = true : undefined
                 } else {
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             isIn(col_loc_6, row, colsAndRows) ? candidates[col_loc_6][row] = true: undefined
                             break
                         }
@@ -2819,16 +3136,16 @@ function drawPossibleMoves(
 
             while (row_loc_5 <= 7 && moveable.upDown){ // to down
 
-                let piece = getPiece(col, row_loc_5, true)
+                let piece = getPiece(col, row_loc_5, true, boardInverseGeneral)
                 
 
                 if (piece == null){
                     isIn(col, row_loc_5, colsAndRows) ? candidates[col][row_loc_5] = true : undefined
                 } else {
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             isIn(col, row_loc_5, colsAndRows) ? candidates[col][row_loc_5] = true : undefined
                             break
                         }
@@ -2841,15 +3158,15 @@ function drawPossibleMoves(
 
             while (row_loc_6 >= 0 && moveable.upDown){ // to up
 
-                let piece = getPiece(col, row_loc_6, true)
+                let piece = getPiece(col, row_loc_6, true, boardInverseGeneral)
 
                 if (piece == null){
                     isIn(col, row_loc_6, colsAndRows) ? candidates[col][row_loc_6] = true : undefined
                 } else {
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece && Object.values(initBoard[key])[0].color != turn){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             isIn(col, row_loc_6, colsAndRows) ? candidates[col][row_loc_6] = true : undefined
                             break
                         }
@@ -2880,11 +3197,11 @@ function drawPossibleMoves(
 
             // down
             if (row+1 <= 7){
-                let piece = getPiece(col, row+1, true) 
+                let piece = getPiece(col, row+1, true, boardInverseGeneral)
                 
                 if (piece == null){
                     
-                    if (notEatable(col, row+1, turn)){
+                    if (notEatable(col, row+1, turn, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col, row +1, colsAndRows)){ 
                             candidates[col][row+1] = true; has_move=true
                             has_move = true
@@ -2893,14 +3210,14 @@ function drawPossibleMoves(
                     }
                     
                 } else {
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
     
                 
-                        if ( Object.keys(initBoard[key])[0] == piece 
-                            && Object.values(initBoard[key])[0].color != turn
-                            && Object.values(initBoard[key])[0].kind != "king"
-                            && notKingAdjacent(col, row+1, turn)
-                            && notEatable(col, row+1, turn)){
+                        if ( Object.keys(initBoardGeneral[key])[0] == piece 
+                            && Object.values(initBoardGeneral[key])[0].color != turn
+                            && Object.values(initBoardGeneral[key])[0].kind != "king"
+                            && notKingAdjacent(col, row+1, turn, initBoardGeneral, boardInverseGeneral)
+                            && notEatable(col, row+1, turn, initBoardGeneral, boardInverseGeneral)){
     
                                 candidates[col][row+1] = true
                                 has_move = true
@@ -2912,9 +3229,9 @@ function drawPossibleMoves(
             // right
             if (col +1 <= 7){
 
-                let piece_2 = getPiece(col+1, row, true)
+                let piece_2 = getPiece(col+1, row, true, boardInverseGeneral)
                 if (piece_2 == null){
-                    if (notEatable(col+1, row, turn)){
+                    if (notEatable(col+1, row, turn, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col+1, row, colsAndRows)){
                             candidates[col+1][row] = true
                             has_move = true
@@ -2922,12 +3239,12 @@ function drawPossibleMoves(
                     }
                 } else {
     
-                    for (let key in initBoard){
-                        if ( Object.keys(initBoard[key])[0] == piece_2
-                            && Object.values(initBoard[key])[0].color != turn
-                            && Object.values(initBoard[key])[0].kind != "king"
-                            && notKingAdjacent(col+1, row, turn)
-                            && notEatable(col+1, row, turn)){
+                    for (let key in initBoardGeneral){
+                        if ( Object.keys(initBoardGeneral[key])[0] == piece_2
+                            && Object.values(initBoardGeneral[key])[0].color != turn
+                            && Object.values(initBoardGeneral[key])[0].kind != "king"
+                            && notKingAdjacent(col+1, row, turn, initBoardGeneral, boardInverseGeneral)
+                            && notEatable(col+1, row, turn, initBoardGeneral, boardInverseGeneral)){
                     
                                 candidates[col+1][row] = true
                                 has_move = true
@@ -2939,14 +3256,14 @@ function drawPossibleMoves(
             // right down
             if (col+1 <= 7 && row+1 <= 7){
 
-                let piece_3 = getPiece(col+1, row+1, true)
+                let piece_3 = getPiece(col+1, row+1, true, boardInverseGeneral)
     
                 console.log("res of not Eatable: ")
-                let res = notEatable(col+1, row, turn+1)
+                let res = notEatable(col+1, row, turn+1, initBoardGeneral, boardInverseGeneral)
                 console.log("res: ", res)
                 console.log("done")
                 if (piece_3 == null){
-                    if (notEatable(col+1, row+1, turn)){
+                    if (notEatable(col+1, row+1, turn, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col+1, row+1, colsAndRows)){
                         
                             candidates[col+1][row+1] = true
@@ -2957,13 +3274,13 @@ function drawPossibleMoves(
     
                 } else {
     
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
     
-                        if ( Object.keys(initBoard[key])[0] == piece_3
-                            && Object.values(initBoard[key])[0].color != turn
-                            && Object.values(initBoard[key])[0].kind != "king"
-                            && notKingAdjacent(col+1, row+1, turn)
-                            && notEatable(col+1, row+1, turn)){
+                        if ( Object.keys(initBoardGeneral[key])[0] == piece_3
+                            && Object.values(initBoardGeneral[key])[0].color != turn
+                            && Object.values(initBoardGeneral[key])[0].kind != "king"
+                            && notKingAdjacent(col+1, row+1, turn, initBoardGeneral, boardInverseGeneral)
+                            && notEatable(col+1, row+1, turn, initBoardGeneral, boardInverseGeneral)){
                         
                                 candidates[col+1][row+1] = true
                                 has_move = true
@@ -2975,10 +3292,10 @@ function drawPossibleMoves(
             // right up
             if (col +1 <= 7 && row-1 >= 0){
 
-                let piece_4 = getPiece(col+1, row-1, true)
+                let piece_4 = getPiece(col+1, row-1, true, boardInverseGeneral)
     
                 if (piece_4 == null){
-                    if (notEatable(col+1, row-1, turn)){
+                    if (notEatable(col+1, row-1, turn, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col+1, row-1, colsAndRows)){
                             candidates[col+1][row-1] = true
                             has_move = true
@@ -2987,13 +3304,13 @@ function drawPossibleMoves(
     
                 } else {
     
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
     
-                        if ( Object.keys(initBoard[key])[0] == piece_4
-                            && Object.values(initBoard[key])[0].color != turn
-                            && Object.values(initBoard[key])[0].kind != "king"
-                            && notKingAdjacent(col+1, row-1, turn)
-                            && notEatable(col+1, row-1, turn)){
+                        if ( Object.keys(initBoardGeneral[key])[0] == piece_4
+                            && Object.values(initBoardGeneral[key])[0].color != turn
+                            && Object.values(initBoardGeneral[key])[0].kind != "king"
+                            && notKingAdjacent(col+1, row-1, turn, initBoardGeneral, boardInverseGeneral)
+                            && notEatable(col+1, row-1, turn, initBoardGeneral, boardInverseGeneral)){
                         
                                 candidates[col+1][row-1] = true
                                 has_move = true
@@ -3005,10 +3322,10 @@ function drawPossibleMoves(
             // left down
             if (col -1 >= 0 && row+1 <= 7){
 
-                let piece_5 = getPiece(col-1, row+1, true)
+                let piece_5 = getPiece(col-1, row+1, true, boardInverseGeneral)
     
                 if (piece_5 == null){
-                    if (notEatable(col-1, row+1, turn+1)){
+                    if (notEatable(col-1, row+1, turn+1, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col-1, row+1, colsAndRows)){
                             candidates[col-1][row+1] = true
                             has_move = true
@@ -3016,13 +3333,13 @@ function drawPossibleMoves(
                     }
                 } else {
     
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
     
-                        if ( Object.keys(initBoard[key])[0] == piece_5
-                            && Object.values(initBoard[key])[0].color != turn
-                            && Object.values(initBoard[key])[0].kind != "king"
-                            && notKingAdjacent(col-1, row+1, turn)
-                            && notEatable(col-1, row+1, turn)){
+                        if ( Object.keys(initBoardGeneral[key])[0] == piece_5
+                            && Object.values(initBoardGeneral[key])[0].color != turn
+                            && Object.values(initBoardGeneral[key])[0].kind != "king"
+                            && notKingAdjacent(col-1, row+1, turn, initBoardGeneral, boardInverseGeneral)
+                            && notEatable(col-1, row+1, turn, initBoardGeneral, boardInverseGeneral)){
                             
                                 candidates[col-1][row+1] = true
                                 has_move = true
@@ -3034,10 +3351,10 @@ function drawPossibleMoves(
             // left
             if (col -1 >= 0){
 
-                let piece_6 = getPiece(col-1, row, true)
+                let piece_6 = getPiece(col-1, row, true, boardInverseGeneral)
     
                 if (piece_6 == null){
-                    if (notEatable(col-1, row, turn)){
+                    if (notEatable(col-1, row, turn, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col-1, row, colsAndRows)){
                             candidates[col-1][row] = true
                             has_move = true
@@ -3046,13 +3363,13 @@ function drawPossibleMoves(
     
                 } else {
     
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
     
-                        if ( Object.keys(initBoard[key])[0] == piece_6
-                            && Object.values(initBoard[key])[0].color != turn
-                            && Object.values(initBoard[key])[0].kind != "king"
-                            && notKingAdjacent(col-1, row, turn)
-                            && notEatable(col-1, row, turn)){
+                        if ( Object.keys(initBoardGeneral[key])[0] == piece_6
+                            && Object.values(initBoardGeneral[key])[0].color != turn
+                            && Object.values(initBoardGeneral[key])[0].kind != "king"
+                            && notKingAdjacent(col-1, row, turn, initBoardGeneral, boardInverseGeneral)
+                            && notEatable(col-1, row, turn, initBoardGeneral, boardInverseGeneral)){
                         
                                 candidates[col-1][row] = true
                                 has_move = true
@@ -3064,10 +3381,10 @@ function drawPossibleMoves(
             // left up
             if (col -1 >= 0 && row -1 >= 0){
 
-                let piece_7 = getPiece(col-1, row-1, true)
+                let piece_7 = getPiece(col-1, row-1, true, boardInverseGeneral)
     
                 if (piece_7 == null){
-                    if (notEatable(col-1, row-1, turn)){
+                    if (notEatable(col-1, row-1, turn, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col-1, row-1, colsAndRows)){
                             candidates[col-1][row-1] = true
                             has_move = true
@@ -3076,13 +3393,13 @@ function drawPossibleMoves(
     
                 } else {
     
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
     
-                        if ( Object.keys(initBoard[key])[0] == piece_7
-                            && Object.values(initBoard[key])[0].color != turn
-                            && Object.values(initBoard[key])[0].kind != "king"
-                            && notKingAdjacent(col-1, row-1, turn)
-                            && notEatable(col-1, row-1, turn)){
+                        if ( Object.keys(initBoardGeneral[key])[0] == piece_7
+                            && Object.values(initBoardGeneral[key])[0].color != turn
+                            && Object.values(initBoardGeneral[key])[0].kind != "king"
+                            && notKingAdjacent(col-1, row-1, turn, initBoardGeneral, boardInverseGeneral)
+                            && notEatable(col-1, row-1, turn, initBoardGeneral, boardInverseGeneral)){
                         
                                 candidates[col-1][row-1] = true
                                 has_move = true
@@ -3094,10 +3411,10 @@ function drawPossibleMoves(
             // up
             if (row -1 >= 0){
 
-                let piece_8 = getPiece(col, row-1, true)
+                let piece_8 = getPiece(col, row-1, true, boardInverseGeneral)
     
                 if (piece_8 == null){
-                    if (notEatable(col, row-1, turn)){
+                    if (notEatable(col, row-1, turn, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col, row-1, colsAndRows)){
                             candidates[col][row-1] = true
                             has_move = true
@@ -3106,13 +3423,13 @@ function drawPossibleMoves(
     
                 } else {
     
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
     
-                        if ( Object.keys(initBoard[key])[0] == piece_8
-                            && Object.values(initBoard[key])[0].color != turn
-                            && Object.values(initBoard[key])[0].kind != "king"
-                            && notKingAdjacent(col, row-1, turn)
-                            && notEatable(col, row-1, turn)){
+                        if ( Object.keys(initBoardGeneral[key])[0] == piece_8
+                            && Object.values(initBoardGeneral[key])[0].color != turn
+                            && Object.values(initBoardGeneral[key])[0].kind != "king"
+                            && notKingAdjacent(col, row-1, turn, initBoardGeneral, boardInverseGeneral)
+                            && notEatable(col, row-1, turn, initBoardGeneral, boardInverseGeneral)){
                         
                                 candidates[col][row-1] = true
                                 has_move = true
@@ -3129,10 +3446,11 @@ function drawPossibleMoves(
     }
 }
 
-
+// clear initboard
 // NOTE: Check if move is makeable - if it's drawn, it's makeable
 function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch | null, selectedPiece: Piece,
-                   wsInstance: WebSocket|null){
+                   wsInstance: WebSocket|null, initBoardGeneral: RefObject<{}[]>, //setInitBoardGeneral: React.Dispatch, 
+                   boardInverseGeneral: RefObject<{}[]>){
 
     // first clear the board
     if (setDrawState != null) { // if it's null, it means we're doing the opponent's move
@@ -3147,49 +3465,67 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
         throw new Error("Selected col or Selected row of SelectedPiece shouldn't be -1. Function makeMove");
     }
 
-    let sourceObj = boardInverse[selected_col]
+    let updated_piece
 
-    let obj = boardInverse[col_id]
+    console.log("inside setBoardInverseGeneral")
+    let newBoardInverseLocal = [...boardInverseGeneral.current]
+    let sourceObj = newBoardInverseLocal[selected_col]
+
+    let obj = newBoardInverseLocal[col_id]
     for (let key in obj){
         if (Number(String(key)[1]) == row_id){
 
             obj[key] = selectedPiece.name
             //console.log("make Move - add piece:", obj[key])
+            console.log("Found piece")
             
 
         }
         if (Number(String(key)[1]) == selected_row){
             //console.log("make Move - delete piece:", sourceObj[key])
             sourceObj[key] = "empty" // empty the source location
+            console.log("emptied it")
         }
     }
 
-    console.log("current board Inverse: ", boardInverse[selected_col])
+    console.log("current board Inverse: ", newBoardInverseLocal[selected_col])
 
-    let piece = getPiece(col_id, row_id, true);
+    let piece = getPiece(col_id, row_id, true, newBoardInverseLocal);
     //console.log(piece)
 
-    let updated_piece
+    
     // has_moved
-    for (let key in initBoard){ // key is just index here
+    let localInitBoardGeneral = [...initBoardGeneral.current]
+    for (let key in localInitBoardGeneral){ // key is just index here
         
-        if (Object.keys(initBoard[key])[0] == piece){
+        if (Object.keys(localInitBoardGeneral[key])[0] == piece){
             
             console.log("changing has moved")
-            let unknownKey  = Object.keys(initBoard[key])[0]
-            initBoard[key][unknownKey].has_moved = true
-            initBoard[key][unknownKey].col = col_id
-            initBoard[key][unknownKey].row = row_id
-            updated_piece = initBoard[key][unknownKey]
-            //setSelectedPiece({...initBoard[key][unknownKey]})
-            console.log("current piece data: ", initBoard[key][unknownKey])
+            let unknownKey  = Object.keys(localInitBoardGeneral[key])[0]
+
+            
+                let newInitBoardLocal = [...localInitBoardGeneral]
+                newInitBoardLocal[key][unknownKey].has_moved = true
+                newInitBoardLocal[key][unknownKey].col = col_id
+                newInitBoardLocal[key][unknownKey].row = row_id
+                updated_piece = newInitBoardLocal[key][unknownKey]
+                console.log("Update piece inside is : ", updated_piece)
+            
+            initBoardGeneral.current = newInitBoardLocal
+            
+            
+
+            console.log("current piece data: ", initBoardGeneral.current[key][unknownKey])
             console.log("col is : ", col_id," row is : ", row_id)
-            //Object.values(initBoard[key])[0].has_moved = true
-            //console.log(initBoard[key])
-            //Object.values(initBoard[key])[0]
+            
             break;
         }
     }
+    boardInverseGeneral.current = [...newBoardInverseLocal];
+
+    console.log("After changing board Invere General: ", boardInverseGeneral)
+    console.log("The new updated piece is", updated_piece)
+    console.log("current piece data after all (initBoardGeneral): ", initBoardGeneral.current)
 
     let move_msg: Move = {
         type: "Move",
@@ -3225,7 +3561,9 @@ function clearBoard(setDrawState: React.Dispatch){
 
 // after take piece, we should remove it from initboards cause later in the game there are dead pieces that actually blocks checks etc
 
-function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInstance: WebSocket|null){
+// clear init board
+function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInstance: WebSocket|null, initBoardGeneral: RefObject<{}[]>
+                    , boardInverseGeneral: RefObject<{}[]>){
     /*
         Function that runs when a piece is taken, col_id, row_id is the location of the eaten piece, selected piece is the one that eats
     */
@@ -3233,45 +3571,60 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
     let from_row = selectedPiece.row
     let from_col = selectedPiece.col
 
-    let piece_eaten = getPiece(col_id, row_id, true)
-    let init_board_len1 = initBoard.length
-    // remove
-    initBoard = initBoard.filter((elem) => Object.keys(elem)[0] != piece_eaten)
+    let piece_eaten = getPiece(col_id, row_id, true, boardInverseGeneral.current)
+    let init_board_len1 = initBoardGeneral.current.length
 
-    let init_board_len2 = initBoard.length
+    let initBoard = [...initBoardGeneral.current]
+    initBoard = initBoard.filter((elem) => Object.keys(elem)[0] != piece_eaten)
+    initBoardGeneral.current = [...initBoard]
+      
+    
+
+    let init_board_len2 = initBoardGeneral.current.length
     if (init_board_len1 == init_board_len2) throw new Error (`Couldn't found the piece by it's locations: ${row_id}, ${col_id}. function takePiece`)
     
     console.log("selectedPiece.row: ", selectedPiece.row)
-    let obj = boardInverse[selectedPiece.col]
 
-    for (let key in obj){
-        if (Number(String(key)[1]) == selectedPiece.row){ // find the old piece and make it empty
-            obj[key] = "empty" 
+    let localBoardInverse = boardInverseGeneral.current
+        let obj = localBoardInverse[selectedPiece.col]
+
+        for (let key in obj){
+            if (Number(String(key)[1]) == selectedPiece.row){ // find the old piece and make it empty
+                obj[key] = "empty" 
+            }
         }
-    }
-
-
-    let second_obj = boardInverse[col_id]
-
-    for (let key in second_obj){
-        if (Number(String(key)[1]) == row_id){ // find the eaten piece and make it's place the selected piece
-            second_obj[key] = selectedPiece.name;
+    
+    
+        let second_obj = localBoardInverse[col_id]
+    
+        for (let key in second_obj){
+            if (Number(String(key)[1]) == row_id){ // find the eaten piece and make it's place the selected piece
+                second_obj[key] = selectedPiece.name;
+            }
         }
-    }
+    boardInverseGeneral.current = localBoardInverse
+    
 
 
     let updated_piece
-    for (let elem in initBoard){
-        if (Object.keys(initBoard[elem])[0] == selectedPiece.name){ // find the selectedPiece and change info
-            let unknownKey = Object.keys(initBoard[elem])[0]
-            initBoard[elem][unknownKey].has_moved = true
-            initBoard[elem][unknownKey].col = col_id
-            initBoard[elem][unknownKey].row = row_id
-            updated_piece = initBoard[elem][unknownKey]
+    for (let elem in initBoardGeneral.current){
+        if (Object.keys(initBoardGeneral.current[elem])[0] == selectedPiece.name){ // find the selectedPiece and change info
+            let unknownKey = Object.keys(initBoardGeneral.current[elem])[0]
+
+            let localInitBoard = initBoardGeneral.current
+                localInitBoard[elem][unknownKey].has_moved = true
+                localInitBoard[elem][unknownKey].col = col_id
+                localInitBoard[elem][unknownKey].row = row_id
+                updated_piece = localInitBoard[elem][unknownKey]
+
+            initBoardGeneral.current = [...localInitBoard]
+            
         }
     }
 
-    isCheckCondition(col_id, row_id)
+    if (updated_piece == null) {console.log("Big error in take piece !!!!")}
+
+    isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current)
 
     let move_msg: Move = {
         type: "Move",
@@ -3286,18 +3639,25 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 
     return updated_piece
 }
+// This currently only checks the checks from recently moved piece, not by others (i.e. the opening checks where you move a piece and
+// another piece is now threating the king other than moving piece). For this you'd have to check for every opponent's other piece
+// if it has a clear direction to the king (similar to what we did in setMoveablePieces where we found the opponent pieces toward king with a 
+// (one) blocking piece)
+function isCheckCondition(col_id: number, row_id: number, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
 
-function isCheckCondition(col_id: number, row_id: number){
-
-    let piece = getPiece(col_id, row_id, true)
+    if (boardInverseGeneral == null || boardInverseGeneral == undefined){
+        console.log("BoardInverseGeneral shouldn't be null or undefined ever")
+    }
+    console.log("boardInverseGeneral inside isCheckCondition: ", boardInverseGeneral)
+    let piece = getPiece(col_id, row_id, true, boardInverseGeneral)
     if (piece == null){
         throw new Error("for the given location, piece should've been found. In isCheckCondition")
     }
 
     let piece_in = null
-    for (let key in initBoard){
-        if (Object.keys(initBoard[key])[0] == piece){
-            piece_in = initBoard[key]
+    for (let key in initBoardGeneral){
+        if (Object.keys(initBoardGeneral[key])[0] == piece){
+            piece_in = initBoardGeneral[key]
             break
         }
     }
@@ -3313,23 +3673,23 @@ function isCheckCondition(col_id: number, row_id: number){
             row_inc = 1
         }
 
-        let piece_target = getPiece(col_id+1, row_id + row_inc, true)
+        let piece_target = getPiece(col_id+1, row_id + row_inc, true, boardInverseGeneral)
         if (piece_target != null){
-            for (let key in initBoard){
-                if (Object.keys(initBoard[key])[0] == piece_target 
-                    && Object.values(initBoard[key])[0].kind == "king"
-                    && Object.values(initBoard[key])[0].color != local_turn){
+            for (let key in initBoardGeneral){
+                if (Object.keys(initBoardGeneral[key])[0] == piece_target 
+                    && Object.values(initBoardGeneral[key])[0].kind == "king"
+                    && Object.values(initBoardGeneral[key])[0].color != local_turn){
                         return true
                 }
             }
         }
 
-        piece_target = getPiece(col_id-1, row_id + row_inc, true)
+        piece_target = getPiece(col_id-1, row_id + row_inc, true, boardInverseGeneral)
         if (piece_target != null){
-            for (let key in initBoard){
-                if (Object.keys(initBoard[key])[0] == piece_target 
-                    && Object.values(initBoard[key])[0].kind == "king"
-                    && Object.values(initBoard[key])[0].color != local_turn){
+            for (let key in initBoardGeneral){
+                if (Object.keys(initBoardGeneral[key])[0] == piece_target 
+                    && Object.values(initBoardGeneral[key])[0].kind == "king"
+                    && Object.values(initBoardGeneral[key])[0].color != local_turn){
                         return true
                 }
             }
@@ -3341,13 +3701,13 @@ function isCheckCondition(col_id: number, row_id: number){
 
                     if (row_id +1 <= 7){
 
-                        let piece = getPiece(col_id-2, row_id+1, true)
+                        let piece = getPiece(col_id-2, row_id+1, true, boardInverseGeneral)
                         if (piece != null){ // there is no piece, you can draw
                             
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     return true
                                 }
                             }
@@ -3357,14 +3717,14 @@ function isCheckCondition(col_id: number, row_id: number){
                     }
                     if (row_id -1 >= 0){
 
-                        let piece = getPiece(col_id-2, row_id-1, true)
+                        let piece = getPiece(col_id-2, row_id-1, true, boardInverseGeneral)
                         if (piece != null){ // there is no piece, draw
                              // there is a piece, if it's not black -> draw
                     
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     return true
                                 }
                             }
@@ -3376,14 +3736,14 @@ function isCheckCondition(col_id: number, row_id: number){
                 if (col_id +2 <= 7){
 
                     if (row_id +1 <= 7){
-                        let piece = getPiece(col_id+2, row_id+1, true)
+                        let piece = getPiece(col_id+2, row_id+1, true, boardInverseGeneral)
 
                         if (piece != null){ // there is no piece, you can draw
                              // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     return true
                                 }
                             }
@@ -3391,14 +3751,14 @@ function isCheckCondition(col_id: number, row_id: number){
                         
                     }
                     if (row_id -1 >= 0){
-                        let piece = getPiece(col_id+2, row_id-1, true)
+                        let piece = getPiece(col_id+2, row_id-1, true, boardInverseGeneral)
 
                         if (piece != null){ // there is no piece, you can draw
                              // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     return true
                                 }
                             }
@@ -3410,14 +3770,14 @@ function isCheckCondition(col_id: number, row_id: number){
                 if (row_id +2 <= 7){
 
                     if (col_id -1 >= 0){
-                        let piece = getPiece(col_id-1, row_id+2, true)
+                        let piece = getPiece(col_id-1, row_id+2, true, boardInverseGeneral)
 
                         if (piece != null){ // there is no piece, you can draw
                              // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     return true
                                 }
                             }
@@ -3425,15 +3785,15 @@ function isCheckCondition(col_id: number, row_id: number){
                         
                     }
                     if (col_id +1 <= 7){
-                        let piece = getPiece(col_id+1, row_id+2, true)
+                        let piece = getPiece(col_id+1, row_id+2, true, boardInverseGeneral)
 
                         if (piece != null){ // there is no piece, you can draw
                             
                              // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     return true
                                 }
                             }
@@ -3445,15 +3805,15 @@ function isCheckCondition(col_id: number, row_id: number){
                 if (row_id -2 >= 0){
 
                     if (col_id -1 >= 0){
-                        let piece = getPiece(col_id-1, row_id-2, true)
+                        let piece = getPiece(col_id-1, row_id-2, true, boardInverseGeneral)
 
                         if (piece != null){ // there is no piece, you can draw
                             
                              // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     return true
                                 }
                             }
@@ -3462,15 +3822,15 @@ function isCheckCondition(col_id: number, row_id: number){
                         
                     }
                     if (col_id +1 <= 7){
-                        let piece = getPiece(col_id+1, row_id-2, true)
+                        let piece = getPiece(col_id+1, row_id-2, true, boardInverseGeneral)
 
                         if (piece != null){ // there is no piece, you can draw
                             
                             // there is a piece, make sure it's not black
-                            for (let key in initBoard){
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                            for (let key in initBoardGeneral){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     return true
                                 }
                             }
@@ -3488,13 +3848,13 @@ function isCheckCondition(col_id: number, row_id: number){
                 let col_loc_2 = col_id +1;
                 while (row_loc >= 0){ // to the left
                     
-                    let piece = getPiece(col_id, row_loc, true)
+                    let piece = getPiece(col_id, row_loc, true, boardInverseGeneral)
                     if (piece != null){ // empty, draw it
                         
-                        for (let key in initBoard){
-                            if (Object.keys(initBoard[key])[0] == piece 
-                                && Object.values(initBoard[key])[0].color != local_turn
-                                && Object.values(initBoard[key])[0].kind == "king"){
+                        for (let key in initBoardGeneral){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                 
                                     return true
                             }
@@ -3505,14 +3865,14 @@ function isCheckCondition(col_id: number, row_id: number){
                 }
                 while (row_loc_2 <= 7){ // to the down 
                     
-                    let piece = getPiece(col_id, row_loc_2, true);
+                    let piece = getPiece(col_id, row_loc_2, true, boardInverseGeneral);
                     if (piece != null) {
                         
                         
-                        for (let key in initBoard){
-                            if (Object.keys(initBoard[key])[0] == piece 
-                                && Object.values(initBoard[key])[0].color != local_turn
-                                && Object.values(initBoard[key])[0].kind == "king"){
+                        for (let key in initBoardGeneral){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                 
                                     return true
                             }
@@ -3523,14 +3883,14 @@ function isCheckCondition(col_id: number, row_id: number){
                 }
                 while (col_loc >= 0){ // to the up
                     
-                    let piece = getPiece(col_loc, row_id, true);
+                    let piece = getPiece(col_loc, row_id, true, boardInverseGeneral);
                     if (piece != null) {
                         
                         
-                        for (let key in initBoard){
-                            if (Object.keys(initBoard[key])[0] == piece 
-                                && Object.values(initBoard[key])[0].color != local_turn
-                                && Object.values(initBoard[key])[0].kind == "king"){
+                        for (let key in initBoardGeneral){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                 
                                     return true
                             }
@@ -3541,14 +3901,14 @@ function isCheckCondition(col_id: number, row_id: number){
                 }
                 while (col_loc_2 <= 7){ // to the right
                     
-                    let piece = getPiece(col_loc_2, row_id, true);
+                    let piece = getPiece(col_loc_2, row_id, true, boardInverseGeneral);
                     if (piece != null) {
                         
 
-                        for (let key in initBoard){
-                            if (Object.keys(initBoard[key])[0] == piece 
-                                && Object.values(initBoard[key])[0].color != local_turn
-                                && Object.values(initBoard[key])[0].kind == "king"){
+                        for (let key in initBoardGeneral){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                 
                                     return true
                             }
@@ -3573,16 +3933,16 @@ function isCheckCondition(col_id: number, row_id: number){
                     if (row_loc >= 0){
 
                         // get piece
-                        let piece = getPiece(col_loc, row_loc, true);
+                        let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
 
                         if (piece != null){
                             
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
 
                                         return true
 
@@ -3600,16 +3960,16 @@ function isCheckCondition(col_id: number, row_id: number){
                     if (row_loc_2 <= 7){
 
                         // get piece
-                        let piece = getPiece(col_loc_2, row_loc_2, true);
+                        let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
 
                         if (piece != null){
                             
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                     
                                         return true
 
@@ -3627,16 +3987,16 @@ function isCheckCondition(col_id: number, row_id: number){
                     if (row_loc_3 >= 0){
 
                         // get piece
-                        let piece = getPiece(col_loc_3, row_loc_3, true);
+                        let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
 
                         if (piece != null){
                             
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
 
                                         return true
 
@@ -3654,16 +4014,16 @@ function isCheckCondition(col_id: number, row_id: number){
                     if (row_loc_4 <= 7){
 
                         // get piece
-                        let piece = getPiece(col_loc_4, row_loc_4, true);
+                        let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
 
                         if (piece != null){
                             
 
-                            for (let key in initBoard){
+                            for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoard[key])[0] == piece 
-                                    && Object.values(initBoard[key])[0].color != local_turn
-                                    && Object.values(initBoard[key])[0].kind == "king"){
+                                if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
 
                                         return true
                                 }
@@ -3695,16 +4055,16 @@ function isCheckCondition(col_id: number, row_id: number){
 
                 if (row_loc >= 0){
 
-                    let piece = getPiece(col_loc, row_loc, true);
+                    let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
 
                     if (piece != null){
                         
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece 
-                                && Object.values(initBoard[key])[0].color != local_turn
-                                && Object.values(initBoard[key])[0].kind == "king"){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                 
                                     return true
                             }
@@ -3721,16 +4081,16 @@ function isCheckCondition(col_id: number, row_id: number){
 
                 if (row_loc_2 <= 7){
 
-                    let piece = getPiece(col_loc_2, row_loc_2, true);
+                    let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
 
                     if (piece != null){
                         
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece 
-                                && Object.values(initBoard[key])[0].color != local_turn
-                                && Object.values(initBoard[key])[0].kind == "king"){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                 
                                     return true
                             }
@@ -3747,16 +4107,16 @@ function isCheckCondition(col_id: number, row_id: number){
 
                 if (row_loc_3 >= 0){
 
-                    let piece = getPiece(col_loc_3, row_loc_3, true);
+                    let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
 
                     if (piece != null){
                         
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece 
-                                && Object.values(initBoard[key])[0].color != local_turn
-                                && Object.values(initBoard[key])[0].kind == "king"){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                 
                                     return true
                             }
@@ -3773,16 +4133,16 @@ function isCheckCondition(col_id: number, row_id: number){
 
                 if (row_loc_4 <= 7){
 
-                    let piece = getPiece(col_loc_4, row_loc_4, true);
+                    let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
 
                     if (piece != null){
                         
 
-                        for (let key in initBoard){
+                        for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoard[key])[0] == piece 
-                                && Object.values(initBoard[key])[0].color != local_turn
-                                && Object.values(initBoard[key])[0].kind == "king"){
+                            if (Object.keys(initBoardGeneral[key])[0] == piece 
+                                && Object.values(initBoardGeneral[key])[0].color != local_turn
+                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
                                 
                                     return true
                             }
@@ -3798,16 +4158,16 @@ function isCheckCondition(col_id: number, row_id: number){
 
             while (col_loc_5 <= 7){ // to right
 
-                let piece = getPiece(col_loc_5, row_id, true)
+                let piece = getPiece(col_loc_5, row_id, true, boardInverseGeneral)
                 
                 if (piece != null){
                     
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece 
-                            && Object.values(initBoard[key])[0].color != local_turn
-                            && Object.values(initBoard[key])[0].kind == "king"){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece 
+                            && Object.values(initBoardGeneral[key])[0].color != local_turn
+                            && Object.values(initBoardGeneral[key])[0].kind == "king"){
                             
                                 return true
                         }
@@ -3820,16 +4180,16 @@ function isCheckCondition(col_id: number, row_id: number){
 
             while (col_loc_6 >= 0){ // to left
 
-                let piece = getPiece(col_loc_6, row_id, true)
+                let piece = getPiece(col_loc_6, row_id, true, boardInverseGeneral)
 
                 if (piece != null){
                     
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece 
-                            && Object.values(initBoard[key])[0].color != local_turn
-                            && Object.values(initBoard[key])[0].kind == "king"){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece 
+                            && Object.values(initBoardGeneral[key])[0].color != local_turn
+                            && Object.values(initBoardGeneral[key])[0].kind == "king"){
                             
                                 return true
                         }
@@ -3842,17 +4202,17 @@ function isCheckCondition(col_id: number, row_id: number){
 
             while (row_loc_5 <= 7){ // to down
 
-                let piece = getPiece(col_id, row_loc_5, true)
+                let piece = getPiece(col_id, row_loc_5, true, boardInverseGeneral)
                 
 
                 if (piece != null){
                     
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece 
-                            && Object.values(initBoard[key])[0].color != local_turn
-                            && Object.values(initBoard[key])[0].kind == "king"){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece 
+                            && Object.values(initBoardGeneral[key])[0].color != local_turn
+                            && Object.values(initBoardGeneral[key])[0].kind == "king"){
                             
                                 return true
                         }
@@ -3865,16 +4225,16 @@ function isCheckCondition(col_id: number, row_id: number){
 
             while (row_loc_6 >= 0){ // to up
 
-                let piece = getPiece(col_id, row_loc_6, true)
+                let piece = getPiece(col_id, row_loc_6, true, boardInverseGeneral)
 
                 if (piece != null){
                     
 
-                    for (let key in initBoard){
+                    for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoard[key])[0] == piece 
-                            && Object.values(initBoard[key])[0].color != local_turn
-                            && Object.values(initBoard[key])[0].kind == "king"){
+                        if (Object.keys(initBoardGeneral[key])[0] == piece 
+                            && Object.values(initBoardGeneral[key])[0].color != local_turn
+                            && Object.values(initBoardGeneral[key])[0].kind == "king"){
                             
                                 return true
                         }
@@ -3902,26 +4262,32 @@ function isCheckCondition(col_id: number, row_id: number){
       - pawn goes to other pieces (a selection required)
       - rook move O-O O-O-O
 
-      - implement after makeMove function protocols
+      - implement after makeMove function protocols +
+      
+      - board square colors are not right +
+      - in check situation if king can't move but a piece block the check it's not game over (isNotBlocked function has some flaws
+      identifying the blocked pieces) +
+      - the opening checks in isCheckCondition is not satisfied (next weeks job)
+      
 
       --- later ? (after backend in rust)
       - piece move by mouse hold
 */
-function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispatch, allDrawState: boolean[][], 
-                       setSelectedPiece: React.Dispatch, selectedPiece: Piece, turn: string, setTurn: React.Dispatch,
-                       setIsCheck: React.Dispatch, isCheck: boolean, checkingPiece: Piece, setCheckingPiece: React.Dispatch,
-                       colsAndRows: null|{row: number, col:number}[], setColsAndRows: React.Dispatch, wsInstance: WebSocket|null,
-                       playerTurn: string){
+function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispatch, allDrawState: boolean[][], setSelectedPiece: React.Dispatch, 
+                       selectedPiece: Piece, turn: string, setTurn: React.Dispatch, setIsCheck: React.Dispatch, isCheck: boolean, 
+                       checkingPiece: Piece, setCheckingPiece: React.Dispatch, colsAndRows: null|{row: number, col:number}[], 
+                       setColsAndRows: React.Dispatch, wsInstance: WebSocket|null, playerTurn: RefObject<string>, initBoardGeneral: RefObject<{}[]>, 
+                       boardInverseGeneral: RefObject<{}[]>){
     /*
         Onclick handler on squares. It draws the possible moves, and should handle the move
         Notes: could be two separate function -> draw possible moves and leave, handle the move
     */
     console.log("onclickSquare :")
-    if (playerTurn != turn){
+    if (playerTurn.current != turn){
         return;
     }
 
-    let piece = getPiece(col_id, row_id, true)
+    let piece = getPiece(col_id, row_id, true, boardInverseGeneral.current)
     console.log("destination is : ", piece)
     // get the piece information from board
     let piece_in = null;
@@ -3933,17 +4299,18 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
             console.log("we make move to empty place")
             console.log("selected piece is (before makeMove): ", selectedPiece)
 
-            let updated_piece = makeMove(col_id, row_id, setDrawState, selectedPiece, wsInstance); 
+            let updated_piece = makeMove(col_id, row_id, setDrawState, selectedPiece, wsInstance, initBoardGeneral, 
+                                          boardInverseGeneral); 
             
-            
-            let is_check_local = isCheckCondition(col_id, row_id) // check if the piece in the given location can thread the opponent king
+            // check if the piece in the given location can thread the opponent king
+            let is_check_local = isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current) 
             setIsCheck(is_check_local)
 
             if (is_check_local) {
                 
                 setCheckingPiece({...updated_piece})
                 console.log("check came by: ", updated_piece)
-                let cols_and_rows = setMoveablePieces(turn, updated_piece, setColsAndRows)
+                let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initBoardGeneral.current)
                 console.log("real cols and rows: ", cols_and_rows)
                 setColsAndRows([...cols_and_rows])
                 console.log("cols and rows: ", colsAndRows)
@@ -3970,35 +4337,37 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
 
     } else { // we taking a piece or first selection
 
-        for (let key in initBoard){ // key is just index here
+        for (let key in initBoardGeneral.current){ // key is just index here
         
-            //console.log(initBoard[key])
-            if (Object.keys(initBoard[key])[0] == piece){
             
-                piece_in = initBoard[key]
+            if (Object.keys(initBoardGeneral.current[key])[0] == piece){
+            
+                piece_in = initBoardGeneral.current[key]
                 console.log("piece_in here: ",piece_in)
                 break;
             }
         }
 
         if (piece_in == null){
-            console.log("current situation of initboard: ", initBoard)
+            console.log("current situation of initboardGeneral: ", initBoardGeneral.current)
             throw new Error("The piece is not found, it should've been found. Function: onClickSquare")
         } else if (Object.values(piece_in)[0].color != turn) { // opponent piece
 
             if (allDrawState[col_id][row_id] == true) {
 
-                let updated_piece = takePiece(col_id, row_id, selectedPiece, wsInstance);
+                let updated_piece = takePiece(col_id, row_id, selectedPiece, wsInstance, initBoardGeneral, 
+                                               boardInverseGeneral);
                 
                 clearBoard(setDrawState);
 
-                let is_check_local = isCheckCondition(col_id, row_id) // check if the piece in the given location can thread the opponent king
+                // check if the piece in the given location can thread the opponent king
+                let is_check_local = isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current) 
                 setIsCheck(is_check_local)
 
                 if (is_check_local) {
                     setCheckingPiece(updated_piece)
                     
-                    let cols_and_rows = setMoveablePieces(turn, updated_piece, setColsAndRows)
+                    let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initBoardGeneral.current)
                     
                     setColsAndRows([...cols_and_rows])
                 } else {
@@ -4012,7 +4381,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
                 })
 
                 // send the move to the server
-                sendMoveToServer(wsInstance, "")
+                //sendMoveToServer(wsInstance, "")
                 console.log("take piece")
             }
             else {
@@ -4037,11 +4406,18 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
 
                 console.log(Object.values(piece_in)[0])
                 
+                let localBoardInverse = [...boardInverseGeneral.current]
+                console.log("local board Inverse before error: ", localBoardInverse)
+                let is_it_blocked = isNotBlocked({...Object.values(piece_in)[0], turn, initBoardGeneral, boardInverseGeneral: localBoardInverse})
+                console.log("Ok, is it blocked ? : ", is_it_blocked)
 
-                let is_it_blocked = isNotBlocked({...Object.values(piece_in)[0], turn})
-
-                let args = {...Object.values(piece_in)[0], setDrawState, turn, isCheck, colsAndRows, is_it_blocked}
+                let localInitBoardGeneral = [...initBoardGeneral.current]
+                let args = {...Object.values(piece_in)[0], setDrawState, turn, isCheck, colsAndRows, is_it_blocked, playerTurn, 
+                             initBoardGeneral: localInitBoardGeneral, boardInverseGeneral: localBoardInverse}
+                // handle this issue later ^^^^^^^^^^^^^
                 console.log(args)
+
+                // IN here there is a mistake on drawing the pawn that could eat right
                 drawPossibleMoves(args)
             }
             
@@ -4062,30 +4438,33 @@ interface Move {
     Funtion to realize moves coming from server, receiving
 */
 function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPiece: React.Dispatch, setColsAndRows: React.Dispatch,
-                            setTurn: React.Dispatch, turn: string){
+                            setTurn: React.Dispatch, turn: string, initboardGeneral: RefObject<{}[]>,
+                            boardInverseGeneral: RefObject<{}[]>, playerTurn: RefObject<string>){
 
-                                  /*let custom_selected_piece: Piece = {
-        col: move.from_col,
-        row: move.from_row,
-        name: move.piece_name,
-        kind: "not important",
-        color: "not important",
-        has_moved: true,
-        moveable: true
-    }*/
     console.log("OK now we need to do the move: ", move)
+
+    move.from_row = 7 - move.from_row
+    move.to_row = 7 - move.to_row
+    move.from_col = 7 - move.from_col
+    move.to_col = 7 - move.to_col
+
+
+    console.log("translated move: ", move)
+    console.log("current initBoard: ", initboardGeneral.current)
+    console.log("current boardInverseGeneral: ", boardInverseGeneral.current)
+    console.log("player Turn: ", playerTurn.current)
   
 
-    let piece = getPiece(move.from_col, move.from_row, true)
+    let piece = getPiece(move.from_col, move.from_row, true, boardInverseGeneral.current)
     console.log("Looking for ", move.from_col, move.from_row)
     console.log("Piece found is ", piece)
 
     let piece_in = null
-    for (let key in initBoard){ // key is just index here
+    for (let key in initboardGeneral.current){ // key is just index here
         
-        if (Object.keys(initBoard[key])[0] == piece){
+        if (Object.keys(initboardGeneral.current[key])[0] == piece){
             
-            piece_in = initBoard[key]
+            piece_in = initboardGeneral.current[key]
             console.log("piece_in here: ",piece_in)
             break;
         }
@@ -4094,16 +4473,22 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
     let custom_selected_piece = {...Object.values(piece_in)[0]}
     console.log("For opponent custom selected piece is: ", custom_selected_piece)
 
-    let updated_piece = makeMove(move.to_col, move.to_row, null, custom_selected_piece, null)
+    let updated_piece = makeMove(move.to_col, move.to_row, null, custom_selected_piece, null, initboardGeneral,
+                                  boardInverseGeneral)
     
-    let is_check_local = isCheckCondition(move.to_col, move.to_row) // check if the piece in the given location can thread the opponent king
+    // check if the piece in the given location can thread the opponent king
+    let is_check_local = isCheckCondition(move.to_col, move.to_row, initboardGeneral.current, boardInverseGeneral.current) 
     setIsCheck(is_check_local)
+
+    setTurn((old: string) => {
+        return old == "white" ? "black" : "white" // just flip the turn
+    })
     
     if (is_check_local) {
         
         setCheckingPiece({...updated_piece})
         console.log("check came by: ", updated_piece)
-        let cols_and_rows = setMoveablePieces(turn, updated_piece, setColsAndRows)
+        let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initboardGeneral.current)
         console.log("real cols and rows: ", cols_and_rows)
         setColsAndRows([...cols_and_rows])
     } else {
@@ -4111,9 +4496,11 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
     }
     
     
-    setTurn((old: string) => {
-        return old == "white" ? "black" : "white" // just flip the turn
-    })
+    
+
+    console.log("current initBoard: ", initboardGeneral)
+    console.log("current boardInverseGeneral: ", boardInverseGeneral)
+    console.log("player Turn: ", playerTurn.current)
 
 
     console.log("Opponent move is done")
@@ -4162,10 +4549,15 @@ export default function Board(){
         [...initDrawState]
     ) // initial state of possible moves
 
+    const initBoardGeneral = useRef<{}[]>(initBoard_fromWhite)
+    const boardInverseGeneral = useRef<{}[]>(boardInverse_fromWhite)
+
     const [selectedPiece, setSelectedPiece] = useState<Piece>({...nullPiece});
 
     const [turn, setTurn] = useState<string>("white")
-    const [playerTurn, setPlayerTurn] = useState<string>("white") 
+    //const [playerTurn, setPlayerTurn] = useState<string>("") 
+    const playerTurn = useRef("")
+
     // NOTE: We need to and these two when clicking to a piece
 
     const [isCheck, setIsCheck] = useState<boolean>(false)
@@ -4209,28 +4601,40 @@ export default function Board(){
                 console.log("received message: ", e.data)
                 console.log(e)
     
-                if (e.data == "GameStarting"){
+                if (e.data == "GameStarting"){ // game start message
+
                     console.log("game is starting now")
                     setIsGameReady(true)
-                }
-                 else if (isJsonString(e.data) && JSON.parse(e.data).type == "Move"){
+
+                } else if (isJsonString(e.data) && JSON.parse(e.data).type == "Move"){ // move message
     
-                    makeOpponentMove(JSON.parse(e.data), setIsCheck, setCheckingPiece, setColsAndRows, setTurn, turn)
-                    console.log("Opponents move: ", e.data)
-                } else if (e.data.includes("opponent")){
+                    makeOpponentMove(JSON.parse(e.data), setIsCheck, setCheckingPiece, setColsAndRows, setTurn, turn, initBoardGeneral,
+                                      boardInverseGeneral, playerTurn)
+                    
+
+                } else if (e.data.includes("opponent")){ // color deciding message
+
                     if (e.data.includes("white")){
-                        setPlayerTurn("white");
+
+                        console.log("ANNOUNCEMENT: changing player turn to white")
+                        playerTurn.current = "white";
+                        initBoardGeneral.current = [...initBoard_fromWhite]
+                        boardInverseGeneral.current = [...boardInverse_fromWhite]
                         if (!e.data.includes("do_not_sent_back")) {
                             wsInstance.send("youre black (opponent) do_not_sent_back")
                         }
                             
                     } else {
-                        setPlayerTurn("black")
+
+                        console.log("ANNOUNCEMENT: changing player turn to black")
+                        playerTurn.current = "black";
+                        initBoardGeneral.current = [...initBoard_fromBlack]
+                        boardInverseGeneral.current = [...boardInverse_fromBlack]
                         if (!e.data.includes("do_not_sent_back")) {
                             wsInstance.send("youre white (opponent) do_not_sent_back")
                         }
                     }
-                } else {
+                } else { // error case
                     console.log(typeof((e.data)))
     
                     console.log("Unexpected message: ", e.data)
@@ -4268,6 +4672,8 @@ export default function Board(){
             setColsAndRows={setColsAndRows}
             wsInstance={wsInstance}
             playerTurn={playerTurn}
+            initBoardGeneral={initBoardGeneral}
+            boardInverseGeneral={boardInverseGeneral}
         />)
     })
     
@@ -4297,11 +4703,15 @@ interface ColumnProps {
     colsAndRows: null|{row:number, col:number}[]
     setColsAndRows: React.Dispatch
     wsInstance: WebSocket | null
-    playerTurn: string
+    playerTurn: RefObject<string>
+    initBoardGeneral: RefObject<{}[]>
+    boardInverseGeneral: RefObject<{}[]>
+
 }
 
 function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck,
-                 isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn} : ColumnProps){
+                 isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn, initBoardGeneral,
+                 boardInverseGeneral} : ColumnProps){
 
     let squares = Array()
     for (let i = 0; i<BOARD_SIZE; i++){
@@ -4313,7 +4723,7 @@ function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, se
     
     squares.map((elem, index) => {
 
-        let color = index % 2 == 0 ? (id % 2 == 0 ? "bg-chess-dark" : "bg-chess-light") : (id % 2 == 0 ? "bg-chess-light" : "bg-chess-dark")
+        let color = index % 2 == 0 ? (id % 2 == 0 ? "bg-chess-light" : "bg-chess-dark") : (id % 2 == 0 ? "bg-chess-dark" : "bg-chess-light")
         let label_color = color == "bg-chess-dark" ? "text-chess-light" : "text-chess-dark"
         displaySquare.push(
             <Square 
@@ -4337,6 +4747,8 @@ function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, se
             setColsAndRows={setColsAndRows}
             wsInstance={wsInstance}
             playerTurn={playerTurn}
+            initBoardGeneral={initBoardGeneral}
+            boardInverseGeneral={boardInverseGeneral}
             />
         )
     })
@@ -4370,20 +4782,23 @@ interface SquareProps{
     colsAndRows: null|{row:number, col:number}[]
     setColsAndRows: React.Dispatch
     wsInstance: WebSocket | null
-    playerTurn: string
+    playerTurn: RefObject<string>
+    initBoardGeneral: RefObject<{}[]>
+    boardInverseGeneral: RefObject<{}[]>
 }
 
 function Square({col_id, row_id, color, label_color, setDrawState, drawState, allDrawState, setSelectedPiece, selectedPiece, turn, 
-                 setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn}: SquareProps){
+                 setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn,
+                 initBoardGeneral, boardInverseGeneral}: SquareProps){
 
-    let piece = getPiece(col_id, row_id, false) // piece is like wking.svg
-    let piece_name = getPiece(col_id, row_id, true)
+    let piece = getPiece(col_id, row_id, false, boardInverseGeneral.current) // piece is like wking.svg
+    let piece_name = getPiece(col_id, row_id, true, boardInverseGeneral.current)
     let piece_in
 
-    for (let key in initBoard){
+    for (let key in initBoardGeneral.current){
 
-        if (piece != null && Object.keys(initBoard[key])[0] == piece_name){
-            piece_in = initBoard[key]
+        if (piece != null && Object.keys(initBoardGeneral.current[key])[0] == piece_name){
+            piece_in = initBoardGeneral.current[key]
         }
     }
 
@@ -4403,8 +4818,12 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
     return (
         <div
           className={`${bgColor} w-25 h-25 relative ${bgHover}`}
-          onClick={() => onclickSquare(col_id, row_id, setDrawState, allDrawState, setSelectedPiece, selectedPiece, turn,
-            setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn)}
+          row-id={row_id}
+          col-id={col_id}
+
+          onClick={() => onclickSquare(col_id, row_id, setDrawState, allDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck, 
+            isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn, initBoardGeneral,
+            boardInverseGeneral)}
         >
           {/* Şah işareti */}
           {isKingChecked && (
