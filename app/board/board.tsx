@@ -1240,7 +1240,7 @@ console.log("king is in right down")
             }
 
         } else if (checkingPiece.row < turn_king.row && checkingPiece.col > turn_king.col){ // king is in left down
-console.log("king is in left up | king is in left down (for white)")
+console.log("king is in left down | king is in right up (for white)") // this works for black
             let king_col = turn_king.col +1
             let king_row = turn_king.row -1
 
@@ -1252,25 +1252,32 @@ console.log("king is in left up | king is in left down (for white)")
                     king_col++;
                     king_row--;
                 }
-            } else {
-                while (king_col > checkingPiece.col && king_row < checkingPiece.row){
+            } else { // for black
+
+                while (king_col < checkingPiece.col && king_row > checkingPiece.row){
 
                     console.log("pushing row: ", king_row, "col: ", king_col)
                     cols_and_rows.push({row:  king_row, col: king_col})    
-                    king_col--;
-                    king_row++;   
+                    king_col++;
+                    king_row--;   
                 }
             }
 
         } else if (checkingPiece.row > turn_king.row && checkingPiece.col < turn_king.col){ // king is in right up
-console.log("king is in right up (for black)")
+console.log("king is in right up (for white)") // this works for white
             let king_col = turn_king.col -1
             let king_row = turn_king.row +1
-            while (king_col < checkingPiece.col && king_row > checkingPiece.row){
-                console.log("pushing row: ", king_row, "col: ", king_col)
-                cols_and_rows.push({row:  king_row, col: king_col})
-                king_col++;
-                king_row--;
+
+            if (playerTurn == "white"){
+
+                while (king_col > checkingPiece.col && king_row < checkingPiece.row){
+                    console.log("pushing row: ", king_row, "col: ", king_col)
+                    cols_and_rows.push({row:  king_row, col: king_col})
+                    king_col--;
+                    king_row++;
+                }
+            } else {
+                throw new Error("Implement check from black too, you did white but left black for later")
             }
 
         } else if (checkingPiece.row < turn_king.row && checkingPiece.col < turn_king.col){ // king is in right down 
@@ -3458,6 +3465,9 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     }
     console.log("makeMove: col: ", col_id, "row: ", row_id)
 
+    // for opponent move, you also need to check the 7th row
+    let pawn_upgrade = (selectedPiece.kind == "pawn" && (row_id == 0 || row_id == 7))
+
     // move the piece, remove from one square, add to another square
     let selected_col = selectedPiece.col
     let selected_row = selectedPiece.row
@@ -3475,7 +3485,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     for (let key in obj){
         if (Number(String(key)[1]) == row_id){
 
-            obj[key] = selectedPiece.name
+            obj[key] = !pawn_upgrade ? selectedPiece.name : `${selectedPiece.name}_upgraded_queen` // make queen replacable by the choice of user - later
             //console.log("make Move - add piece:", obj[key])
             console.log("Found piece")
             
@@ -3490,15 +3500,15 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
 
     console.log("current board Inverse: ", newBoardInverseLocal[selected_col])
 
-    let piece = getPiece(col_id, row_id, true, newBoardInverseLocal);
-    //console.log(piece)
+    let piece = getPiece(col_id, row_id, true, newBoardInverseLocal); 
+    console.log("what piece is: ",piece)
 
     
     // has_moved
     let localInitBoardGeneral = [...initBoardGeneral.current]
     for (let key in localInitBoardGeneral){ // key is just index here
         
-        if (Object.keys(localInitBoardGeneral[key])[0] == piece){
+        if ((Object.keys(localInitBoardGeneral[key])[0] == piece) || (pawn_upgrade && Object.keys(localInitBoardGeneral[key])[0] == `${selectedPiece.name}`)){
             
             console.log("changing has moved")
             let unknownKey  = Object.keys(localInitBoardGeneral[key])[0]
@@ -3508,14 +3518,33 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
                 newInitBoardLocal[key][unknownKey].has_moved = true
                 newInitBoardLocal[key][unknownKey].col = col_id
                 newInitBoardLocal[key][unknownKey].row = row_id
-                updated_piece = newInitBoardLocal[key][unknownKey]
+
+                if (pawn_upgrade) {
+
+                    newInitBoardLocal[key][unknownKey].kind = "queen" // to be changed as selection of user - later
+                    newInitBoardLocal[key][unknownKey].name = `${selectedPiece.name}_upgraded_${newInitBoardLocal[key][unknownKey].kind}` // name + upgraded + kind
+                    newInitBoardLocal[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                    // can we change the key of initboardGeneral, it stays as W_pawn_4. If can't we shouldn't be using the key, instead we can use name value
+                    console.log("pawn goes to queen: ", newInitBoardLocal[key][unknownKey])
+
+                    newInitBoardLocal[key][unknownKey+"_upgraded_queen"] = newInitBoardLocal[key][unknownKey]
+                    updated_piece = newInitBoardLocal[key][unknownKey+"_upgraded_queen"]
+
+                    delete newInitBoardLocal[key][unknownKey]
+                } else {
+
+                    updated_piece = newInitBoardLocal[key][unknownKey]
+                }
+
+                
+                
                 console.log("Update piece inside is : ", updated_piece)
             
             initBoardGeneral.current = newInitBoardLocal
             
             
 
-            console.log("current piece data: ", initBoardGeneral.current[key][unknownKey])
+            console.log("current piece data: ", initBoardGeneral.current[key][unknownKey+"_upgraded_queen"])
             console.log("col is : ", col_id," row is : ", row_id)
             
             break;
@@ -3566,6 +3595,7 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
                     , boardInverseGeneral: RefObject<{}[]>){
     /*
         Function that runs when a piece is taken, col_id, row_id is the location of the eaten piece, selected piece is the one that eats
+            If wsInstance is null, it means we're executing move coming from opponent, no need to send it back
     */
 
     let from_row = selectedPiece.row
@@ -3649,6 +3679,7 @@ function isCheckCondition(col_id: number, row_id: number, initBoardGeneral: {}[]
         console.log("BoardInverseGeneral shouldn't be null or undefined ever")
     }
     console.log("boardInverseGeneral inside isCheckCondition: ", boardInverseGeneral)
+    console.log("initBoardGeneral in isCheckCondition: ", initBoardGeneral)
     let piece = getPiece(col_id, row_id, true, boardInverseGeneral)
     if (piece == null){
         throw new Error("for the given location, piece should've been found. In isCheckCondition")
@@ -3656,11 +3687,12 @@ function isCheckCondition(col_id: number, row_id: number, initBoardGeneral: {}[]
 
     let piece_in = null
     for (let key in initBoardGeneral){
-        if (Object.keys(initBoardGeneral[key])[0] == piece){
+        if (Object.values(initBoardGeneral[key])[0].name == piece){
             piece_in = initBoardGeneral[key]
             break
         }
     }
+
     let local_turn = Object.values(piece_in)[0].color
     let piece_kind = Object.values(piece_in)[0].kind
 
@@ -4250,6 +4282,327 @@ function isCheckCondition(col_id: number, row_id: number, initBoardGeneral: {}[]
 }
 
 /*
+   This function checks our rooks, bishops, and queen(s) if they can reach (or eat) opponent's king, then it's (indirect) check condition
+*/
+function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
+
+    // get opponent's king
+    let opp_king
+    for (let key in initBoardGeneral){
+
+        if (Object.values(initBoardGeneral[key])[0].color != turn && Object.values(initBoardGeneral[key])[0].kind == "king"){
+            let unknownKey = Object.keys(initBoardGeneral[key])[0]
+            opp_king = initBoardGeneral[key][unknownKey]
+            break;
+        }
+    }
+
+    // iterate on our pieces
+    for (let key in initBoardGeneral){
+
+        let is_indirect_check_cause = true;
+        let may_return = false;
+        let piece: any = Object.values(initBoardGeneral[key])[0]
+        
+        if (piece.color == turn){
+            
+            if (piece.kind == "bishop"){
+    
+                if (((piece.col - opp_king.col) == (piece.row - opp_king.row)) && (piece.col - opp_king.col > 0)){ // king is in left-up
+
+                    may_return = true;
+                    let piece_row = piece.row -1
+                    let piece_col = piece.col -1
+
+                    while ((piece_col > opp_king.col) && (piece_row > opp_king.row)){
+
+                        let piece_in = getPiece(piece_col, piece_row, true, boardInverseGeneral, false);
+                        if (piece_in != null){
+                            is_indirect_check_cause = false;
+                            break;
+                        }
+
+                        piece_row--;
+                        piece_col--;
+                    }
+
+                } else if (((piece.col - opp_king.col) == (piece.row - opp_king.row)) && (piece.col - opp_king.col < 0)){ // king is in right-bottom
+
+                    may_return = true;
+                    let piece_row = piece.row +1
+                    let piece_col = piece.col +1
+
+                    while ((piece_col < opp_king.col) && (piece_row < opp_king.row)){
+
+                        let piece_in = getPiece(piece_col, piece_row, true, boardInverseGeneral, false);
+                        if (piece_in != null){
+                            is_indirect_check_cause = false;
+                            break;
+                        }
+
+                        piece_row++;
+                        piece_col++;
+                    }
+
+                } else if (((piece.col - opp_king.col) == -1 * (piece.row - opp_king.row)) && (piece.col - opp_king.col > 0)){ // king is in left-bottom
+
+                    may_return = true;
+                    let piece_row = piece.row +1
+                    let piece_col = piece.col -1
+
+                    while ((piece_col > opp_king.col) && (piece_row < opp_king.row)){
+
+                        let piece_in = getPiece(piece_col, piece_row, true, boardInverseGeneral, false);
+                        if (piece_in != null){
+                            is_indirect_check_cause = false;
+                            break;
+                        }
+
+                        piece_row++;
+                        piece_col--;
+                    }
+
+                } else if (((piece.col - opp_king.col) == -1 * (piece.row - opp_king.row)) && (piece.col - opp_king.col > 0)){ // king is in right-up
+
+                    may_return = true;
+                    let piece_row = piece.row -1
+                    let piece_col = piece.col +1
+
+                    while ((piece_col < opp_king.col) && (piece_row > opp_king.row)){
+
+                        let piece_in = getPiece(piece_col, piece_row, true, boardInverseGeneral, false);
+                        if (piece_in != null){
+                            is_indirect_check_cause = false;
+                            break;
+                        }
+
+                        piece_row--;
+                        piece_col++;
+                    }
+                }
+
+            } else if (piece.kind == "rook"){
+
+                if (piece.col == opp_king.col){ // on the same col
+
+                    may_return = true;
+                    if (piece.row > opp_king.row){ // king is in up
+
+                        let piece_row = piece.row -1
+                        while (piece_row > opp_king.row){
+
+                            let piece_in = getPiece(piece.col, piece_row, true, boardInverseGeneral, false)
+                            if (piece_in != null){
+                                is_indirect_check_cause = false;
+                                break;
+                            }
+
+                            piece_row--;
+                        }
+                    } else { // king is in bottom
+
+                        let piece_row = piece.row +1
+                        while (piece_row < opp_king.row){
+
+                            let piece_in = getPiece(piece.col, piece_row, true, boardInverseGeneral, false)
+                            if (piece_in != null){
+                                is_indirect_check_cause = false;
+                                break;
+                            }
+
+                            piece_row++;
+                        }
+                    }
+                } else if (piece.row == opp_king.row){ // on the same row
+
+                    may_return = true;
+                    if (piece.col > opp_king.col){ // king is on left
+
+                        let piece_col = piece.col -1
+                        while (piece_col > opp_king.col){
+
+                            let piece_in = getPiece(piece_col, piece.row, true, boardInverseGeneral, false);
+                            if (piece_in != null){
+                                is_indirect_check_cause = false;
+                                break;
+                            }
+
+                            piece_col--;
+                        }
+
+                    } else { // king is in right
+
+                        let piece_col = piece.col +1
+                        while (piece_col < opp_king.col){
+
+                            let piece_in = getPiece(piece_col, piece.row, true, boardInverseGeneral, false);
+                            if (piece_in != null){
+                                is_indirect_check_cause = false;
+                                break;
+                            }
+
+                            piece_col++;
+                        }
+                    }
+                }
+
+            } else if (piece.kind == "queen"){
+                console.log("piece is in ", piece.col, piece.row)
+                console.log("king is in ", opp_king.col, opp_king.row)
+                if (piece.col == opp_king.col){ // on the same col
+
+                    may_return = true;
+                    if (piece.row > opp_king.row){ // king is in up
+
+                        let piece_row = piece.row -1
+                        while (piece_row > opp_king.row){
+
+                            let piece_in = getPiece(piece.col, piece_row, true, boardInverseGeneral, false)
+                            if (piece_in != null){
+                                is_indirect_check_cause = false;
+                                break;
+                            }
+
+                            piece_row--;
+                        }
+                    } else { // king is in bottom
+
+                        let piece_row = piece.row +1
+                        while (piece_row < opp_king.row){
+
+                            let piece_in = getPiece(piece.col, piece_row, true, boardInverseGeneral, false)
+                            if (piece_in != null){
+                                is_indirect_check_cause = false;
+                                break;
+                            }
+
+                            piece_row++;
+                        }
+                    }
+                } else if (piece.row == opp_king.row){ // on the same row
+
+                    may_return = true;
+                    if (piece.col > opp_king.col){ // king is on left
+
+                        let piece_col = piece.col -1
+                        while (piece_col > opp_king.col){
+
+                            let piece_in = getPiece(piece_col, piece.row, true, boardInverseGeneral, false);
+                            if (piece_in != null){
+                                is_indirect_check_cause = false;
+                                break;
+                            }
+
+                            piece_col--;
+                        }
+
+                    } else { // king is in right
+
+                        let piece_col = piece.col +1
+                        while (piece_col < opp_king.col){
+
+                            let piece_in = getPiece(piece_col, piece.row, true, boardInverseGeneral, false);
+                            if (piece_in != null){
+                                is_indirect_check_cause = false;
+                                break;
+                            }
+
+                            piece_col++;
+                        }
+                    }
+                } else if (((piece.col - opp_king.col) == (piece.row - opp_king.row)) && (piece.col - opp_king.col > 0)){ // king is in left-up
+
+                    console.log("ok in here, king is in left up")
+                    may_return = true;
+                    let piece_row = piece.row -1
+                    let piece_col = piece.col -1
+
+                    while ((piece_col > opp_king.col) && (piece_row > opp_king.row)){
+
+                        let piece_in = getPiece(piece_col, piece_row, true, boardInverseGeneral, false);
+                        if (piece_in != null){
+                            is_indirect_check_cause = false;
+                            break;
+                        }
+
+                        piece_row--;
+                        piece_col--;
+                    }
+
+                } else if (((piece.col - opp_king.col) == (piece.row - opp_king.row)) && (piece.col - opp_king.col < 0)){ // king is in right-bottom
+
+                    console.log("ok in here, king is in right bottom")
+                    may_return = true;
+                    let piece_row = piece.row +1
+                    let piece_col = piece.col +1
+
+                    while ((piece_col < opp_king.col) && (piece_row < opp_king.row)){
+
+                        let piece_in = getPiece(piece_col, piece_row, true, boardInverseGeneral, false);
+                        if (piece_in != null){
+                            is_indirect_check_cause = false;
+                            break;
+                        }
+
+                        piece_row++;
+                        piece_col++;
+                    }
+
+                } else if (((piece.col - opp_king.col) == -1 * (piece.row - opp_king.row)) && (piece.col - opp_king.col > 0)){ // king is in left-bottom
+
+                    console.log("ok in here, king is in left bottom")
+                    may_return = true;
+                    let piece_row = piece.row +1
+                    let piece_col = piece.col -1
+
+                    while ((piece_col > opp_king.col) && (piece_row < opp_king.row)){
+
+                        let piece_in = getPiece(piece_col, piece_row, true, boardInverseGeneral, false);
+                        if (piece_in != null){
+                            is_indirect_check_cause = false;
+                            break;
+                        }
+
+                        piece_row++;
+                        piece_col--;
+                    }
+
+                } else if (((piece.col - opp_king.col) == -1 * (piece.row - opp_king.row)) && (piece.col - opp_king.col < 0)){ // king is in right-up
+
+                    console.log("ok in here, king is in right up")
+                    may_return = true;
+                    let piece_row = piece.row -1 
+                    let piece_col = piece.col +1
+
+                    while ((piece_col < opp_king.col) && (piece_row > opp_king.row)){
+
+                        let piece_in = getPiece(piece_col, piece_row, true, boardInverseGeneral, false);
+                        if (piece_in != null){
+                            console.log("there is a piece: ", piece_in)
+                            is_indirect_check_cause = false;
+                            break;
+                        }
+
+                        piece_row--;
+                        piece_col++;
+                    }
+                }
+                
+            }
+
+            if (may_return && is_indirect_check_cause == true){
+
+                return piece;
+            }
+        }
+
+        
+    }
+
+    return null;
+}
+
+/*
     TODO : 
       - other pieces : rook+, knight+, bishop+, queen+, king+
       - moves for white too: pawn+, knight+, rook+, bishop+, queen+, king+
@@ -4258,7 +4611,7 @@ function isCheckCondition(col_id: number, row_id: number, initBoardGeneral: {}[]
       - check condition animation -> next move is forced to king +
       - king shouldn't be able to eat something that is protected by other opponent's piece +
       - checkmate conditions -> write it completetly in fireGameOver()
-      - pawn goes to queen
+      - pawn goes to queen -> this will be when pawn makeMove to last row || pawn takePiece to last row. Then turn it into queen/others
       - pawn goes to other pieces (a selection required)
       - rook move O-O O-O-O
 
@@ -4267,7 +4620,8 @@ function isCheckCondition(col_id: number, row_id: number, initBoardGeneral: {}[]
       - board square colors are not right +
       - in check situation if king can't move but a piece block the check it's not game over (isNotBlocked function has some flaws
       identifying the blocked pieces) +
-      - the opening checks in isCheckCondition is not satisfied (next weeks job)
+      - the opening checks in isCheckCondition is not satisfied (next weeks job) (partially: setMoveablePieces is not solid for both colors) +
+      - implement opponent's take piece situation, currently there is only makeMove, so when opponent take a piece, it doesn't dissappear +
       
 
       --- later ? (after backend in rust)
@@ -4306,15 +4660,33 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
             let is_check_local = isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current) 
             setIsCheck(is_check_local)
 
-            if (is_check_local) {
+            let is_indirect_check_local = isIndirectCheckCondition(turn, initBoardGeneral.current, boardInverseGeneral.current);
+            console.log("the result of INDIRECT:", is_indirect_check_local);
+
+            if (is_check_local && is_indirect_check_local != null && is_check_local == is_indirect_check_local){
+
+                // WHAT DO WE DO?
+                throw new Error("Handle the double check condition");
+
+            } else if (is_check_local) {
                 
                 setCheckingPiece({...updated_piece})
-                console.log("check came by: ", updated_piece)
+
                 let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initBoardGeneral.current)
-                console.log("real cols and rows: ", cols_and_rows)
+
                 setColsAndRows([...cols_and_rows])
-                console.log("cols and rows: ", colsAndRows)
-            } else {
+
+            } else if (is_indirect_check_local != null){
+                
+                setCheckingPiece(is_indirect_check_local);
+
+                let cols_and_rows = setMoveablePieces(playerTurn.current, is_indirect_check_local, setColsAndRows, initBoardGeneral.current)
+                    
+                setColsAndRows([...cols_and_rows])
+
+                setIsCheck(true)
+            }
+            else {
                 setColsAndRows(null)
             }
             
@@ -4364,12 +4736,34 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
                 let is_check_local = isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current) 
                 setIsCheck(is_check_local)
 
-                if (is_check_local) {
+                let is_indirect_check_local = isIndirectCheckCondition(turn, initBoardGeneral.current, boardInverseGeneral.current);
+                
+
+            
+                // if both check occur in the same time, we have no other option than moving the king
+                if (is_check_local && is_indirect_check_local != null && is_check_local == is_indirect_check_local){
+
+                    // ONLY KING CAN MOVE
+                    throw new Error("Handle the double check condition");
+
+                } else if (is_check_local) { // normal check
+                    
                     setCheckingPiece(updated_piece)
                     
                     let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initBoardGeneral.current)
                     
                     setColsAndRows([...cols_and_rows])
+
+                } else if (is_indirect_check_local != null){ // it's indirect check condition
+
+                    setCheckingPiece(is_indirect_check_local);
+
+                    let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initBoardGeneral.current)
+                    
+                    setColsAndRows([...cols_and_rows])
+
+                    setIsCheck(true)
+
                 } else {
                     setColsAndRows(null)
                 }
@@ -4435,7 +4829,7 @@ interface Move {
 }
 
 /*
-    Funtion to realize moves coming from server, receiving
+    Funtion to realize moves coming from server, receiving                                 
 */
 function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPiece: React.Dispatch, setColsAndRows: React.Dispatch,
                             setTurn: React.Dispatch, turn: string, initboardGeneral: RefObject<{}[]>,
@@ -4472,34 +4866,60 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
     if (piece_in == null) {console.log("There should be an ERROR"); return;}
     let custom_selected_piece = {...Object.values(piece_in)[0]}
     console.log("For opponent custom selected piece is: ", custom_selected_piece)
+    console.log("moving to col:", move.to_col, " to row: ", move.to_row)
 
-    let updated_piece = makeMove(move.to_col, move.to_row, null, custom_selected_piece, null, initboardGeneral,
+    let piece_there = getPiece(move.to_col, move.to_row, true, boardInverseGeneral.current, false)
+    
+    let updated_piece
+    if (piece_there == null){
+        updated_piece = makeMove(move.to_col, move.to_row, null, custom_selected_piece, null, initboardGeneral,
                                   boardInverseGeneral)
+    } else {
+        updated_piece = takePiece(move.to_col, move.to_row, custom_selected_piece, null, initboardGeneral, boardInverseGeneral)
+    }
+    
     
     // check if the piece in the given location can thread the opponent king
     let is_check_local = isCheckCondition(move.to_col, move.to_row, initboardGeneral.current, boardInverseGeneral.current) 
     setIsCheck(is_check_local)
 
-    setTurn((old: string) => {
-        return old == "white" ? "black" : "white" // just flip the turn
-    })
+    let is_indirect_check_local = isIndirectCheckCondition(turn, initboardGeneral.current, boardInverseGeneral.current);
+
     
-    if (is_check_local) {
+    if (is_check_local && is_indirect_check_local != null && is_check_local == is_indirect_check_local){
+        throw new Error();
+    } else if (is_check_local) {
         
         setCheckingPiece({...updated_piece})
-        console.log("check came by: ", updated_piece)
+        // console.log("check came by: ", updated_piece)
         let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initboardGeneral.current)
-        console.log("real cols and rows: ", cols_and_rows)
+        // console.log("real cols and rows: ", cols_and_rows)
         setColsAndRows([...cols_and_rows])
-    } else {
+
+    } else if (is_indirect_check_local != null){
+
+        console.log("Opponent INDIRECT check path")
+
+        setCheckingPiece({...is_indirect_check_local})
+
+        let cols_and_rows = setMoveablePieces(playerTurn.current, is_indirect_check_local, setColsAndRows, initboardGeneral.current)
+
+        setColsAndRows([...cols_and_rows])
+        console.log("set cols and rows after opponent move:\n", cols_and_rows)
+        setIsCheck(true);
+
+    }
+    else {
         setColsAndRows(null)
     }
     
-    
-    
+    setTurn((old: string) => {
+        return old == "white" ? "black" : "white" // just flip the turn
+    })
 
-    console.log("current initBoard: ", initboardGeneral)
-    console.log("current boardInverseGeneral: ", boardInverseGeneral)
+
+    console.log("current initBoard: ", initboardGeneral.current)
+    console.log("current boardInverseGeneral: ", boardInverseGeneral.current)
     console.log("player Turn: ", playerTurn.current)
 
 
@@ -4793,6 +5213,11 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
 
     let piece = getPiece(col_id, row_id, false, boardInverseGeneral.current) // piece is like wking.svg
     let piece_name = getPiece(col_id, row_id, true, boardInverseGeneral.current)
+
+    if (piece_name && piece_name.includes("upgraded")) {
+        piece = piece_name[0].toLowerCase() + "Q.svg"
+    }
+
     let piece_in
 
     for (let key in initBoardGeneral.current){
