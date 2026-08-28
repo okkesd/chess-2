@@ -2470,6 +2470,134 @@ function fireGameOver(turn: string){
 
 }
 
+/* 
+    of opponent's any piece can't reach to (col,row) -> true, else -> false
+    !!! implement
+*/
+function opponentCantReach(col: number, row: number, turn: string) : boolean{
+
+    return true
+}
+
+function noPieceBetween(from_col: number, from_row: number, to_col: number, to_row: number, BoardInverseGeneral: {}[]): boolean{
+
+    if ((from_col == to_col) && (from_row == to_row)){
+        throw new Error("The same position given to noPieceBetween")
+    }
+
+    if (from_col == to_col){ // same col
+        if (from_row > to_row){
+
+            let row = from_row -1
+            while (row > to_row){
+                
+                if (getPiece(from_col, row, true, BoardInverseGeneral, false) != null){
+                    return false
+                }
+
+                row--;
+            }
+
+        } else {
+
+            let row = from_row +1
+            while (row < to_row){
+
+                if (getPiece(from_col, row, true, BoardInverseGeneral, false) != null){
+                    return false
+                }
+
+                row++;
+            }
+        }
+    } else if (from_row == to_row) { // same row
+        if (from_col > to_col){
+
+            let col = from_col -1
+            while (col > to_col){
+
+                if (getPiece(col, from_row, true, BoardInverseGeneral, false) != null){
+                    return false;
+                }
+
+                col--;
+            }
+        } else {
+
+            let col = from_col +1
+            while (col < to_col){
+
+                if (getPiece(col, from_row, true, BoardInverseGeneral, false) != null){
+                    return false;
+                }
+
+                col++;
+            }
+        }
+    } else if ((from_col - to_col == from_row - to_row) && from_col > to_col){
+
+        let col = from_col -1
+        let row = from_row -1
+
+        while (col > to_col){
+
+            if (getPiece(col, row, true, BoardInverseGeneral, false) != null){
+                return false
+            }
+
+            col--;
+            row--;
+        }
+
+    } else if ((from_col - to_col == from_row - to_row) && from_col < to_col){
+
+        let col = from_col +1
+        let row = from_row +1
+
+        while (col < to_col){
+
+            if (getPiece(col, row, true, BoardInverseGeneral, false) != null){
+                return false
+            }
+
+            col++;
+            row++;
+        }
+
+    } else if ((from_col - to_col == -1* (from_row - to_row)) && from_col > to_col){
+
+        let col = from_col -1
+        let row = from_row +1
+
+        while (col > to_col){
+
+            if (getPiece(col, row, true, BoardInverseGeneral, false) != null){
+                return false
+            }
+
+            col--;
+            row++;
+        }
+
+    } else if ((from_col - to_col == -1* (from_row - to_row)) && from_col < to_col){
+
+        let col = from_col +1
+        let row = from_row -1
+
+        while (col < to_col){
+
+            if (getPiece(col, row, true, BoardInverseGeneral, false) != null){
+                return false
+            }
+
+            col++;
+            row--;
+        }
+    }
+     
+    return true
+}
+
 // clean init board
 // we're gonna change the if conditions to include also player_color when deciding inc or dec
 // we're gonna also change the initial setup for the different player_color s
@@ -3196,6 +3324,11 @@ function drawPossibleMoves(
         In this position, W King can move to right, which shouldn't be able to 
         */
 
+        /*
+        Castle Move: King hasn't moved && Rook hasn't moved && No piece between rook and king
+        Implement only short castle for now
+        */
+
         let has_move = false
         setDrawState((old: boolean[][]) => {
 
@@ -3210,7 +3343,7 @@ function drawPossibleMoves(
                     
                     if (notEatable(col, row+1, turn, initBoardGeneral, boardInverseGeneral)){
                         if ( colsAndRows == null || !isIn(col, row +1, colsAndRows)){ 
-                            candidates[col][row+1] = true; has_move=true
+                            candidates[col][row+1] = true
                             has_move = true
                         }
 
@@ -3235,6 +3368,7 @@ function drawPossibleMoves(
 
             // right
             if (col +1 <= 7){
+                console.log("in right, has_moved: ", has_moved)
 
                 let piece_2 = getPiece(col+1, row, true, boardInverseGeneral)
                 if (piece_2 == null){
@@ -3242,6 +3376,7 @@ function drawPossibleMoves(
                         if ( colsAndRows == null || !isIn(col+1, row, colsAndRows)){
                             candidates[col+1][row] = true
                             has_move = true
+                            console.log("right++")
                         }
                     }
                 } else {
@@ -3255,6 +3390,44 @@ function drawPossibleMoves(
                     
                                 candidates[col+1][row] = true
                                 has_move = true
+
+                                console.log("in right++")
+                        }
+                    }
+                }
+
+                // for castle move (to the right)
+                if (!has_moved){
+                    let rook_2 = getPiece(7, 7, true, boardInverseGeneral, false)
+                    // how do we get the piece ?
+                    for (let key in initBoardGeneral){ // key is just index here
+        
+                        if (Object.keys(initBoardGeneral[key])[0] == rook_2 && Object.values(initBoardGeneral[key])[0].color == turn){
+                            rook_2 = Object.values(initBoardGeneral[key])[0];
+                        }
+                    }
+
+                    if (rook_2 && rook_2.has_moved == false){
+
+                        if (noPieceBetween(col, row, 7, 7, boardInverseGeneral)){
+    
+                            // use opponentCantReach to check no threat for the path of king
+                            let is_clear = true
+                            let local_col = col+1
+                            while (local_col < 7){
+    
+                                if (opponentCantReach(local_col, row, turn) == false){
+                                    is_clear = false
+                                    break
+                                }
+    
+                                local_col++;
+                            }
+                            
+                            if (is_clear){
+                                console.log("isclear ++")
+                                candidates[col+2][row] = true;
+                            }
                         }
                     }
                 }
@@ -3383,6 +3556,39 @@ function drawPossibleMoves(
                         }
                     }
                 }
+
+                if (!has_moved){
+
+                    let rook_1 = getPiece(0, 7, true, boardInverseGeneral, false)
+
+                    for (let key in initBoardGeneral){ // key is just index here
+        
+                        if (Object.keys(initBoardGeneral[key])[0] == rook_1 && Object.values(initBoardGeneral[key])[0].color == turn){
+                            rook_1 = Object.values(initBoardGeneral[key])[0];
+                        }
+                    }
+
+                    if (rook_1 && rook_1.has_moved == false && noPieceBetween(col, row, 0, 7, boardInverseGeneral)){
+
+                        // use opponentCantReach to check no threat for the path of king
+                        let is_clear = true
+                        let local_col = col-1
+                        while (local_col > 0){
+
+                            if (opponentCantReach(local_col, row, turn) == false){
+                                is_clear = false
+                                break
+                            }
+
+                            local_col--;
+                        }
+                        
+                        if (is_clear){
+                            candidates[col-2][row] = true;
+                        }
+                        
+                    }
+                }
             }
 
             // left up
@@ -3457,7 +3663,7 @@ function drawPossibleMoves(
 // NOTE: Check if move is makeable - if it's drawn, it's makeable
 function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch | null, selectedPiece: Piece,
                    wsInstance: WebSocket|null, initBoardGeneral: RefObject<{}[]>, //setInitBoardGeneral: React.Dispatch, 
-                   boardInverseGeneral: RefObject<{}[]>){
+                   boardInverseGeneral: RefObject<{}[]>, isCastle?: Boolean) : any{
 
     // first clear the board
     if (setDrawState != null) { // if it's null, it means we're doing the opponent's move
@@ -3467,6 +3673,46 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
 
     // for opponent move, you also need to check the 7th row
     let pawn_upgrade = (selectedPiece.kind == "pawn" && (row_id == 0 || row_id == 7))
+
+    // for castle move
+    let castle_updated_piece
+    let castle = ""
+    if (selectedPiece.kind == "king"){
+        if (selectedPiece.col - col_id > 1){
+
+            castle = "left"
+            console.log("castle to left: ")
+            let rook = getPiece(0, 7, true, boardInverseGeneral.current, false)
+
+            for (let key in initBoardGeneral.current){ // key is just index here
+        
+                if (Object.keys(initBoardGeneral.current[key])[0] == rook && Object.values(initBoardGeneral.current[key])[0].color == selectedPiece.color){
+                    rook = Object.values(initBoardGeneral.current[key])[0];
+                    // somehow update the rook
+                    castle_updated_piece = makeMove(col_id+1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, true)
+
+                    console.log("castle updated piece: ", castle_updated_piece)
+                }
+            }
+
+        } else if (selectedPiece.col - col_id < -1){
+            
+            castle = "right"
+            console.log("castle to right: ")
+            let rook = getPiece(7, 7, true, boardInverseGeneral.current, false)
+
+            for (let key in initBoardGeneral.current){ // key is just index here
+        
+                if (Object.keys(initBoardGeneral.current[key])[0] == rook && Object.values(initBoardGeneral.current[key])[0].color == selectedPiece.color){
+                    rook = Object.values(initBoardGeneral.current[key])[0];
+                    // somehow update the rook
+                    castle_updated_piece = makeMove(col_id-1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, true)
+
+                    console.log("castle updated piece: ", castle_updated_piece)
+                }
+            }
+        }
+    }
 
     // move the piece, remove from one square, add to another square
     let selected_col = selectedPiece.col
@@ -3556,8 +3802,9 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     console.log("The new updated piece is", updated_piece)
     console.log("current piece data after all (initBoardGeneral): ", initBoardGeneral.current)
 
+    console.log("is castle is: ", isCastle)
     let move_msg: Move = {
-        type: "Move",
+        type: isCastle ? "Castle": "Move",
         from_col: selected_col,
         from_row: selected_row,
         piece_name: selectedPiece.name,
@@ -3570,7 +3817,11 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     }
     
     
-    return updated_piece;
+    if (castle != ""){
+        return castle_updated_piece; // return the updated rook since king cannot cause check etc.
+    } else {
+        return updated_piece;
+    }
 }
 
 function clearBoard(setDrawState: React.Dispatch){
@@ -4611,9 +4862,10 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
       - check condition animation -> next move is forced to king +
       - king shouldn't be able to eat something that is protected by other opponent's piece +
       - checkmate conditions -> write it completetly in fireGameOver()
-      - pawn goes to queen -> this will be when pawn makeMove to last row || pawn takePiece to last row. Then turn it into queen/others
+      - pawn goes to queen -> this will be when pawn makeMove to last row || pawn takePiece to last row. Then turn it into queen/others +++
       - pawn goes to other pieces (a selection required)
-      - rook move O-O O-O-O
+      - rook move O-O O-O-O +++
+      - implement opponentCantReach
 
       - implement after makeMove function protocols +
       
@@ -4638,6 +4890,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
     */
     console.log("onclickSquare :")
     if (playerTurn.current != turn){
+        console.log("turn is: ", turn)
         return;
     }
 
@@ -4913,14 +5166,21 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
         setColsAndRows(null)
     }
     
-    setTurn((old: string) => {
-        return old == "white" ? "black" : "white" // just flip the turn
-    })
+    // for castle moves, do not flip turn for king, rook will handle it
+    if (!(move.type == "Castle" && move.piece_name.toLowerCase().includes("rook"))){
+
+        
+        setTurn((old: string) => {
+            return old == "white" ? "black" : "white" // just flip the turn
+        })
+    } else {console.log("castle move detected (rook), not flipping the turn")}
+    
 
 
     console.log("current initBoard: ", initboardGeneral.current)
     console.log("current boardInverseGeneral: ", boardInverseGeneral.current)
     console.log("player Turn: ", playerTurn.current)
+    console.log("turn: ", turn)
 
 
     console.log("Opponent move is done")
@@ -5026,7 +5286,7 @@ export default function Board(){
                     console.log("game is starting now")
                     setIsGameReady(true)
 
-                } else if (isJsonString(e.data) && JSON.parse(e.data).type == "Move"){ // move message
+                } else if (isJsonString(e.data) && (JSON.parse(e.data).type == "Move" || JSON.parse(e.data).type == "Castle")){ // move message
     
                     makeOpponentMove(JSON.parse(e.data), setIsCheck, setCheckingPiece, setColsAndRows, setTurn, turn, initBoardGeneral,
                                       boardInverseGeneral, playerTurn)
