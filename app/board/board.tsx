@@ -2470,14 +2470,6 @@ function fireGameOver(turn: string){
 
 }
 
-/* 
-    of opponent's any piece can't reach to (col,row) -> true, else -> false
-    !!! implement
-*/
-function opponentCantReach(col: number, row: number, turn: string) : boolean{
-
-    return true
-}
 
 function noPieceBetween(from_col: number, from_row: number, to_col: number, to_row: number, BoardInverseGeneral: {}[]): boolean{
 
@@ -3416,7 +3408,7 @@ function drawPossibleMoves(
                             let local_col = col+1
                             while (local_col < 7){
     
-                                if (opponentCantReach(local_col, row, turn) == false){
+                                if (!notEatable(local_col, row, turn, initBoardGeneral, boardInverseGeneral)){ // opponentCantReach(local_col, row, turn) == false
                                     is_clear = false
                                     break
                                 }
@@ -3575,7 +3567,7 @@ function drawPossibleMoves(
                         let local_col = col-1
                         while (local_col > 0){
 
-                            if (opponentCantReach(local_col, row, turn) == false){
+                            if (!notEatable(local_col, row, turn, initBoardGeneral, boardInverseGeneral)){ //   opponentCantReach(local_col, row, turn) == false
                                 is_clear = false
                                 break
                             }
@@ -3663,7 +3655,7 @@ function drawPossibleMoves(
 // NOTE: Check if move is makeable - if it's drawn, it's makeable
 function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch | null, selectedPiece: Piece,
                    wsInstance: WebSocket|null, initBoardGeneral: RefObject<{}[]>, //setInitBoardGeneral: React.Dispatch, 
-                   boardInverseGeneral: RefObject<{}[]>, isCastle?: Boolean) : any{
+                   boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number, isCastle?: Boolean) : any{
 
     // first clear the board
     if (setDrawState != null) { // if it's null, it means we're doing the opponent's move
@@ -3673,6 +3665,45 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
 
     // for opponent move, you also need to check the 7th row
     let pawn_upgrade = (selectedPiece.kind == "pawn" && (row_id == 0 || row_id == 7))
+    let choice = ""
+    let moveables
+
+    if (pawn_upgrade && isUpgradingMove == -1){
+
+        setIsUpgradingMove(col_id) // set the flag
+        return null
+        
+    } else if (isUpgradingMove != -1 && isUpgradingMove == col_id){
+
+        console.log("upgrading: col_id: ", col_id)
+
+        pawn_upgrade = true
+        if (row_id == 0){
+            choice = "queen"
+            moveables = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+        } else if (row_id == 1){
+            choice = "rook"
+            moveables = {upDown: true, leftRight: true}
+        } else if (row_id == 2){
+            choice = "bishop"
+            moveables = {leftUp: true, rightUp: true}
+        } else if (row_id == 3){
+            choice = "knight"
+            moveables = true
+        }
+        console.log("upgrading to: ", choice)
+        if (wsInstance != null){
+            row_id = 0
+        } else {
+            row_id = 7
+        }
+        
+        
+    } else if (isUpgradingMove == -1) {
+        console.log("continue")
+    } else {
+        throw new Error("upgrading move error, probably should't call makeMove, inspect")
+    }
 
     // for castle move
     let castle_updated_piece
@@ -3689,7 +3720,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
                 if (Object.keys(initBoardGeneral.current[key])[0] == rook && Object.values(initBoardGeneral.current[key])[0].color == selectedPiece.color){
                     rook = Object.values(initBoardGeneral.current[key])[0];
                     // somehow update the rook
-                    castle_updated_piece = makeMove(col_id+1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, true)
+                    castle_updated_piece = makeMove(col_id+1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
 
                     console.log("castle updated piece: ", castle_updated_piece)
                 }
@@ -3706,7 +3737,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
                 if (Object.keys(initBoardGeneral.current[key])[0] == rook && Object.values(initBoardGeneral.current[key])[0].color == selectedPiece.color){
                     rook = Object.values(initBoardGeneral.current[key])[0];
                     // somehow update the rook
-                    castle_updated_piece = makeMove(col_id-1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, true)
+                    castle_updated_piece = makeMove(col_id-1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
 
                     console.log("castle updated piece: ", castle_updated_piece)
                 }
@@ -3731,7 +3762,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     for (let key in obj){
         if (Number(String(key)[1]) == row_id){
 
-            obj[key] = !pawn_upgrade ? selectedPiece.name : `${selectedPiece.name}_upgraded_queen` // make queen replacable by the choice of user - later
+            obj[key] = !pawn_upgrade ? selectedPiece.name : `${selectedPiece.name}_upgraded_${choice}`
             //console.log("make Move - add piece:", obj[key])
             console.log("Found piece")
             
@@ -3767,14 +3798,14 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
 
                 if (pawn_upgrade) {
 
-                    newInitBoardLocal[key][unknownKey].kind = "queen" // to be changed as selection of user - later
+                    newInitBoardLocal[key][unknownKey].kind = choice // to be changed as selection of user - later
                     newInitBoardLocal[key][unknownKey].name = `${selectedPiece.name}_upgraded_${newInitBoardLocal[key][unknownKey].kind}` // name + upgraded + kind
-                    newInitBoardLocal[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                    newInitBoardLocal[key][unknownKey].moveable = moveables
                     // can we change the key of initboardGeneral, it stays as W_pawn_4. If can't we shouldn't be using the key, instead we can use name value
                     console.log("pawn goes to queen: ", newInitBoardLocal[key][unknownKey])
 
-                    newInitBoardLocal[key][unknownKey+"_upgraded_queen"] = newInitBoardLocal[key][unknownKey]
-                    updated_piece = newInitBoardLocal[key][unknownKey+"_upgraded_queen"]
+                    newInitBoardLocal[key][unknownKey+`_upgraded_${choice}`] = newInitBoardLocal[key][unknownKey]
+                    updated_piece = newInitBoardLocal[key][unknownKey+`_upgraded_${choice}`]
 
                     delete newInitBoardLocal[key][unknownKey]
                 } else {
@@ -3790,7 +3821,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
             
             
 
-            console.log("current piece data: ", initBoardGeneral.current[key][unknownKey+"_upgraded_queen"])
+            console.log("current piece data: ", initBoardGeneral.current[key][unknownKey+`_upgraded_${choice}`])
             console.log("col is : ", col_id," row is : ", row_id)
             
             break;
@@ -3803,13 +3834,26 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     console.log("current piece data after all (initBoardGeneral): ", initBoardGeneral.current)
 
     console.log("is castle is: ", isCastle)
+
+    let move_type = ""
+    let upgrade_to = ""
+    if (isCastle){
+        move_type = "Castle"
+    } else if (isUpgradingMove != -1){
+        move_type = "Upgrade"
+        upgrade_to = choice
+    } else {
+        move_type = "Move"
+    }
+
     let move_msg: Move = {
-        type: isCastle ? "Castle": "Move",
+        type: move_type,
         from_col: selected_col,
         from_row: selected_row,
         piece_name: selectedPiece.name,
         to_col: col_id,
-        to_row: row_id
+        to_row: row_id,
+        upgrade_to: upgrade_to
     }
 
     if (setDrawState != null){
@@ -3843,12 +3887,47 @@ function clearBoard(setDrawState: React.Dispatch){
 
 // clear init board
 function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInstance: WebSocket|null, initBoardGeneral: RefObject<{}[]>
-                    , boardInverseGeneral: RefObject<{}[]>){
+                    , boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
     /*
         Function that runs when a piece is taken, col_id, row_id is the location of the eaten piece, selected piece is the one that eats
             If wsInstance is null, it means we're executing move coming from opponent, no need to send it back
     */
 
+    let pawn_upgrade = selectedPiece.kind == "pawn" && (row_id == 0 || row_id == 7) && isUpgradingMove == -1
+    let choice = ""
+    let moveables
+
+    if (pawn_upgrade){
+
+        console.log("upgrade in takePiece: col_id: ", col_id)
+        setIsUpgradingMove(col_id)
+        return null
+    } else if (isUpgradingMove == col_id){
+
+        console.log("upgrading: col_id: ", col_id)
+
+        pawn_upgrade = true
+        if (row_id == 0){
+            choice = "queen"
+            moveables = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+        } else if (row_id == 1){
+            choice = "rook"
+            moveables = {upDown: true, leftRight: true}
+        } else if (row_id == 2){
+            choice = "bishop"
+            moveables = {leftUp: true, rightUp: true}
+        } else if (row_id == 3){
+            choice = "knight"
+            moveables = true
+        }
+        console.log("upgrading to: ", choice)
+        if (wsInstance != null){
+            row_id = 0
+        } else {
+            row_id = 7
+        }
+    }
+    
     let from_row = selectedPiece.row
     let from_col = selectedPiece.col
 
@@ -3860,7 +3939,6 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
     initBoardGeneral.current = [...initBoard]
       
     
-
     let init_board_len2 = initBoardGeneral.current.length
     if (init_board_len1 == init_board_len2) throw new Error (`Couldn't found the piece by it's locations: ${row_id}, ${col_id}. function takePiece`)
     
@@ -3871,7 +3949,10 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 
         for (let key in obj){
             if (Number(String(key)[1]) == selectedPiece.row){ // find the old piece and make it empty
+                
                 obj[key] = "empty" 
+                
+                
             }
         }
     
@@ -3880,7 +3961,7 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
     
         for (let key in second_obj){
             if (Number(String(key)[1]) == row_id){ // find the eaten piece and make it's place the selected piece
-                second_obj[key] = selectedPiece.name;
+                second_obj[key] = !pawn_upgrade ? selectedPiece.name : `${selectedPiece.name}_upgraded_${choice}`    
             }
         }
     boardInverseGeneral.current = localBoardInverse
@@ -3896,7 +3977,24 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
                 localInitBoard[elem][unknownKey].has_moved = true
                 localInitBoard[elem][unknownKey].col = col_id
                 localInitBoard[elem][unknownKey].row = row_id
-                updated_piece = localInitBoard[elem][unknownKey]
+
+                if (pawn_upgrade){
+                 
+                    localInitBoard[key][unknownKey].kind = choice // to be changed as selection of user - later
+                    localInitBoard[key][unknownKey].name = `${selectedPiece.name}_upgraded_${localInitBoard[key][unknownKey].kind}` // name + upgraded + kind
+                    localInitBoard[key][unknownKey].moveable = moveables
+                    // can we change the key of initboardGeneral, it stays as W_pawn_4. If can't we shouldn't be using the key, instead we can use name value
+                    console.log("pawn goes to queen: ", localInitBoard[key][unknownKey])
+
+                    localInitBoard[key][unknownKey+`_upgraded_${choice}`] = localInitBoard[key][unknownKey]
+                    updated_piece = localInitBoard[key][unknownKey+`_upgraded_${choice}`]
+
+                    delete localInitBoard[key][unknownKey]
+                } else {
+                    updated_piece = localInitBoard[elem][unknownKey]
+                }
+
+                
 
             initBoardGeneral.current = [...localInitBoard]
             
@@ -3913,7 +4011,8 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
         from_row: from_row,
         piece_name: selectedPiece.name,
         to_col: col_id,
-        to_row: row_id
+        to_row: row_id,
+        upgrade_to: choice
     }
 
     if (wsInstance != null) {sendMoveToServer(wsInstance, move_msg);}
@@ -4862,10 +4961,11 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
       - check condition animation -> next move is forced to king +
       - king shouldn't be able to eat something that is protected by other opponent's piece +
       - checkmate conditions -> write it completetly in fireGameOver()
-      - pawn goes to queen -> this will be when pawn makeMove to last row || pawn takePiece to last row. Then turn it into queen/others +++
-      - pawn goes to other pieces (a selection required)
       - rook move O-O O-O-O +++
-      - implement opponentCantReach
+      - pawn goes to queen -> this will be when pawn makeMove to last row || pawn takePiece to last row. Then turn it into queen/others +++
+      - pawn goes to other pieces (a selection required) +++
+      - pawn goes to upgrade for takePiece +++
+
 
       - implement after makeMove function protocols +
       
@@ -4876,14 +4976,22 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
       - implement opponent's take piece situation, currently there is only makeMove, so when opponent take a piece, it doesn't dissappear +
       
 
+      all above is done except:
+      - checkmate conditions -> write it completetly in fireGameOver()
+
       --- later ? (after backend in rust)
       - piece move by mouse hold
+      - time (frontend first, backend next)
+      - username
+      - account creation (all kind of backend stuff)
+      - game registery (in backend, to a sqlite3-like db)
+      - bizarre moves of FFA (Fatih Furkan Altınkaya) 
 */
 function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispatch, allDrawState: boolean[][], setSelectedPiece: React.Dispatch, 
                        selectedPiece: Piece, turn: string, setTurn: React.Dispatch, setIsCheck: React.Dispatch, isCheck: boolean, 
                        checkingPiece: Piece, setCheckingPiece: React.Dispatch, colsAndRows: null|{row: number, col:number}[], 
                        setColsAndRows: React.Dispatch, wsInstance: WebSocket|null, playerTurn: RefObject<string>, initBoardGeneral: RefObject<{}[]>, 
-                       boardInverseGeneral: RefObject<{}[]>){
+                       boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
     /*
         Onclick handler on squares. It draws the possible moves, and should handle the move
         Notes: could be two separate function -> draw possible moves and leave, handle the move
@@ -4899,16 +5007,30 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
     // get the piece information from board
     let piece_in = null;
 
-    if (piece == null){ // handle not drawn empty square
+    if (piece == null ){ // handle not drawn empty square - || isUpgradingMove != -1
 
 
-        if (allDrawState[col_id][row_id] == true) {
+        if (allDrawState[col_id][row_id] == true || isUpgradingMove == col_id) { // making move to empty place
             console.log("we make move to empty place")
             console.log("selected piece is (before makeMove): ", selectedPiece)
 
             let updated_piece = makeMove(col_id, row_id, setDrawState, selectedPiece, wsInstance, initBoardGeneral, 
-                                          boardInverseGeneral); 
+                                          boardInverseGeneral, setIsUpgradingMove, isUpgradingMove); 
+
+            if (updated_piece == null){ // upgrading move return, maybe could be something better than null
+                console.log("Upgrading move detected, returning early from onClickSquare, so user will select the next piece")
+                return;
+            }
             
+            if (isUpgradingMove == -1){
+
+
+            } else {
+                setIsUpgradingMove(-1) // clear the number
+                row_id = 0
+            }
+            
+
             // check if the piece in the given location can thread the opponent king
             let is_check_local = isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current) 
             setIsCheck(is_check_local)
@@ -4981,8 +5103,13 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
             if (allDrawState[col_id][row_id] == true) {
 
                 let updated_piece = takePiece(col_id, row_id, selectedPiece, wsInstance, initBoardGeneral, 
-                                               boardInverseGeneral);
+                                               boardInverseGeneral, setIsUpgradingMove, isUpgradingMove);
                 
+                                            
+                if (updated_piece == null){
+                    return;
+                }
+
                 clearBoard(setDrawState);
 
                 // check if the piece in the given location can thread the opponent king
@@ -5079,6 +5206,7 @@ interface Move {
     piece_name: string
     to_col: number
     to_row: number
+    upgrade_to: string
 }
 
 /*
@@ -5086,7 +5214,7 @@ interface Move {
 */
 function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPiece: React.Dispatch, setColsAndRows: React.Dispatch,
                             setTurn: React.Dispatch, turn: string, initboardGeneral: RefObject<{}[]>,
-                            boardInverseGeneral: RefObject<{}[]>, playerTurn: RefObject<string>){
+                            boardInverseGeneral: RefObject<{}[]>, playerTurn: RefObject<string>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
 
     console.log("OK now we need to do the move: ", move)
 
@@ -5095,13 +5223,37 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
     move.from_col = 7 - move.from_col
     move.to_col = 7 - move.to_col
 
+    let is_upgrade_local = isUpgradingMove
+    let old_to_row = move.to_row
 
     console.log("translated move: ", move)
     console.log("current initBoard: ", initboardGeneral.current)
     console.log("current boardInverseGeneral: ", boardInverseGeneral.current)
     console.log("player Turn: ", playerTurn.current)
-  
 
+    if (move.type == "Upgrade"){
+        console.log("Upgrade to :", move.upgrade_to)
+
+        //setIsUpgradingMove(move.to_col)
+        is_upgrade_local = move.to_col
+        
+
+        switch (move.upgrade_to) {
+            case "queen":
+              move.to_row = 0;
+              break;
+            case "rook":
+              move.to_row = 1;
+              break;
+            case "bishop":
+              move.to_row = 2;
+              break;
+            case "knight":
+              move.to_row = 3;
+              break;
+        }
+    }
+  
     let piece = getPiece(move.from_col, move.from_row, true, boardInverseGeneral.current)
     console.log("Looking for ", move.from_col, move.from_row)
     console.log("Piece found is ", piece)
@@ -5126,11 +5278,15 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
     let updated_piece
     if (piece_there == null){
         updated_piece = makeMove(move.to_col, move.to_row, null, custom_selected_piece, null, initboardGeneral,
-                                  boardInverseGeneral)
+                                  boardInverseGeneral, setIsUpgradingMove, is_upgrade_local)
     } else {
-        updated_piece = takePiece(move.to_col, move.to_row, custom_selected_piece, null, initboardGeneral, boardInverseGeneral)
+        updated_piece = takePiece(move.to_col, move.to_row, custom_selected_piece, null, initboardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove)
     }
     
+    if (move.type == "Upgrade"){
+        //setIsUpgradingMove(-1)
+        move.to_row = old_to_row
+    }
     
     // check if the piece in the given location can thread the opponent king
     let is_check_local = isCheckCondition(move.to_col, move.to_row, initboardGeneral.current, boardInverseGeneral.current) 
@@ -5243,6 +5399,7 @@ export default function Board(){
     const [isCheck, setIsCheck] = useState<boolean>(false)
     const [checkingPiece, setCheckingPiece] = useState<Piece>({...nullPiece})
     const [colsAndRows, setColsAndRows] = useState<null|{row:number, col: number}[]>(null)
+    const [isUpgradingMove, setIsUpgradingMove] = useState<number>(-1)
 
     const isBrowser = typeof window !== "undefined";
     const [wsInstance, setWsInstance] = useState<WebSocket | null>(null)
@@ -5286,10 +5443,11 @@ export default function Board(){
                     console.log("game is starting now")
                     setIsGameReady(true)
 
-                } else if (isJsonString(e.data) && (JSON.parse(e.data).type == "Move" || JSON.parse(e.data).type == "Castle")){ // move message
+                } else if (isJsonString(e.data) && 
+                (JSON.parse(e.data).type == "Move" || JSON.parse(e.data).type == "Castle" || JSON.parse(e.data).type == "Upgrade")){ // move message
     
                     makeOpponentMove(JSON.parse(e.data), setIsCheck, setCheckingPiece, setColsAndRows, setTurn, turn, initBoardGeneral,
-                                      boardInverseGeneral, playerTurn)
+                                      boardInverseGeneral, playerTurn, setIsUpgradingMove, isUpgradingMove)
                     
 
                 } else if (e.data.includes("opponent")){ // color deciding message
@@ -5354,6 +5512,8 @@ export default function Board(){
             playerTurn={playerTurn}
             initBoardGeneral={initBoardGeneral}
             boardInverseGeneral={boardInverseGeneral}
+            setIsUpgradingMove={setIsUpgradingMove}
+            isUpgradingMove={isUpgradingMove}
         />)
     })
     
@@ -5386,12 +5546,13 @@ interface ColumnProps {
     playerTurn: RefObject<string>
     initBoardGeneral: RefObject<{}[]>
     boardInverseGeneral: RefObject<{}[]>
-
+    setIsUpgradingMove: React.Dispatch
+    isUpgradingMove: number
 }
 
 function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck,
                  isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn, initBoardGeneral,
-                 boardInverseGeneral} : ColumnProps){
+                 boardInverseGeneral, setIsUpgradingMove, isUpgradingMove} : ColumnProps){
 
     let squares = Array()
     for (let i = 0; i<BOARD_SIZE; i++){
@@ -5429,6 +5590,8 @@ function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, se
             playerTurn={playerTurn}
             initBoardGeneral={initBoardGeneral}
             boardInverseGeneral={boardInverseGeneral}
+            setIsUpgradingMove={setIsUpgradingMove}
+            isUpgradingMove={isUpgradingMove}
             />
         )
     })
@@ -5465,17 +5628,54 @@ interface SquareProps{
     playerTurn: RefObject<string>
     initBoardGeneral: RefObject<{}[]>
     boardInverseGeneral: RefObject<{}[]>
+    setIsUpgradingMove: React.Dispatch
+    isUpgradingMove: number
 }
 
 function Square({col_id, row_id, color, label_color, setDrawState, drawState, allDrawState, setSelectedPiece, selectedPiece, turn, 
                  setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn,
-                 initBoardGeneral, boardInverseGeneral}: SquareProps){
+                 initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove}: SquareProps){
 
     let piece = getPiece(col_id, row_id, false, boardInverseGeneral.current) // piece is like wking.svg
     let piece_name = getPiece(col_id, row_id, true, boardInverseGeneral.current)
 
     if (piece_name && piece_name.includes("upgraded")) {
-        piece = piece_name[0].toLowerCase() + "Q.svg"
+
+        piece = piece_name[0].toLowerCase()
+
+        if (piece_name.includes("queen")){
+            piece += "Q.svg"
+        } else if (piece_name.includes("rook")){
+            piece += "R.svg"
+        } else if (piece_name.includes("bishop")){
+            piece += "B.svg"
+        } else if (piece_name.includes("knight")){
+            piece += "N.svg"
+        }
+        
+    }
+
+    let isDarken = false
+
+    if (isUpgradingMove == col_id){ // upgrading move column
+
+        if (row_id == 0){ // queen
+
+            piece = playerTurn.current == "white" ? "wQ.svg" : "bQ.svg"
+        } else if (row_id == 1){ // rook
+
+            piece = playerTurn.current == "white" ? "wR.svg" : "bR.svg"
+        } else if (row_id == 2){ // bishop
+
+            piece = playerTurn.current == "white" ? "wB.svg" : "bB.svg"
+        } else if (row_id == 3){ // knight
+
+            piece = playerTurn.current == "white" ? "wN.svg" : "bN.svg"
+        } else {
+            isDarken = true
+        }
+    } else if (isUpgradingMove != -1){
+        isDarken = true
     }
 
     let piece_in
@@ -5502,13 +5702,13 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
 
     return (
         <div
-          className={`${bgColor} w-25 h-25 relative ${bgHover}`}
+          className={`${bgColor} w-25 h-25 relative ${bgHover} `} // ${isDarken ? 'darken' : ''}
           row-id={row_id}
           col-id={col_id}
-
+          style={isDarken ? { filter: 'brightness(0.6) saturate(0.3) drop-shadow(0 2px 4px rgba(0,0,0,0.5))', opacity: '0.85' } : {}}
           onClick={() => onclickSquare(col_id, row_id, setDrawState, allDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck, 
             isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn, initBoardGeneral,
-            boardInverseGeneral)}
+            boardInverseGeneral, setIsUpgradingMove, isUpgradingMove)}
         >
           {/* Şah işareti */}
           {isKingChecked && (
