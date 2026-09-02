@@ -312,6 +312,17 @@ let initDrawState = [
 
 let nullPiece = {col: -1, row: -1, name: "null", kind: "null", has_moved: false, color: "null", moveable: false}
 
+let initMovingArr = [
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+    ]
+
 function getPiece(col_id: number, row_id: number, get_name: boolean, boardInverseGeneral: {}[], debug?: Boolean|undefined){
     /*
         Get the piece name or image path by given col_id and row_id
@@ -490,7 +501,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
         }
 
         if (Object.values(piece)[0].kind == "bishop"){
-            console.log("in bishop")
+            
                 let col_loc = piece_col_loc-1
                 let col_loc_2 = piece_col_loc-1
                 let col_loc_3 = piece_col_loc+1
@@ -614,7 +625,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
         } else if (Object.values(piece)[0].kind == "knight"){
 
-        console.log("in knight")    
+         
             if (piece_col_loc - 2 >= 0){
 
                     if (piece_row_loc +1 <= 7){
@@ -765,7 +776,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 }
         } else if (Object.values(piece)[0].kind == "rook"){
  
-            console.log("in rook")
+            
                     
             let row_loc = piece_row_loc-1
             let row_loc_2 = piece_row_loc+1
@@ -849,7 +860,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
         } else if (Object.values(piece)[0].kind == "queen"){
 
-            console.log("in queen")
+            
             let col_loc = piece_col_loc-1
             let col_loc_2 = piece_col_loc-1;
             let col_loc_3 = piece_col_loc+1
@@ -3314,12 +3325,11 @@ function drawPossibleMoves(
         Position: Black Queen - Black Pawn
                                 White King
         In this position, W King can move to right, which shouldn't be able to 
+
+        Position: Black King - White Queen
+        In this position B King can move to left down but it is now drawn. Also B King can't move to left but it is shown as can. 
         */
 
-        /*
-        Castle Move: King hasn't moved && Rook hasn't moved && No piece between rook and king
-        Implement only short castle for now
-        */
 
         let has_move = false
         setDrawState((old: boolean[][]) => {
@@ -3495,9 +3505,11 @@ function drawPossibleMoves(
             if (col -1 >= 0 && row+1 <= 7){
 
                 let piece_5 = getPiece(col-1, row+1, true, boardInverseGeneral)
+                console.log("piece in left down is: ", piece_5)
     
                 if (piece_5 == null){
                     if (notEatable(col-1, row+1, turn+1, initBoardGeneral, boardInverseGeneral)){
+                        console.log("notEatable is true")
                         if ( colsAndRows == null || !isIn(col-1, row+1, colsAndRows)){
                             candidates[col-1][row+1] = true
                             has_move = true
@@ -3524,9 +3536,11 @@ function drawPossibleMoves(
             if (col -1 >= 0){
 
                 let piece_6 = getPiece(col-1, row, true, boardInverseGeneral)
-    
+
+                console.log("piece in left is: ", piece_6)
                 if (piece_6 == null){
                     if (notEatable(col-1, row, turn, initBoardGeneral, boardInverseGeneral)){
+                        console.log("notEatable is true")
                         if ( colsAndRows == null || !isIn(col-1, row, colsAndRows)){
                             candidates[col-1][row] = true
                             has_move = true
@@ -4978,9 +4992,13 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
 
       all above is done except:
       - checkmate conditions -> write it completetly in fireGameOver()
+      - lots of bugs in check conditions: B King - W Queen (King can move left and can't move left down - wrong || B King 
+                                                                                                                          \ 
+                                                                                                                            W Pawn, not check by white but check by black - wrong)
 
       --- later ? (after backend in rust)
-      - piece move by mouse hold
+      - piece move by mouse hold ++ (seems done)
+      - premove
       - time (frontend first, backend next)
       - username
       - account creation (all kind of backend stuff)
@@ -5375,6 +5393,7 @@ function isJsonString(str: string) {
     return true;
 }
 
+const makeMovingArr = () => Array.from({length: 8}, () => Array(8).fill(false))
 
 export default function Board(){
 
@@ -5400,6 +5419,38 @@ export default function Board(){
     const [checkingPiece, setCheckingPiece] = useState<Piece>({...nullPiece})
     const [colsAndRows, setColsAndRows] = useState<null|{row:number, col: number}[]>(null)
     const [isUpgradingMove, setIsUpgradingMove] = useState<number>(-1)
+
+    // mouseHold move
+    const [isMovingArr, setIsMovingArr] = useState<boolean[][]>(makeMovingArr)
+    const [isMouseMove, setIsMouseMove] = useState<boolean>(false)
+    const [mouseLoc, setMouseLoc] = useState<{x:number, y:number}>({x: 0, y: 0})
+
+
+    function mouseUp(){
+        console.log("Mouse is up")
+        setIsMovingArr(makeMovingArr())
+        setIsMouseMove(false)
+    }
+
+    function handleMouseMove(e: React.MouseEvent){
+        if (isMouseMove){
+            setMouseLoc({x : e.clientX, y: e.clientY})
+        }
+    }
+
+    function setIsMoving(col: number, row: number, to_what: boolean, x:number, y:number){
+
+        //if (turn == playerTurn.current){
+            setIsMovingArr((old) => {
+                old[col][row] = to_what
+    
+                return [...old]
+            })
+            setIsMouseMove(true)
+            setMouseLoc({x: x, y:y})
+        //}
+    }
+    // end mouseHold move
 
     const isBrowser = typeof window !== "undefined";
     const [wsInstance, setWsInstance] = useState<WebSocket | null>(null)
@@ -5514,13 +5565,16 @@ export default function Board(){
             boardInverseGeneral={boardInverseGeneral}
             setIsUpgradingMove={setIsUpgradingMove}
             isUpgradingMove={isUpgradingMove}
+            isMovingArrColumn={isMovingArr[index]}
+            setIsMoving={setIsMoving}
+            mouseLoc={mouseLoc}
         />)
     })
     
 
     return(
         <>
-            <div className="Board flex m-5 ">
+            <div className="Board flex m-5 " onMouseUp={mouseUp} onMouseMove={(e) =>  handleMouseMove(e)}>
                 {isGameReady ? displayColumns : <div>Game searching ... Wait</div>}
             </div>
         </>
@@ -5548,11 +5602,14 @@ interface ColumnProps {
     boardInverseGeneral: RefObject<{}[]>
     setIsUpgradingMove: React.Dispatch
     isUpgradingMove: number
+    isMovingArrColumn: boolean[]
+    setIsMoving: (col: number, row: number, to_what: boolean, x:number, y:number) => void
+    mouseLoc: {x:number, y:number}
 }
 
 function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck,
                  isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn, initBoardGeneral,
-                 boardInverseGeneral, setIsUpgradingMove, isUpgradingMove} : ColumnProps){
+                 boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, isMovingArrColumn, setIsMoving, mouseLoc} : ColumnProps){
 
     let squares = Array()
     for (let i = 0; i<BOARD_SIZE; i++){
@@ -5592,6 +5649,9 @@ function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, se
             boardInverseGeneral={boardInverseGeneral}
             setIsUpgradingMove={setIsUpgradingMove}
             isUpgradingMove={isUpgradingMove}
+            isMovingSquare={isMovingArrColumn[index]}
+            setIsMoving={setIsMoving}
+            mouseLoc={mouseLoc}
             />
         )
     })
@@ -5630,11 +5690,14 @@ interface SquareProps{
     boardInverseGeneral: RefObject<{}[]>
     setIsUpgradingMove: React.Dispatch
     isUpgradingMove: number
+    isMovingSquare: boolean
+    setIsMoving: (col: number, row: number, to_what: boolean, x:number, y:number) => void
+    mouseLoc: {x:number, y:number}
 }
 
 function Square({col_id, row_id, color, label_color, setDrawState, drawState, allDrawState, setSelectedPiece, selectedPiece, turn, 
                  setTurn, setIsCheck, isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn,
-                 initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove}: SquareProps){
+                 initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, isMovingSquare, setIsMoving, mouseLoc}: SquareProps){
 
     let piece = getPiece(col_id, row_id, false, boardInverseGeneral.current) // piece is like wking.svg
     let piece_name = getPiece(col_id, row_id, true, boardInverseGeneral.current)
@@ -5698,7 +5761,17 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
     const isKingChecked = piece != null && isCheck && turn == piece_in[piece_name].color && piece_in[piece_name].kind == "king"
     if (isKingChecked) console.log("check camee!!!!")
 
+    function handleMouseUp(e: React.MouseEvent){
+        if (!isMovingSquare){
+            console.log("mouse is up on: col", col_id, " row", row_id, " -> making move")
+            onclickSquare(col_id, row_id, setDrawState, allDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck, 
+                isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn, initBoardGeneral,
+                boardInverseGeneral, setIsUpgradingMove, isUpgradingMove)
     
+            console.log("onClickSquare must be down after mouse up")
+        }
+    }
+
 
     return (
         <div
@@ -5706,9 +5779,11 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
           row-id={row_id}
           col-id={col_id}
           style={isDarken ? { filter: 'brightness(0.6) saturate(0.3) drop-shadow(0 2px 4px rgba(0,0,0,0.5))', opacity: '0.85' } : {}}
-          onClick={() => onclickSquare(col_id, row_id, setDrawState, allDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck, 
+          onMouseDown={() => onclickSquare(col_id, row_id, setDrawState, allDrawState, setSelectedPiece, selectedPiece, turn, setTurn, setIsCheck, 
             isCheck, checkingPiece, setCheckingPiece, colsAndRows, setColsAndRows, wsInstance, playerTurn, initBoardGeneral,
             boardInverseGeneral, setIsUpgradingMove, isUpgradingMove)}
+        
+          onMouseUp={(e) => handleMouseUp(e)}
         >
           {/* Şah işareti */}
           {isKingChecked && (
@@ -5719,7 +5794,8 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
             />
           )}
         
-          {piece != null && <img src={piece} className="relative z-20" />}
+          {piece != null && 
+          <Piece piece={piece} key={col_id*10 + row_id} isMovingPiece={isMovingSquare} setIsMoving={setIsMoving} col_id={col_id} row_id={row_id} mouseLoc={mouseLoc}/>}
           {col_id == 7 && (
             <span className={`${label_color} text-xs absolute top-0 right-0 p-1 z-20`}>
               {8 - row_id}
@@ -5739,3 +5815,29 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
         </div>
     )
 }
+// <img src={piece} className="relative z-20" />
+interface PieceProps {
+    piece: string
+    isMovingPiece: boolean
+    setIsMoving: (col: number, row: number, to_what: boolean, x:number, y:number) => void
+    col_id: number
+    row_id: number
+    mouseLoc: {x:number, y:number}
+}
+
+function Piece({piece, isMovingPiece, setIsMoving, col_id, row_id, mouseLoc} : PieceProps){
+    
+
+ 
+
+  let moving_styles = isMovingPiece ? {position: "fixed", left: mouseLoc.x - 45, top: mouseLoc.y - 45, height: 90, width: 90, pointerEvents: "none", zIndex: 1000} :
+     {position: "relative", left: 0, top: 0}
+
+    return (
+        <div style={{backgroundImage: `url(${piece})`, height: '100%', width: '100%', cursor: "grab", ...moving_styles} as React.CSSProperties} 
+             onMouseDown={(e) => {e.preventDefault();setIsMoving(col_id, row_id, true, e.clientX, e.clientY);}} >
+            
+        </div>
+    )
+}
+//restingPos.current = {x: e.clientX, y: e.clientY}; 
