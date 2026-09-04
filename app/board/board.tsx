@@ -477,6 +477,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
     // the idea is to traverse every opponent piece and traverse their possible moves like in drawPossibleMoves
     // and if we encounter to the given square location return false
 
+    console.log("notEatable turn is: ", turn)
     let opponent_pieces: string[] = []
 
     // add the opponent pieces (as names)
@@ -484,24 +485,29 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
         if (Object.values(initBoardGeneral[key])[0].color != turn) opponent_pieces.push(Object.keys(initBoardGeneral[key])[0])
     }
 
-    console.log("for col: ", col, " for row: ", row)
+    console.log("for col: ", col, " for row: ", row, " opp_pieces len: ", opponent_pieces.length) // col 2 row 5
     for (let op_piece in opponent_pieces){
 
         let piece_col_loc
         let piece_row_loc
-        let piece: Object = nullPiece // not sure of this
+        let piece_op: Object = nullPiece // not sure of this
         for (let key in initBoardGeneral){
 
             if (Object.keys(initBoardGeneral[key])[0] == opponent_pieces[op_piece]){
-                piece = initBoardGeneral[key]
+                piece_op = initBoardGeneral[key]
                 piece_col_loc = Object.values(initBoardGeneral[key])[0].col
                 piece_row_loc = Object.values(initBoardGeneral[key])[0].row
                 break
             }
         }
 
-        if (Object.values(piece)[0].kind == "bishop"){
+        let piece_color = Object.values(piece_op)[0].color
+
+        if (Object.values(piece_op)[0].kind == "bishop"){
             
+            if (col == 1 && row == 5){
+                console.log("ok in bishop")
+            }
                 let col_loc = piece_col_loc-1
                 let col_loc_2 = piece_col_loc-1
                 let col_loc_3 = piece_col_loc+1
@@ -521,18 +527,24 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                         if (piece == null){
                             //candidates[col_loc][row_loc] = true
-                            if (col_loc == col && row_loc == row) return false
+                            if (col_loc == col && row_loc == row) {console.log("notEatable from bishop left-up"); return false;}
                         } else {
 
+                            let to_continue = false
                             for (let key in initBoardGeneral){
 
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidates[col_loc][row_loc] = true
-                                    if (col_loc == col && row_loc == row) return false
+                                    if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                        to_continue = true;
+                                    } else {
+                                        if (col_loc == col && row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    }
                                     break
                                 }
                             }
-                            break
+                            if (!to_continue) break
+                            // break
                         }
                     }
                     col_loc--;
@@ -545,21 +557,32 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                         // get piece
                         let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
+                        if (col == 1 && row == 5){
+                            console.log("ok piece is: ", piece, " col: ", col_loc_2, " row: ", row_loc_2)
+                        }
 
                         if (piece == null){
-                            //candidates[col_loc_2][row_loc_2] = true
-                            if (col_loc_2 == col && row_loc_2 == row) return false
+                            
+                            if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from bishop left-down"); return false;}
                         } else {
-
+                            let to_continue = false
                             for (let key in initBoardGeneral){
 
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidates[col_loc_2][row_loc_2] = true
-                                    if (col_loc_2 == col && row_loc_2 == row) return false
-                                    break
+                                    
+                                    if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                        to_continue = true;
+                                    } else {
+                                        if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    
+                                        
+                                    }
+                                        break
+                                    
                                 }
                             }
-                            break
+                            if (!to_continue) break
+                            
                         }
                     }
                     col_loc_2--;
@@ -575,18 +598,24 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                         if (piece == null){
                             //candidates[col_loc_3][row_loc_3] = true
-                            if (col_loc_3 == col && row_loc_3 == row) return false
+                            if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from bishop right-up"); return false;}
                         } else {
 
+                            let to_continue = false
                             for (let key in initBoardGeneral){
 
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidates[col_loc_3][row_loc_3] = true
-                                    if (col_loc_3 == col && row_loc_3 == row) return false
+                                    if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                        to_continue = true;
+                                    } else {
+                                        if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    }
                                     break
                                 }
                             }
-                            break
+                            if (!to_continue) break
+                            //break
                         }
                     }
                     col_loc_3++;
@@ -602,18 +631,25 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                         if (piece == null){
                             //candidates[col_loc_4][row_loc_4] = true
-                            if (col_loc_4 == col && row_loc_4 == row) return false
+                            if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from bishop right-down"); return false;}
                         } else {
 
+                            let to_continue = false
                             for (let key in initBoardGeneral){
 
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                     //candidates[col_loc_4][row_loc_4] = true
-                                    if (col_loc_4 == col && row_loc_4 == row) return false
+                                    if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                        to_continue = true;
+                                    } else {
+                                        if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                        
+                                    }
                                     break
                                 }
                             }
-                            break
+                            if (!to_continue) break
+                            //break
                         }
                     }
                     col_loc_4++;
@@ -623,7 +659,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
 
 
-        } else if (Object.values(piece)[0].kind == "knight"){
+        } else if (Object.values(piece_op)[0].kind == "knight"){
 
          
             if (piece_col_loc - 2 >= 0){
@@ -632,13 +668,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                         let piece = getPiece(piece_col_loc-2, piece_row_loc+1, true, boardInverseGeneral)
                         if (piece == null){ // there is no piece, you can draw
-                            //candidate[col-2][row+1] = true
-                            if (piece_col_loc-2 == col && piece_row_loc+1 == row) return false
+                            
+                            if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidate[col-2][row+1] = true
-                                    if (piece_col_loc-2 == col && piece_row_loc+1 == row) return false
+                            
+                                    if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                                 }
                             }
                         }
@@ -649,15 +685,15 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                         let piece = getPiece(piece_col_loc-2, piece_row_loc-1, true, boardInverseGeneral)
                         if (piece == null){ // there is no piece, draw
-                            //candidate[col-2][row-1] = true
-                            if (piece_col_loc-2 == col && piece_row_loc-1 == row) return false
+                            
+                            if (piece_col_loc-2 == col && piece_row_loc-1 == row) {console.log("notEatable from knight"); return false;}
 
                         } else { // there is a piece, if it's not black -> draw
                     
                             for (let key in initBoardGeneral){
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidate[col-2][row-1] = true
-                                    if (piece_col_loc-2 == col && piece_row_loc-1 == row) return false
+                                    
+                                    if (piece_col_loc-2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                                 }
                             }
                         }
@@ -671,13 +707,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let piece = getPiece(piece_col_loc+2, piece_row_loc+1, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
-                            //candidate[col+2][row+1] = true
-                            if (piece_col_loc+2 == col && piece_row_loc+1 == row) return false
+                            
+                            if (piece_col_loc+2 == col && piece_row_loc+1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidate[col+2][row+1] = true
-                                    if (piece_col_loc+2 == col && piece_row_loc+1 == row) return false
+                                    
+                                    if (piece_col_loc+2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                                 }
                             }
                         }
@@ -687,13 +723,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let piece = getPiece(piece_col_loc+2, piece_row_loc-1, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
-                            //candidate[col+2][row-1] = true
-                            if (piece_col_loc+1 == col && piece_row_loc-1 == row) return false
+                            
+                            if (piece_col_loc+1 == col && piece_row_loc-1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidate[col+2][row-1] = true
-                                    if (piece_col_loc+2 == col && piece_row_loc-1 == row) return false
+                                    
+                                    if (piece_col_loc+2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                                 }
                             }
                         }
@@ -707,13 +743,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let piece = getPiece(piece_col_loc-1, piece_row_loc+2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
-                            //candidate[col-1][row+2] = true
-                            if (piece_col_loc-1 == col && piece_row_loc+1 == row) return false
+                            
+                            if (piece_col_loc-1 == col && piece_row_loc+1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidate[col-1][row+2] = true
-                                    if (piece_col_loc-1 == col && piece_row_loc+2 == row) return false
+                                    
+                                    if (piece_col_loc-1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                                 }
                             }
                         }
@@ -723,13 +759,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let piece = getPiece(piece_col_loc+1, piece_row_loc+2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
-                            //candidate[col+1][row+2] = true
-                            if (piece_col_loc+1 == col && piece_row_loc+2 == row) return false
+                            
+                            if (piece_col_loc+1 == col && piece_row_loc+2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidate[col+1][row+2] = true
-                                    if (piece_col_loc+1 == col && piece_row_loc+2 == row) return false
+                                    
+                                    if (piece_col_loc+1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                                 }
                             }
                         }
@@ -743,13 +779,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let piece = getPiece(piece_col_loc-1, piece_row_loc-2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
-                            //candidate[col-1][row-2] = true
-                            if (piece_col_loc-1 == col && piece_row_loc-2 == row) return false
+                            
+                            if (piece_col_loc-1 == col && piece_row_loc-2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidate[col-1][row-2] = true
-                                    if (piece_col_loc == col-1 && piece_row_loc-2 == row) return false
+                                    
+                                    if (piece_col_loc == col-1 && piece_row_loc-2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                                 }
                             }
                         }
@@ -760,13 +796,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let piece = getPiece(piece_col_loc+1, piece_row_loc-2, true, boardInverseGeneral)
 
                         if (piece == null){ // there is no piece, you can draw
-                            //candidate[col+1][row-2] = true
-                            if (piece_col_loc+1 == col && piece_row_loc-2 == row) return false
+                            
+                            if (piece_col_loc+1 == col && piece_row_loc-2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
                                 if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    //candidate[col+1][row-2] = true
-                                    if (piece_col_loc+1 == col && piece_row_loc-2 == row) return false
+                                    
+                                    if (piece_col_loc+1 == col && piece_row_loc-2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                                 }
                             }
                         }
@@ -774,7 +810,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         
                     }
                 }
-        } else if (Object.values(piece)[0].kind == "rook"){
+        } else if (Object.values(piece_op)[0].kind == "rook"){
  
             
                     
@@ -788,17 +824,23 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 let piece = getPiece(piece_col_loc, row_loc, true, boardInverseGeneral)
                 if (piece == null){ // empty, draw it
                     
-                    if (piece_col_loc == col && row_loc == row) return false;
+                    if (piece_col_loc == col && row_loc == row) {console.log("notEatable from rook"); return false;};
                 } else {
 
+                    let to_continue = false
                     for (let key in initBoardGeneral){
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (piece_col_loc == col && row_loc == row) return false;
+                            if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                to_continue = true
+                            } else {
+                                if (piece_col_loc == col && row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;};
+                            }
+                            
                             break;
                         }
                     }
-                    break;
+                    if (!to_continue) break;
                 }
                 row_loc--;
             }
@@ -807,16 +849,22 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 
                 let piece = getPiece(piece_col_loc, row_loc_2, true, boardInverseGeneral);
                 if (piece == null) {
-                    if (piece_col_loc == col && row_loc_2 == row) return false;
+                    if (piece_col_loc == col && row_loc_2 == row) {console.log("notEatable from rook"); return false;};
                 } else {
+                    let to_continue = false
                     for (let key in initBoardGeneral){
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (piece_col_loc == col && row_loc_2 == row) return false;
+                            if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                to_continue = true
+                            } else {
+                                if (piece_col_loc == col && row_loc_2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;};
+                            }
+                            
                             break;
                         }
                     }
-                    break;
+                    if (!to_continue) break;
                 }
                 row_loc_2++;
             }
@@ -826,15 +874,22 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 let piece = getPiece(col_loc, piece_row_loc, true, boardInverseGeneral);
                 if (piece == null) {
                     
-                    if (col_loc == col && piece_row_loc == row) return false;
+                    if (col_loc == col && piece_row_loc == row) {console.log("notEatable from rook"); return false;}
                 } else {
+
+                    let to_continue = false
                     for (let key in initBoardGeneral){
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                            if (col_loc == col && piece_row_loc == row) return false;
+
+                            if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                to_continue = true
+                            } else {
+                                if (col_loc == col && piece_row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;};
+                            }
                             break;
                         }
                     }
-                    break;
+                    if (!to_continue) break;
                 }
                 col_loc--;
             }
@@ -844,21 +899,28 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 let piece = getPiece(col_loc_2, piece_row_loc, true, boardInverseGeneral);
                 if (piece == null) {
                     
-                    if (col_loc_2 == col && piece_row_loc == row) return false;
+                    if (col_loc_2 == col && piece_row_loc == row) {console.log("notEatable from rook"); return false;};
                 } else {
+
+                    let to_continue = false
                     for (let key in initBoardGeneral){
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (col_loc_2 == col && piece_row_loc == row) return false;
+                            if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                to_continue = true
+                            } else {
+                                if (col_loc_2 == col && piece_row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;};
+                            }
+                            
                             break;
                         }
                     }
-                    break;
+                    if (!to_continue) break;
                 }
                 col_loc_2++;
             }
 
-        } else if (Object.values(piece)[0].kind == "queen"){
+        } else if (Object.values(piece_op)[0].kind == "queen"){
 
             
             let col_loc = piece_col_loc-1
@@ -883,18 +945,23 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                     if (piece == null){
                         
-                        if (col_loc == col && row_loc == row) return false
+                        if (col_loc == col && row_loc == row) {console.log("notEatable from queen"); return false;}
                     } else {
 
+                        let to_continue = false
                         for (let key in initBoardGeneral){
 
                             if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 
-                                if (col_loc == col && row_loc == row) return false
+                                if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                    to_continue = true
+                                } else {
+                                    if (col_loc == col && row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                }
                                 break
                             }
                         }
-                        break
+                        if (!to_continue) break;
                     }
                 }
 
@@ -910,18 +977,23 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                     if (piece == null){
                         
-                        if (col_loc_2 == col && row_loc_2 == row) return false
+                        if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from queen"); return false;}
                     } else {
 
+                        let to_continue = false
                         for (let key in initBoardGeneral){
 
                             if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 
-                                if (col_loc_2 == col && row_loc_2 == row) return false
+                                if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                    to_continue = true
+                                } else {
+                                    if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                }
                                 break
                             }
                         }
-                        break
+                        if (!to_continue) break; 
                     }
                 }
 
@@ -937,18 +1009,24 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                     if (piece == null){
                         
-                        if (col_loc_3 == col && row_loc_3 == row) return false
+                        if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from queen"); return false;}
                     } else {
 
+                        let to_continue = false
                         for (let key in initBoardGeneral){
 
                             if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 
-                                if (col_loc_3 == col && row_loc_3 == row) return false
+                                if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                    to_continue = true
+                                } else {
+                                    if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                }
+                                
                                 break
                             }
                         }
-                        break
+                        if (!to_continue) break; 
                     }
                 }
 
@@ -964,18 +1042,24 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                     if (piece == null){
                         
-                        if (col_loc_4 == col && row_loc_4 == row) return false
+                        if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from queen"); return false;}
                     } else {
 
+                        let to_continue = false
                         for (let key in initBoardGeneral){
 
                             if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                                 
-                                if (col_loc_4 == col && row_loc_4 == row) return false
+                                if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                    to_continue = true
+                                } else {
+                                    if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                }
+                                
                                 break
                             }
                         }
-                        break
+                        if (!to_continue) break; 
                     }
                 }
 
@@ -990,41 +1074,51 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 
                 if (piece == null){
                     
-                    if (col_loc_5 == col && piece_row_loc == row) return false
+                    if (col_loc_5 == col && piece_row_loc == row) {console.log("notEatable from queen"); return false;}
                 } else {
 
+                    let to_continue = false
                     for (let key in initBoardGeneral){
 
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (col_loc_5 == col && piece_row_loc == row) return false
+                            if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                to_continue = true
+                            } else {
+                                if (col_loc_5 == col && piece_row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                            }
                             break
                         }
                     }
-                    break
+                    if (!to_continue) break; 
                 }
 
                 col_loc_5++;
             }
 
             while (col_loc_6 >= 0){ // to left
-
+                
                 let piece = getPiece(col_loc_6, piece_row_loc, true, boardInverseGeneral)
 
                 if (piece == null){
                     
-                    if (col_loc_6 == col && piece_row_loc == row) return false
+                    if (col_loc_6 == col && piece_row_loc == row) {console.log("notEatable from queen"); return false;}
                 } else {
 
+                    let to_continue = false
                     for (let key in initBoardGeneral){
 
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (col_loc_6 == col && piece_row_loc == row) return false
+                            if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                to_continue = true
+                            } else {
+                                if (col_loc_6 == col && piece_row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                            }
                             break
                         }
                     }
-                    break
+                    if (!to_continue) break; 
                 }
 
                 col_loc_6--;
@@ -1037,18 +1131,23 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                 if (piece == null){
                     
-                    if (piece_col_loc == col && row_loc_5 == row) return false
+                    if (piece_col_loc == col && row_loc_5 == row) {console.log("notEatable from queen"); return false;}
                 } else {
 
+                    let to_continue = false
                     for (let key in initBoardGeneral){
 
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (piece_col_loc == col && row_loc_5 == row) return false
+                            if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                to_continue = true
+                            } else {
+                                if (piece_col_loc == col && row_loc_5 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                            }
                             break
                         }
                     }
-                    break
+                    if (!to_continue) break; 
                 }
 
                 row_loc_5++;
@@ -1059,58 +1158,99 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 let piece = getPiece(piece_col_loc, row_loc_6, true, boardInverseGeneral)
 
                 if (piece == null){
-                    if (piece_col_loc == col && row_loc_6 == row) return false
+                    if (piece_col_loc == col && row_loc_6 == row) {console.log("notEatable from queen"); return false;}
                 } else {
 
+                    let to_continue = false
                     for (let key in initBoardGeneral){
 
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (piece_col_loc == col && row_loc_6 == row) return false
+                            if (Object.values(initBoardGeneral[key])[0].color != piece_color && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                to_continue = true
+                            } else {
+                                if (piece_col_loc == col && row_loc_6 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                            }                            
                             break
                         }
                     }
-                    break
+                    if (!to_continue) break; 
                 }
 
                 row_loc_6--;
             }
-        } else if (Object.values(piece)[0].kind == "pawn"){ 
+        } else if (Object.values(piece_op)[0].kind == "pawn"){ 
             // you need to think for the white pawns, so it goes up (down in row index)
             console.log("in pawn")
 
-            if (piece_col_loc + 1 < 8 && piece_row_loc - 1 >= 0){
-                        
+            // for black pawns, it's either (col_loc-1, row_loc+1) || (col_loc+1, row_loc+1) (from white perspective, check to white king)
+            // therefore we need the turn
+
+            if (turn == "black"){ // for check to black king
+                
+                if (piece_col_loc + 1 < 8 && piece_row_loc - 1 >= 0){
+                            
                     let piece = getPiece(piece_col_loc + 1, piece_row_loc - 1, true, boardInverseGeneral)
                     if (piece == null){
-                        if (piece_col_loc +1 == col && piece_row_loc -1 == row) return false
+                        if (piece_col_loc +1 == col && piece_row_loc -1 == row) {return false;}
                     }
                     for (let key in initBoardGeneral){ // key is just index here
     
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (piece_col_loc +1 == col && piece_row_loc -1 == row) return false
+                            if (piece_col_loc +1 == col && piece_row_loc -1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                         }
                     }
                 } 
                 if (piece_col_loc - 1 >= 0 && piece_row_loc -1 >= 0){
                     let piece = getPiece(piece_col_loc - 1, piece_row_loc -1, true, boardInverseGeneral)
                     if (piece == null){
-                        if (piece_col_loc-1 == col && piece_row_loc -1 == row) return false
+                        if (piece_col_loc-1 == col && piece_row_loc -1 == row) {return false;}
+                    
+                    for (let key in initBoardGeneral){ // key is just index here        
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                            
+                            if (piece_col_loc-1 == col && piece_row_loc -1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                        }
+                    }
+                }
+                }
+
+            } else { // for check to white king
+
+                if (piece_col_loc + 1 < 8 && piece_row_loc + 1 < 8){
+                            
+                    let piece = getPiece(piece_col_loc + 1, piece_row_loc + 1, true, boardInverseGeneral)
+                    if (piece == null){
+                        if (piece_col_loc +1 == col && piece_row_loc +1 == row) {return false;}
+                    }
+                    for (let key in initBoardGeneral){ // key is just index here
+    
+                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                            
+                            if (piece_col_loc +1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                        }
+                    }
+                } 
+                if (piece_col_loc - 1 >= 0 && piece_row_loc +1 < 8){
+                    let piece = getPiece(piece_col_loc - 1, piece_row_loc +1, true, boardInverseGeneral)
+                    if (piece == null){
+                        if (piece_col_loc-1 == col && piece_row_loc +1 == row) {return false;}
                     }
                     for (let key in initBoardGeneral){ // key is just index here        
                         if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
                             
-                            if (piece_col_loc-1 == col && piece_row_loc -1 == row) return false
+                            if (piece_col_loc-1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
                         }
                     }
                 }
+            }
         }
-
     }
 
     return true
 }
+
 
 // NOTE: In here probably we need to know the playerTurn too in order to get the correct squares between checking piece and our king
 // currently it comes but seems like it inverse, not correct squares. Job for the weekend!!!
@@ -1279,7 +1419,7 @@ console.log("king is in right up (for white)") // this works for white
             let king_col = turn_king.col -1
             let king_row = turn_king.row +1
 
-            if (playerTurn == "white"){
+            if (playerTurn == "white" || playerTurn == "black"){
 
                 while (king_col > checkingPiece.col && king_row < checkingPiece.row){
                     console.log("pushing row: ", king_row, "col: ", king_col)
@@ -3441,7 +3581,7 @@ function drawPossibleMoves(
                 let piece_3 = getPiece(col+1, row+1, true, boardInverseGeneral)
     
                 console.log("res of not Eatable: ")
-                let res = notEatable(col+1, row, turn+1, initBoardGeneral, boardInverseGeneral)
+                let res = notEatable(col+1, row, turn, initBoardGeneral, boardInverseGeneral)
                 console.log("res: ", res)
                 console.log("done")
                 if (piece_3 == null){
@@ -3508,7 +3648,7 @@ function drawPossibleMoves(
                 console.log("piece in left down is: ", piece_5)
     
                 if (piece_5 == null){
-                    if (notEatable(col-1, row+1, turn+1, initBoardGeneral, boardInverseGeneral)){
+                    if (notEatable(col-1, row+1, turn, initBoardGeneral, boardInverseGeneral)){
                         console.log("notEatable is true")
                         if ( colsAndRows == null || !isIn(col-1, row+1, colsAndRows)){
                             candidates[col-1][row+1] = true
@@ -3847,7 +3987,6 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     console.log("The new updated piece is", updated_piece)
     console.log("current piece data after all (initBoardGeneral): ", initBoardGeneral.current)
 
-    console.log("is castle is: ", isCastle)
 
     let move_type = ""
     let upgrade_to = ""
@@ -4017,7 +4156,7 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 
     if (updated_piece == null) {console.log("Big error in take piece !!!!")}
 
-    isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current)
+    // isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current) // why is it here ???
 
     let move_msg: Move = {
         type: "Move",
@@ -4037,7 +4176,9 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 // another piece is now threating the king other than moving piece). For this you'd have to check for every opponent's other piece
 // if it has a clear direction to the king (similar to what we did in setMoveablePieces where we found the opponent pieces toward king with a 
 // (one) blocking piece)
-function isCheckCondition(col_id: number, row_id: number, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
+function isCheckCondition(col_id: number, row_id: number, playerTurn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
+
+    // do I have to know player turn here to understand which perspective I'm looking at instead of local_turn
 
     if (boardInverseGeneral == null || boardInverseGeneral == undefined){
         console.log("BoardInverseGeneral shouldn't be null or undefined ever")
@@ -4063,7 +4204,7 @@ function isCheckCondition(col_id: number, row_id: number, initBoardGeneral: {}[]
     if (piece_kind == "pawn"){
 
         let row_inc
-        if (local_turn == "white"){
+        if (playerTurn == local_turn){
             row_inc = -1
         } else {
             row_inc = 1
@@ -4661,19 +4802,25 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
         }
     }
 
+    console.log("(isindirectCheck) turn is: ", turn)
+    console.log("opp_king: ", opp_king) // col: 7, row: 3
+
     // iterate on our pieces
     for (let key in initBoardGeneral){
 
         let is_indirect_check_cause = true;
         let may_return = false;
         let piece: any = Object.values(initBoardGeneral[key])[0]
+        //console.log("piece in: ", piece.col, piece.row) // col: 4, row: 6
         
         if (piece.color == turn){
             
             if (piece.kind == "bishop"){
+                console.log("ok in bishop")
     
                 if (((piece.col - opp_king.col) == (piece.row - opp_king.row)) && (piece.col - opp_king.col > 0)){ // king is in left-up
 
+                    console.log("king is in left up ", opp_king.col, opp_king.row)
                     may_return = true;
                     let piece_row = piece.row -1
                     let piece_col = piece.col -1
@@ -4692,6 +4839,7 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
 
                 } else if (((piece.col - opp_king.col) == (piece.row - opp_king.row)) && (piece.col - opp_king.col < 0)){ // king is in right-bottom
 
+                    console.log("king is in right bottom ", opp_king.col, opp_king.row)
                     may_return = true;
                     let piece_row = piece.row +1
                     let piece_col = piece.col +1
@@ -4710,6 +4858,7 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
 
                 } else if (((piece.col - opp_king.col) == -1 * (piece.row - opp_king.row)) && (piece.col - opp_king.col > 0)){ // king is in left-bottom
 
+                    console.log("king is in left bottom ", opp_king.col, opp_king.row)
                     may_return = true;
                     let piece_row = piece.row +1
                     let piece_col = piece.col -1
@@ -4726,8 +4875,9 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
                         piece_col--;
                     }
 
-                } else if (((piece.col - opp_king.col) == -1 * (piece.row - opp_king.row)) && (piece.col - opp_king.col > 0)){ // king is in right-up
+                } else if (((piece.col - opp_king.col) == -1 * (piece.row - opp_king.row)) && (piece.col - opp_king.col < 0)){ // king is in right-up
 
+                    console.log("king is in right up ", opp_king.col, opp_king.row)
                     may_return = true;
                     let piece_row = piece.row -1
                     let piece_col = piece.col +1
@@ -4992,9 +5142,13 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
 
       all above is done except:
       - checkmate conditions -> write it completetly in fireGameOver()
+
+      -- not eatable for bishop has solution -- roll it out
       - lots of bugs in check conditions: B King - W Queen (King can move left and can't move left down - wrong || B King 
                                                                                                                           \ 
                                                                                                                             W Pawn, not check by white but check by black - wrong)
+        
+      - move comes twice from opponent, invesitage it
 
       --- later ? (after backend in rust)
       - piece move by mouse hold ++ (seems done)
@@ -5003,6 +5157,7 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
       - username
       - account creation (all kind of backend stuff)
       - game registery (in backend, to a sqlite3-like db)
+      - withdraw move
       - bizarre moves of FFA (Fatih Furkan Altınkaya) 
 */
 function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispatch, allDrawState: boolean[][], setSelectedPiece: React.Dispatch, 
@@ -5050,7 +5205,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
             
 
             // check if the piece in the given location can thread the opponent king
-            let is_check_local = isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current) 
+            let is_check_local = isCheckCondition(col_id, row_id, playerTurn.current,  initBoardGeneral.current, boardInverseGeneral.current) 
             setIsCheck(is_check_local)
 
             let is_indirect_check_local = isIndirectCheckCondition(turn, initBoardGeneral.current, boardInverseGeneral.current);
@@ -5131,7 +5286,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
                 clearBoard(setDrawState);
 
                 // check if the piece in the given location can thread the opponent king
-                let is_check_local = isCheckCondition(col_id, row_id, initBoardGeneral.current, boardInverseGeneral.current) 
+                let is_check_local = isCheckCondition(col_id, row_id, playerTurn.current, initBoardGeneral.current, boardInverseGeneral.current) 
                 setIsCheck(is_check_local)
 
                 let is_indirect_check_local = isIndirectCheckCondition(turn, initBoardGeneral.current, boardInverseGeneral.current);
@@ -5307,44 +5462,50 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
     }
     
     // check if the piece in the given location can thread the opponent king
-    let is_check_local = isCheckCondition(move.to_col, move.to_row, initboardGeneral.current, boardInverseGeneral.current) 
+    let is_check_local = isCheckCondition(move.to_col, move.to_row, playerTurn.current, initboardGeneral.current, boardInverseGeneral.current) 
     setIsCheck(is_check_local)
 
-    let is_indirect_check_local = isIndirectCheckCondition(turn, initboardGeneral.current, boardInverseGeneral.current);
-
-    
-    if (is_check_local && is_indirect_check_local != null && is_check_local == is_indirect_check_local){
-        throw new Error();
-    } else if (is_check_local) {
-        
-        setCheckingPiece({...updated_piece})
-        // console.log("check came by: ", updated_piece)
-        let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initboardGeneral.current)
-        // console.log("real cols and rows: ", cols_and_rows)
-        setColsAndRows([...cols_and_rows])
-
-    } else if (is_indirect_check_local != null){
-
-        console.log("Opponent INDIRECT check path")
-
-        setCheckingPiece({...is_indirect_check_local})
-
-        let cols_and_rows = setMoveablePieces(playerTurn.current, is_indirect_check_local, setColsAndRows, initboardGeneral.current)
-
-        setColsAndRows([...cols_and_rows])
-        console.log("set cols and rows after opponent move:\n", cols_and_rows)
-        setIsCheck(true);
-
-    }
-    else {
-        setColsAndRows(null)
-    }
     
     // for castle moves, do not flip turn for king, rook will handle it
     if (!(move.type == "Castle" && move.piece_name.toLowerCase().includes("rook"))){
 
         
         setTurn((old: string) => {
+
+            console.log("turn: ", turn)
+
+            let is_indirect_check_local = isIndirectCheckCondition(old, initboardGeneral.current, boardInverseGeneral.current);
+        
+            
+            if (is_check_local && is_indirect_check_local != null && is_check_local == is_indirect_check_local){
+                throw new Error();
+            } else if (is_check_local) {
+                
+                setCheckingPiece({...updated_piece})
+                // console.log("check came by: ", updated_piece)
+                let cols_and_rows = setMoveablePieces(playerTurn.current, updated_piece, setColsAndRows, initboardGeneral.current)
+                // console.log("real cols and rows: ", cols_and_rows)
+                setColsAndRows([...cols_and_rows])
+        
+            } else if (is_indirect_check_local != null){
+        
+                console.log("Opponent INDIRECT check path")
+        
+                setCheckingPiece({...is_indirect_check_local})
+        
+                let cols_and_rows = setMoveablePieces(playerTurn.current, is_indirect_check_local, setColsAndRows, initboardGeneral.current)
+        
+                setColsAndRows([...cols_and_rows])
+                console.log("set cols and rows after opponent move:\n", cols_and_rows)
+                setIsCheck(true);
+        
+            }
+            else {
+                setColsAndRows(null)
+            }
+        
+
+
             return old == "white" ? "black" : "white" // just flip the turn
         })
     } else {console.log("castle move detected (rook), not flipping the turn")}
@@ -5367,7 +5528,7 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
 */
 function sendMoveToServer(wsInstance: WebSocket|null, msg: Move){
     if (wsInstance) {
-
+        console.log("sending move to opponenet!!!")
         wsInstance.send(JSON.stringify(msg));
 
     } else {
