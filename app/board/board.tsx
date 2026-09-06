@@ -403,7 +403,7 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     if (piece != null){
         for (let key in initBoardGeneral){
             let value = initBoardGeneral[key]
-            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
+            if (value.name == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -413,8 +413,8 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     piece = getPiece(col+1, row, true, boardInverseGeneral)
     if (piece != null){
         for (let key in initBoardGeneral){
-            let value = Object.values(initBoardGeneral[key])[0]
-            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
+            let value = initBoardGeneral[key]
+            if (value.name == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -424,8 +424,8 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     piece = getPiece(col+1, row-1, true, boardInverseGeneral)
     if (piece != null){
         for (let key in initBoardGeneral){
-            let value = Object.values(initBoardGeneral[key])[0]
-            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
+            let value = initBoardGeneral[key]
+            if (value.name == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -435,8 +435,8 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     piece = getPiece(col, row+1, true, boardInverseGeneral)
     if (piece != null){
         for (let key in initBoardGeneral){
-            let value = Object.values(initBoardGeneral[key])[0]
-            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
+            let value = initBoardGeneral[key]
+            if (value.name == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -446,8 +446,8 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     piece = getPiece(col, row-1, true, boardInverseGeneral)
     if (piece != null){
         for (let key in initBoardGeneral){
-            let value = Object.values(initBoardGeneral[key])[0]
-            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
+            let value = initBoardGeneral[key]
+            if (value.name == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -457,8 +457,8 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     piece = getPiece(col-1, row+1, true, boardInverseGeneral)
     if (piece != null){
         for (let key in initBoardGeneral){
-            let value = Object.values(initBoardGeneral[key])[0]
-            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
+            let value = initBoardGeneral[key]
+            if (value.name == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -468,8 +468,8 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     piece = getPiece(col-1, row, true, boardInverseGeneral)
     if (piece != null){
         for (let key in initBoardGeneral){
-            let value = Object.values(initBoardGeneral[key])[0]
-            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
+            let value = initBoardGeneral[key]
+            if (value.name == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -479,8 +479,8 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     piece = getPiece(col-1, row-1, true, boardInverseGeneral) 
     if (piece != null){
         for (let key in initBoardGeneral){
-            let value = Object.values(initBoardGeneral[key])[0]
-            if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
+            let value = initBoardGeneral[key]
+            if (value.name == piece && value.color != turn && value.kind == "king"){
                 return false
             }
         }
@@ -491,7 +491,7 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
 
 // clear init board
 // NOTE: This should be traversing the alive pieces of opponent !Important
-function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
+function notEatable(col: number, row: number, turn: string, initBoardGeneral: Piece[], boardInverseGeneral: {}[]){
     /*
         Helper function for king to not draw eatable squares
         Returns true if the given square is not Eatable by oppponent, else false which prevents drawing
@@ -505,7 +505,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
     // add the opponent pieces (as names)
     for (let key in initBoardGeneral){
-        if (Object.values(initBoardGeneral[key])[0].color != turn) opponent_pieces.push(Object.keys(initBoardGeneral[key])[0])
+        if (initBoardGeneral[key].color != turn) opponent_pieces.push(initBoardGeneral[key].name)
     }
 
     
@@ -518,22 +518,22 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
     console.log("piece_color is: ", piece_color)
     for (let op_piece in opponent_pieces){
 
-        let piece_col_loc
-        let piece_row_loc
-        let piece_op: Object = nullPiece // not sure of this
+        let piece_col_loc = 1
+        let piece_row_loc = 1
+        let piece_op: Piece = nullPiece // not sure of this
         for (let key in initBoardGeneral){
 
-            if (Object.keys(initBoardGeneral[key])[0] == opponent_pieces[op_piece]){
+            if (initBoardGeneral[key].name == opponent_pieces[op_piece]){
                 piece_op = initBoardGeneral[key]
-                piece_col_loc = Object.values(initBoardGeneral[key])[0].col
-                piece_row_loc = Object.values(initBoardGeneral[key])[0].row
+                piece_col_loc = initBoardGeneral[key].col
+                piece_row_loc = initBoardGeneral[key].row
                 break
             }
         }
 
         
 
-        if (Object.values(piece_op)[0].kind == "bishop"){
+        if (piece_op.kind == "bishop"){
             
             if (col == 1 && row == 5){
                 console.log("ok in bishop")
@@ -563,20 +563,19 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             let to_continue = false
                             for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoardGeneral[key])[0] == piece){
+                                if (initBoardGeneral[key].name == piece){
                                     
-                                    if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                                    if (initBoardGeneral[key].color == piece_color){
         
-                                        if (col_loc == col && row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                        if (col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
         
-                                    } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                    } else if (initBoardGeneral[key].kind == "king"){
                                         to_continue = true
                                     }
                                     break
                                 }
                             }
                             if (!to_continue) break
-                            // break
                         }
                     }
                     col_loc--;
@@ -600,13 +599,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             let to_continue = false
                             for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoardGeneral[key])[0] == piece){
+                                if (initBoardGeneral[key].name == piece){
                                     
-                                    if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                                    if (initBoardGeneral[key].color == piece_color){
         
-                                        if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                        if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
         
-                                    } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                    } else if (initBoardGeneral[key].kind == "king"){
                                         to_continue = true
                                     }
                                     break
@@ -636,20 +635,19 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             let to_continue = false
                             for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoardGeneral[key])[0] == piece){
+                                if (initBoardGeneral[key].name == piece){
                                     
-                                    if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                                    if (initBoardGeneral[key].color == piece_color){
         
-                                        if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                        if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", piece); return false;}
         
-                                    } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                    } else if (initBoardGeneral[key].kind == "king") {
                                         to_continue = true
                                     }
                                     break
                                 }
                             }
                             if (!to_continue) break
-                            //break
                         }
                     }
                     col_loc_3++;
@@ -664,27 +662,26 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
 
                         if (piece == null){
-                            //candidates[col_loc_4][row_loc_4] = true
+                            
                             if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from bishop right-down"); return false;}
                         } else {
 
                             let to_continue = false
                             for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoardGeneral[key])[0] == piece){
+                                if (initBoardGeneral[key].name == piece){
                                     
-                                    if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                                    if (initBoardGeneral[key].color == piece_color){
         
-                                        if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                        if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", piece); return false;}
         
-                                    } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                    } else if (initBoardGeneral[key].kind == "king") {
                                         to_continue = true
                                     }
                                     break
                                 }
                             }
                             if (!to_continue) break
-                            //break
                         }
                     }
                     col_loc_4++;
@@ -694,7 +691,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
 
 
-        } else if (Object.values(piece_op)[0].kind == "knight"){
+        } else if (piece_op.kind == "knight"){
 
          
             if (piece_col_loc - 2 >= 0){
@@ -707,9 +704,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                             
-                                    if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
                         }
@@ -726,9 +723,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         } else { // there is a piece, if it's not black -> draw
                     
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                                     
-                                    if (piece_col_loc-2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (piece_col_loc-2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
                         }
@@ -746,9 +743,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             if (piece_col_loc+2 == col && piece_row_loc+1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                                     
-                                    if (piece_col_loc+2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (piece_col_loc+2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
                         }
@@ -762,9 +759,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             if (piece_col_loc+2 == col && piece_row_loc-1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                                     
-                                    if (piece_col_loc+2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (piece_col_loc+2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
                         }
@@ -782,9 +779,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             if (piece_col_loc-1 == col && piece_row_loc+2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                                     
-                                    if (piece_col_loc-1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (piece_col_loc-1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
                         }
@@ -798,9 +795,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             if (piece_col_loc+1 == col && piece_row_loc+2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                                     
-                                    if (piece_col_loc+1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (piece_col_loc+1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
                         }
@@ -818,9 +815,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             if (piece_col_loc-1 == col && piece_row_loc-2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                                     
-                                    if (piece_col_loc == col-1 && piece_row_loc-2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (piece_col_loc == col-1 && piece_row_loc-2 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
                         }
@@ -835,9 +832,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                             if (piece_col_loc+1 == col && piece_row_loc-2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                                     
-                                    if (piece_col_loc+1 == col && piece_row_loc-2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (piece_col_loc+1 == col && piece_row_loc-2 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
                         }
@@ -845,7 +842,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         
                     }
                 }
-        } else if (Object.values(piece_op)[0].kind == "rook"){
+        } else if (piece_op.kind == "rook"){
  
             
                     
@@ -864,13 +861,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                     let to_continue = false
                     for (let key in initBoardGeneral){
-                        if (Object.keys(initBoardGeneral[key])[0] == piece){
+                        if (initBoardGeneral[key].name == piece){
                             
-                            if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                            if (initBoardGeneral[key].color == piece_color){
         
-                                if (piece_col_loc == col && row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                if (piece_col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                            } else if (initBoardGeneral[key].kind == "king"){
                                 to_continue = true
                             }
                             
@@ -890,13 +887,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 } else {
                     let to_continue = false
                     for (let key in initBoardGeneral){
-                        if (Object.keys(initBoardGeneral[key])[0] == piece){
+                        if (initBoardGeneral[key].name == piece){
                             
-                            if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                            if (initBoardGeneral[key].color == piece_color){
         
-                                if (piece_col_loc == col && row_loc_2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                if (piece_col_loc == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                            } else if (initBoardGeneral[key].kind == "king") {
                                 to_continue = true
                             }
                             
@@ -918,13 +915,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                     let to_continue = false
                     for (let key in initBoardGeneral){
-                        if (Object.keys(initBoardGeneral[key])[0] == piece){
+                        if (initBoardGeneral[key].name == piece){
 
-                            if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                            if (initBoardGeneral[key].color == piece_color){
         
-                                if (col_loc == col && piece_row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                if (col_loc == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                            } else if (initBoardGeneral[key].kind == "king") {
                                 to_continue = true
                             }
                             break;
@@ -945,13 +942,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                     let to_continue = false
                     for (let key in initBoardGeneral){
-                        if (Object.keys(initBoardGeneral[key])[0] == piece){
+                        if (initBoardGeneral[key].name == piece){
                             
-                            if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                            if (initBoardGeneral[key].color == piece_color){
         
-                                if (col_loc_2 == col && piece_row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                if (col_loc_2 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                            } else if (initBoardGeneral[key].kind == "king") {
                                 to_continue = true
                             }
                             
@@ -963,7 +960,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                 col_loc_2++;
             }
 
-        } else if (Object.values(piece_op)[0].kind == "queen"){
+        } else if (piece_op.kind == "queen"){
 
             
             let col_loc = piece_col_loc-1
@@ -994,13 +991,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let to_continue = false
                         for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoardGeneral[key])[0] == piece){
+                            if (initBoardGeneral[key].name == piece){
                                 
-                                if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                                if (initBoardGeneral[key].color == piece_color){
         
-                                    if (col_loc == col && row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
     
-                                } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                } else if (initBoardGeneral[key].kind == "king") {
                                     to_continue = true
                                 }
                                 break
@@ -1028,13 +1025,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let to_continue = false
                         for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoardGeneral[key])[0] == piece){
+                            if (initBoardGeneral[key].name == piece){
                                 
-                                if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                                if (initBoardGeneral[key].color == piece_color){
         
-                                    if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
     
-                                } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                } else if (initBoardGeneral[key].kind == "king") {
                                     to_continue = true
                                 }
                                 break
@@ -1062,13 +1059,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let to_continue = false
                         for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoardGeneral[key])[0] == piece){
+                            if (initBoardGeneral[key].name == piece){
                                 
-                                if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                                if (initBoardGeneral[key].color == piece_color){
         
-                                    if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", piece); return false;}
     
-                                } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                } else if (initBoardGeneral[key].kind == "king") {
                                     to_continue = true
                                 }
                                 
@@ -1097,13 +1094,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         let to_continue = false
                         for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoardGeneral[key])[0] == piece){
+                            if (initBoardGeneral[key].name == piece){
                                 
-                                if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                                if (initBoardGeneral[key].color == piece_color){
         
-                                    if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                    if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", piece); return false;}
     
-                                } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                                } else if (initBoardGeneral[key].kind == "king") {
                                     to_continue = true
                                 }
                                 
@@ -1131,13 +1128,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                     let to_continue = false
                     for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoardGeneral[key])[0] == piece){
+                        if (initBoardGeneral[key].name == piece){
                             
-                            if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                            if (initBoardGeneral[key].color == piece_color){
         
-                                if (col_loc_5 == col && piece_row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                if (col_loc_5 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                            } else if (initBoardGeneral[key].kind == "king") {
                                 to_continue = true
                             }
                             break
@@ -1161,13 +1158,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                     let to_continue = false
                     for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoardGeneral[key])[0] == piece){
+                        if (initBoardGeneral[key].name == piece){
                             
-                            if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                            if (initBoardGeneral[key].color == piece_color){
         
-                                if (col_loc_6 == col && piece_row_loc == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                if (col_loc_6 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                            } else if (initBoardGeneral[key].kind == "king") {
                                 to_continue = true
                             }
                             break
@@ -1192,13 +1189,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                     let to_continue = false
                     for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoardGeneral[key])[0] == piece){
+                        if (initBoardGeneral[key].name == piece){
                             
-                            if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                            if (initBoardGeneral[key].color == piece_color){
 
-                                if (piece_col_loc == col && row_loc_5 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                if (piece_col_loc == col && row_loc_5 == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                            } else if (initBoardGeneral[key].kind == "king") {
                                 to_continue = true
                             }
                             break
@@ -1221,13 +1218,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                     let to_continue = false
                     for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoardGeneral[key])[0] == piece){
+                        if (initBoardGeneral[key].name == piece){
                             
-                            if (Object.values(initBoardGeneral[key])[0].color == piece_color){
+                            if (initBoardGeneral[key].color == piece_color){
         
-                                if (piece_col_loc == col && row_loc_6 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                                if (piece_col_loc == col && row_loc_6 == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (Object.values(initBoardGeneral[key])[0].kind == "king") {
+                            } else if (initBoardGeneral[key].kind == "king") {
                                 to_continue = true
                             }
                             break
@@ -1238,7 +1235,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
                 row_loc_6--;
             }
-        } else if (Object.values(piece_op)[0].kind == "pawn"){ 
+        } else if (piece_op.kind == "pawn"){ 
             // you need to think for the white pawns, so it goes up (down in row index)
             console.log("in pawn")
 
@@ -1255,9 +1252,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                     }
                     for (let key in initBoardGeneral){ // key is just index here
     
-                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                        if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                             
-                            if (piece_col_loc +1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                            if (piece_col_loc +1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", piece); return false;}
                         }
                     }
                 } 
@@ -1267,9 +1264,9 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
                         if (piece_col_loc-1 == col && piece_row_loc +1 == row) {return false;}
                     
                     for (let key in initBoardGeneral){ // key is just index here        
-                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
+                        if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                             
-                            if (piece_col_loc-1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
+                            if (piece_col_loc-1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", piece); return false;}
                         }
                     }
                 }
@@ -1313,18 +1310,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: {}
 
 // NOTE: In here probably we need to know the playerTurn too in order to get the correct squares between checking piece and our king
 // currently it comes but seems like it inverse, not correct squares. Job for the weekend!!!
-function setMoveablePieces(playerTurn: string, checkingPiece: Piece, setColsAndRows: React.Dispatch, initBoardGeneral: {}[]){
+function setMoveablePieces(playerTurn: string, checkingPiece: Piece, setColsAndRows: React.Dispatch, initBoardGeneral: Piece[]){
 
     console.log("LOGS:\nturn:", playerTurn, "checkingPiece.color: ", checkingPiece.color, "\ncheckingPiece:", checkingPiece)
 
     // save the king, we probably need it later
     let turn_king = null
     for (let key in initBoardGeneral){
-        if (Object.values(initBoardGeneral[key])[0].kind == "king" && Object.values(initBoardGeneral[key])[0].color != checkingPiece.color){
+        if (initBoardGeneral[key].kind == "king" && initBoardGeneral[key].color != checkingPiece.color){
 
-                
-                let unknownKey = Object.keys(initBoardGeneral[key])[0]
-                turn_king = initBoardGeneral[key][unknownKey]
+                turn_king = initBoardGeneral[key]
                 break;
             }
     }
@@ -1401,7 +1396,7 @@ console.log("king is in left up")
                 king_row--;
             }
 
-        } else if (checkingPiece.row > turn_king.rook && checkingPiece.col < turn_king.col){ // king is in right up
+        } else if (checkingPiece.row > turn_king.row && checkingPiece.col < turn_king.col){ // king is in right up
 console.log("king is in right up")
             let king_col = turn_king.col -1
             let king_row = turn_king.row +1
@@ -1557,7 +1552,7 @@ interface drawPossibleMovesProps extends Piece {
     colsAndRows: null|{row: number, col:number}[] // {row: number, col:number}[]
     player_color: string
     is_it_blocked: boolean
-    initBoardGeneral: {}[]
+    initBoardGeneral: Piece[]
     boardInverseGeneral: {}[]
 }
 
@@ -1587,8 +1582,7 @@ interface drawPossibleMovesProps extends Piece {
 
 interface isNotBlockedProps extends Piece {
     turn: string
-    initBoardGeneral: RefObject<{}[]>
-    //setInitBoardGeneral: React.Dispatch
+    initBoardGeneral: RefObject<Piece[]>
     boardInverseGeneral: {}[]
 }
 
@@ -1613,12 +1607,12 @@ function isNotBlocked({col,
 
 
     // find the king
-    let turn_king
+    let turn_king: Piece = nullPiece
     for (let key in initBoardGeneral.current){
 
-        if (Object.values(initBoardGeneral.current[key])[0].color == color && Object.values(initBoardGeneral.current[key])[0].kind == "king"){
-            let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
-            turn_king = initBoardGeneral.current[key][unknownKey]
+        if (initBoardGeneral.current[key].color == color && initBoardGeneral.current[key].kind == "king"){
+            
+            turn_king = initBoardGeneral.current[key]
             break;
         }
     }
@@ -1662,10 +1656,10 @@ function isNotBlocked({col,
 
                             let piece_there = getPiece(col, piece_row_2, true, boardInverseGeneral)
                             for (let key in initBoardGeneral.current){
-                                if (Object.keys(initBoardGeneral.current[key])[0] == piece_there){
+                                if (initBoardGeneral.current[key].name == piece_there){
                                 
-                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "rook" || Object.values(initBoardGeneral.current[key])[0].kind == "queen")
-                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
+                                    if ((initBoardGeneral.current[key].kind == "rook" || initBoardGeneral.current[key].kind == "queen")
+                                        && initBoardGeneral.current[key].color != color){
                                         opponent_exists = true
                                         break
                                     } else {
@@ -1715,10 +1709,10 @@ function isNotBlocked({col,
 
                             let piece_there = getPiece(col, piece_row_2, true, boardInverseGeneral)
                             for (let key in initBoardGeneral.current){
-                                if (Object.keys(initBoardGeneral.current[key])[0] == piece_there){
+                                if (initBoardGeneral.current[key].name == piece_there){
                                 
-                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "rook" || Object.values(initBoardGeneral.current[key])[0].kind == "queen")
-                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
+                                    if ((initBoardGeneral.current[key].kind == "rook" || initBoardGeneral.current[key].kind == "queen")
+                                        && initBoardGeneral.current[key].color != color){
                                         opponent_exists = true
                                         break
                                     } else {
@@ -1749,12 +1743,12 @@ function isNotBlocked({col,
 
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
 
                     if (early_return_condition){
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                        localInitBoard[key].moveable = {leftEat: true, rightEat: true, forward: true}    
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
@@ -1762,7 +1756,7 @@ function isNotBlocked({col,
                     } else {
                         
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {leftEat: false, rightEat: false, forward: true}
+                        localInitBoard[key].moveable = {leftEat: false, rightEat: false, forward: true}
                         initBoardGeneral.current = [...localInitBoard]
                         
                         break
@@ -1774,20 +1768,20 @@ function isNotBlocked({col,
         
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
 
                     if (early_return_condition){
                         
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = true
+                        localInitBoard[key].moveable = true
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
                     } else {
 
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = false
+                        localInitBoard[key].moveable = false
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
@@ -1798,19 +1792,19 @@ function isNotBlocked({col,
             
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
                     
                     if (early_return_condition){
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                        localInitBoard[key].moveable = {leftUp: true, rightUp: true}
                         initBoardGeneral.current = [...localInitBoard]
                         
                         break
 
                     } else {
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {leftUp: false, rightUp: false}
+                        localInitBoard[key].moveable = {leftUp: false, rightUp: false}
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
@@ -1822,19 +1816,19 @@ function isNotBlocked({col,
 
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
 
                     if (early_return_condition){
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                        localInitBoard[key].moveable = {upDown: true, leftRight: true}
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
 
                     } else {
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: false}
+                        localInitBoard[key].moveable = {upDown: true, leftRight: false}
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
@@ -1846,13 +1840,13 @@ function isNotBlocked({col,
             
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
 
                     if (early_return_condition){
                         console.log("queen is NOT blocked, only updown allowed!!!")
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                        localInitBoard[key].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
@@ -1860,7 +1854,7 @@ function isNotBlocked({col,
                     } else {
                         console.log("queen is blocked, only updown allowed!!!")
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: false, leftUp: false, rightUp: false}
+                        localInitBoard[key].moveable = {upDown: true, leftRight: false, leftUp: false, rightUp: false}
                         initBoardGeneral.current = [...localInitBoard]
                         
                         break
@@ -1913,11 +1907,11 @@ function isNotBlocked({col,
                             let piece_there = getPiece(piece_col_2, piece_row, true, boardInverseGeneral)
                             console.log(piece_there)
                             for (let key in initBoardGeneral.current){
-                                if (Object.keys(initBoardGeneral.current[key])[0] == piece_there){
+                                if (initBoardGeneral.current[key].name == piece_there){
                                 console.log("a piece found: ", piece_there)
 
-                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "rook" || Object.values(initBoardGeneral.current[key])[0].kind == "queen")
-                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
+                                    if ((initBoardGeneral.current[key].kind == "rook" || initBoardGeneral.current[key].kind == "queen")
+                                        && initBoardGeneral.current[key].color != color){
 
                                         opponent_exists = true
                                         break
@@ -1970,11 +1964,11 @@ function isNotBlocked({col,
                             let piece_there = getPiece(piece_col_2, piece_row, true, boardInverseGeneral)
                             console.log(piece_there)
                             for (let key in initBoardGeneral.current){
-                                if (Object.keys(initBoardGeneral.current[key])[0] == piece_there){
+                                if (initBoardGeneral.current[key].name == piece_there){
                                 console.log("a piece found: ", piece_there)
 
-                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "rook" || Object.values(initBoardGeneral.current[key])[0].kind == "queen")
-                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
+                                    if ((initBoardGeneral.current[key].kind == "rook" || initBoardGeneral.current[key].kind == "queen")
+                                        && initBoardGeneral.current[key].color != color){
 
                                         opponent_exists = true
                                         break
@@ -2006,19 +2000,19 @@ function isNotBlocked({col,
 
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
 
                     if (early_return_condition){
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                        localInitBoard[key].moveable = {leftEat: true, rightEat: true, forward: true}    
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
 
                     } else {
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {leftEat: false, rightEat: false, forward: false}
+                        localInitBoard[key].moveable = {leftEat: false, rightEat: false, forward: false}
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
@@ -2030,12 +2024,12 @@ function isNotBlocked({col,
         
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
 
                     if (early_return_condition){
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = true
+                        localInitBoard[key].moveable = true
                         initBoardGeneral.current = [...localInitBoard]
                         
                         break
@@ -2043,7 +2037,7 @@ function isNotBlocked({col,
                     } else {
 
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = false
+                        localInitBoard[key].moveable = false
                         initBoardGeneral.current = [...localInitBoard]
                         
                         break
@@ -2054,19 +2048,19 @@ function isNotBlocked({col,
             
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
                     
                     if (early_return_condition){
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                        localInitBoard[key].moveable = {leftUp: true, rightUp: true}
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
 
                     } else {
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {leftUp: false, rightUp: false}
+                        localInitBoard[key].moveable = {leftUp: false, rightUp: false}
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
@@ -2078,19 +2072,19 @@ function isNotBlocked({col,
 
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
 
                     if (early_return_condition){
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                        localInitBoard[key].moveable = {upDown: true, leftRight: true}
                         initBoardGeneral.current = [...localInitBoard]
                         
                         break
 
                     } else {
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: true}
+                        localInitBoard[key].moveable = {upDown: false, leftRight: true}
                         initBoardGeneral.current = [...localInitBoard]
                         
                         break
@@ -2102,13 +2096,13 @@ function isNotBlocked({col,
             
             for (let key in initBoardGeneral.current){
 
-                if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                    let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                if (initBoardGeneral.current[key].name == name){
+                    
 
                     if (early_return_condition){
                         console.log("queen is NOT blocked, only updown allowed!!!")
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                        localInitBoard[key].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
                         initBoardGeneral.current = [...localInitBoard]
 
                         break
@@ -2116,7 +2110,7 @@ function isNotBlocked({col,
                     } else {
                         console.log("queen is blocked, only updown allowed!!!")
                         let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: true, leftUp: false, rightUp: false}
+                        localInitBoard[key].moveable = {upDown: false, leftRight: true, leftUp: false, rightUp: false}
                         initBoardGeneral.current = [...localInitBoard]
                         
                         break
@@ -2172,14 +2166,14 @@ function isNotBlocked({col,
                             
                             for (let key in initBoardGeneral.current){
                                 
-                                if (Object.keys(initBoardGeneral.current[key])[0] == piece){
+                                if (initBoardGeneral.current[key].name == piece){
 
-                                    console.log("keys : ", Object.keys(initBoardGeneral.current[key])[0])
-                                    console.log("info: ", Object.values(initBoardGeneral.current[key])[0])
+                                    console.log("keys : ", initBoardGeneral.current[key]).name
+                                    console.log("info: ", initBoardGeneral.current[key])
                                     console.log("piece: ", piece)
 
-                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "queen" || Object.values(initBoardGeneral.current[key])[0].kind == "bishop") 
-                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
+                                    if ((initBoardGeneral.current[key].kind == "queen" || initBoardGeneral.current[key].kind == "bishop") 
+                                        && initBoardGeneral.current[key].color != color){
                                     
                                         opponent_exists = true
                                         break
@@ -2234,10 +2228,10 @@ function isNotBlocked({col,
                             
                             for (let key in initBoardGeneral.current){
                                 
-                                if (Object.keys(initBoardGeneral.current[key])[0] == piece){
+                                if (initBoardGeneral.current[key].name == piece){
 
-                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "queen" || Object.values(initBoardGeneral.current[key])[0].kind == "bishop") 
-                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
+                                    if ((initBoardGeneral.current[key].kind == "queen" || initBoardGeneral.current[key].kind == "bishop") 
+                                        && initBoardGeneral.current[key].color != color){
                                     
                                         opponent_exists = true
                                         break
@@ -2269,19 +2263,19 @@ function isNotBlocked({col,
 
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
     
                         if (early_return_condition){
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                            localInitBoard[key].moveable = {leftEat: true, rightEat: true, forward: true}    
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
     
                         } else {
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: false, forward: false}
+                            localInitBoard[key].moveable = {leftEat: true, rightEat: false, forward: false}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2293,12 +2287,12 @@ function isNotBlocked({col,
             
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
     
                         if (early_return_condition){
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = true
+                            localInitBoard[key].moveable = true
                             initBoardGeneral.current = [...localInitBoard]
                             
                             break
@@ -2306,7 +2300,7 @@ function isNotBlocked({col,
                         } else {
     
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = false
+                            localInitBoard[key].moveable = false
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2317,19 +2311,19 @@ function isNotBlocked({col,
                 
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
                         
                         if (early_return_condition){
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                            localInitBoard[key].moveable = {leftUp: true, rightUp: true}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
     
                         } else {
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: false}
+                            localInitBoard[key].moveable = {leftUp: true, rightUp: false}
                             initBoardGeneral.current = [...localInitBoard]
                                 
                             break
@@ -2341,20 +2335,20 @@ function isNotBlocked({col,
     
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
     
                         if (early_return_condition){
                             
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                            localInitBoard[key].moveable = {upDown: true, leftRight: true}
                             initBoardGeneral.current = [...localInitBoard]
                                 
                             break
     
                         } else {
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: false}
+                            localInitBoard[key].moveable = {upDown: false, leftRight: false}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2366,13 +2360,13 @@ function isNotBlocked({col,
                 
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
     
                         if (early_return_condition){
                             console.log("queen is NOT blocked, only updown allowed!!!")
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                            localInitBoard[key].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2380,7 +2374,7 @@ function isNotBlocked({col,
                         } else {
                             console.log("queen is blocked, only updown allowed!!!")
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: false, leftUp: true, rightUp: false}
+                            localInitBoard[key].moveable = {upDown: false, leftRight: false, leftUp: true, rightUp: false}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2434,13 +2428,13 @@ function isNotBlocked({col,
                             
                             for (let key in initBoardGeneral.current){
                                 
-                                if (Object.keys(initBoardGeneral.current[key])[0] == piece){
-                                    console.log("keys : ", Object.keys(initBoardGeneral.current[key])[0])
-                                    console.log("info: ", Object.values(initBoardGeneral.current[key])[0])
+                                if (initBoardGeneral.current[key].name == piece){
+                                    console.log("keys : ", initBoardGeneral.current[key]).name
+                                    console.log("info: ", initBoardGeneral.current[key])
                                     console.log("piece: ", piece)
 
-                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "queen" || Object.values(initBoardGeneral.current[key])[0].kind == "bishop") 
-                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
+                                    if ((initBoardGeneral.current[key].kind == "queen" || initBoardGeneral.current[key].kind == "bishop") 
+                                        && initBoardGeneral.current[key].color != color){
                                     
                                         opponent_exists = true
                                         break
@@ -2497,9 +2491,9 @@ function isNotBlocked({col,
                             
                             for (let key in initBoardGeneral.current){
                                 
-                                if (Object.keys(initBoardGeneral.current[key])[0] == piece){
-                                    if ((Object.values(initBoardGeneral.current[key])[0].kind == "queen" || Object.values(initBoardGeneral.current[key])[0].kind == "bishop") 
-                                        && Object.values(initBoardGeneral.current[key])[0].color != color){
+                                if (initBoardGeneral.current[key].name == piece){
+                                    if ((initBoardGeneral.current[key].kind == "queen" || initBoardGeneral.current[key].kind == "bishop") 
+                                        && initBoardGeneral.current[key].color != color){
                                     
                                         opponent_exists = true
                                         break
@@ -2532,19 +2526,19 @@ function isNotBlocked({col,
 
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
     
                         if (early_return_condition){
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {leftEat: true, rightEat: true, forward: true}    
+                            localInitBoard[key].moveable = {leftEat: true, rightEat: true, forward: true}    
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
     
                         } else {
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {leftEat: false, rightEat: true, forward: false}
+                            localInitBoard[key].moveable = {leftEat: false, rightEat: true, forward: false}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2556,12 +2550,12 @@ function isNotBlocked({col,
             
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
     
                         if (early_return_condition){
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = true
+                            localInitBoard[key].moveable = true
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2569,7 +2563,7 @@ function isNotBlocked({col,
                         } else {
     
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = false
+                            localInitBoard[key].moveable = false
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2580,19 +2574,19 @@ function isNotBlocked({col,
                 
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
                         
                         if (early_return_condition){
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {leftUp: true, rightUp: true}
+                            localInitBoard[key].moveable = {leftUp: true, rightUp: true}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
     
                         } else {
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {leftUp: false, rightUp: true}
+                            localInitBoard[key].moveable = {leftUp: false, rightUp: true}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2604,19 +2598,19 @@ function isNotBlocked({col,
     
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
     
                         if (early_return_condition){
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true}
+                            localInitBoard[key].moveable = {upDown: true, leftRight: true}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
     
                         } else {
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: false}
+                            localInitBoard[key].moveable = {upDown: false, leftRight: false}
                             initBoardGeneral.current = [...localInitBoard]
 
                             break
@@ -2628,13 +2622,13 @@ function isNotBlocked({col,
                 
                 for (let key in initBoardGeneral.current){
     
-                    if (Object.keys(initBoardGeneral.current[key])[0] == name){
-                        let unknownKey = Object.keys(initBoardGeneral.current[key])[0]
+                    if (initBoardGeneral.current[key].name == name){
+                        
     
                         if (early_return_condition){
                             console.log("queen is NOT blocked, only updown allowed!!!")
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                            localInitBoard[key].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
                             initBoardGeneral.current = [...localInitBoard]
                                 
                             
@@ -2643,7 +2637,7 @@ function isNotBlocked({col,
                         } else {
                             console.log("queen is blocked, only updown allowed!!!")
                             let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key][unknownKey].moveable = {upDown: false, leftRight: false, leftUp: false, rightUp: true}
+                            localInitBoard[key].moveable = {upDown: false, leftRight: false, leftUp: false, rightUp: true}
                             initBoardGeneral.current = [...localInitBoard]
                                 
                             
@@ -3867,7 +3861,7 @@ function drawPossibleMoves(
 // clear initboard
 // NOTE: Check if move is makeable - if it's drawn, it's makeable
 function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch | null, selectedPiece: Piece,
-                   wsInstance: WebSocket|null, initBoardGeneral: RefObject<{}[]>, //setInitBoardGeneral: React.Dispatch, 
+                   wsInstance: WebSocket|null, initBoardGeneral: RefObject<Piece[]>,
                    boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number, isCastle?: Boolean) : any{
 
     // first clear the board
@@ -3879,7 +3873,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     // for opponent move, you also need to check the 7th row
     let pawn_upgrade = (selectedPiece.kind == "pawn" && (row_id == 0 || row_id == 7))
     let choice = ""
-    let moveables
+    let moveables: Moveable = true
 
     if (pawn_upgrade && isUpgradingMove == -1){
 
@@ -3930,8 +3924,8 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
 
             for (let key in initBoardGeneral.current){ // key is just index here
         
-                if (Object.keys(initBoardGeneral.current[key])[0] == rook && Object.values(initBoardGeneral.current[key])[0].color == selectedPiece.color){
-                    rook = Object.values(initBoardGeneral.current[key])[0];
+                if (initBoardGeneral.current[key].name == rook && initBoardGeneral.current[key].color == selectedPiece.color){
+                    rook = initBoardGeneral.current[key];
                     // somehow update the rook
                     castle_updated_piece = makeMove(col_id+1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
 
@@ -3947,8 +3941,8 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
 
             for (let key in initBoardGeneral.current){ // key is just index here
         
-                if (Object.keys(initBoardGeneral.current[key])[0] == rook && Object.values(initBoardGeneral.current[key])[0].color == selectedPiece.color){
-                    rook = Object.values(initBoardGeneral.current[key])[0];
+                if (initBoardGeneral.current[key].name == rook && initBoardGeneral.current[key].color == selectedPiece.color){
+                    rook = initBoardGeneral.current[key];
                     // somehow update the rook
                     castle_updated_piece = makeMove(col_id-1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
 
@@ -3998,32 +3992,31 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     let localInitBoardGeneral = [...initBoardGeneral.current]
     for (let key in localInitBoardGeneral){ // key is just index here
         
-        if ((Object.keys(localInitBoardGeneral[key])[0] == piece) || (pawn_upgrade && Object.keys(localInitBoardGeneral[key])[0] == `${selectedPiece.name}`)){
+        if ((localInitBoardGeneral[key].name == piece) || (pawn_upgrade && localInitBoardGeneral[key].name == `${selectedPiece.name}`)){
             
             console.log("changing has moved")
-            let unknownKey  = Object.keys(localInitBoardGeneral[key])[0]
 
             
                 let newInitBoardLocal = [...localInitBoardGeneral]
-                newInitBoardLocal[key][unknownKey].has_moved = true
-                newInitBoardLocal[key][unknownKey].col = col_id
-                newInitBoardLocal[key][unknownKey].row = row_id
+                newInitBoardLocal[key].has_moved = true
+                newInitBoardLocal[key].col = col_id
+                newInitBoardLocal[key].row = row_id
 
                 if (pawn_upgrade) {
 
-                    newInitBoardLocal[key][unknownKey].kind = choice // to be changed as selection of user - later
-                    newInitBoardLocal[key][unknownKey].name = `${selectedPiece.name}_upgraded_${newInitBoardLocal[key][unknownKey].kind}` // name + upgraded + kind
-                    newInitBoardLocal[key][unknownKey].moveable = moveables
+                    newInitBoardLocal[key].kind = choice // to be changed as selection of user - later
+                    newInitBoardLocal[key].name = `${selectedPiece.name}_upgraded_${newInitBoardLocal[key].kind}` // name + upgraded + kind
+                    newInitBoardLocal[key].moveable = moveables
                     // can we change the key of initboardGeneral, it stays as W_pawn_4. If can't we shouldn't be using the key, instead we can use name value
-                    console.log("pawn goes to queen: ", newInitBoardLocal[key][unknownKey])
+                    console.log("pawn goes to queen: ", newInitBoardLocal[key])
 
-                    newInitBoardLocal[key][unknownKey+`_upgraded_${choice}`] = newInitBoardLocal[key][unknownKey]
-                    updated_piece = newInitBoardLocal[key][unknownKey+`_upgraded_${choice}`]
+                    //newInitBoardLocal[key][unknownKey+`_upgraded_${choice}`] = newInitBoardLocal[key]
+                    updated_piece = newInitBoardLocal[key]
 
-                    delete newInitBoardLocal[key][unknownKey]
+                    //delete newInitBoardLocal[key]
                 } else {
 
-                    updated_piece = newInitBoardLocal[key][unknownKey]
+                    updated_piece = newInitBoardLocal[key]
                 }
 
                 
@@ -4034,7 +4027,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
             
             
 
-            console.log("current piece data: ", initBoardGeneral.current[key][unknownKey+`_upgraded_${choice}`])
+            console.log("current piece data: ", initBoardGeneral.current[key])
             console.log("col is : ", col_id," row is : ", row_id)
             
             break;
@@ -4098,7 +4091,7 @@ function clearBoard(setDrawState: React.Dispatch){
 // after take piece, we should remove it from initboards cause later in the game there are dead pieces that actually blocks checks etc
 
 // clear init board
-function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInstance: WebSocket|null, initBoardGeneral: RefObject<{}[]>
+function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInstance: WebSocket|null, initBoardGeneral: RefObject<Piece[]>
                     , boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
     /*
         Function that runs when a piece is taken, col_id, row_id is the location of the eaten piece, selected piece is the one that eats
@@ -4107,7 +4100,7 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 
     let pawn_upgrade = selectedPiece.kind == "pawn" && (row_id == 0 || row_id == 7) && isUpgradingMove == -1
     let choice = ""
-    let moveables
+    let moveables: Moveable = true
 
     if (pawn_upgrade){
 
@@ -4182,28 +4175,27 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 
     let updated_piece
     for (let elem in initBoardGeneral.current){
-        if (Object.keys(initBoardGeneral.current[elem])[0] == selectedPiece.name){ // find the selectedPiece and change info
-            let unknownKey = Object.keys(initBoardGeneral.current[elem])[0]
+        if (initBoardGeneral.current[elem].name == selectedPiece.name){ // find the selectedPiece and change info
 
             let localInitBoard = initBoardGeneral.current
-                localInitBoard[elem][unknownKey].has_moved = true
-                localInitBoard[elem][unknownKey].col = col_id
-                localInitBoard[elem][unknownKey].row = row_id
+                localInitBoard[elem].has_moved = true
+                localInitBoard[elem].col = col_id
+                localInitBoard[elem].row = row_id
 
                 if (pawn_upgrade){
                  
-                    localInitBoard[key][unknownKey].kind = choice // to be changed as selection of user - later
-                    localInitBoard[key][unknownKey].name = `${selectedPiece.name}_upgraded_${localInitBoard[key][unknownKey].kind}` // name + upgraded + kind
-                    localInitBoard[key][unknownKey].moveable = moveables
-                    // can we change the key of initboardGeneral, it stays as W_pawn_4. If can't we shouldn't be using the key, instead we can use name value
-                    console.log("pawn goes to queen: ", localInitBoard[key][unknownKey])
+                    localInitBoard[elem].kind = choice // to be changed as selection of user - later
+                    localInitBoard[elem].name = `${selectedPiece.name}_upgraded_${localInitBoard[elem].kind}` // name + upgraded + kind
+                    localInitBoard[elem].moveable = moveables
+                    // can we change the elem of initboardGeneral, it stays as W_pawn_4. If can't we shouldn't be using the elem, instead we can use name value
+                    console.log("pawn goes to queen: ", localInitBoard[elem])
 
-                    localInitBoard[key][unknownKey+`_upgraded_${choice}`] = localInitBoard[key][unknownKey]
-                    updated_piece = localInitBoard[key][unknownKey+`_upgraded_${choice}`]
+                    //localInitBoard[elem][unknownelem+`_upgraded_${choice}`] = localInitBoard[elem]
+                    updated_piece = localInitBoard[elem]
 
-                    delete localInitBoard[key][unknownKey]
+                    //delete localInitBoard[key]
                 } else {
-                    updated_piece = localInitBoard[elem][unknownKey]
+                    updated_piece = localInitBoard[elem]
                 }
 
                 
@@ -4235,7 +4227,7 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 // another piece is now threating the king other than moving piece). For this you'd have to check for every opponent's other piece
 // if it has a clear direction to the king (similar to what we did in setMoveablePieces where we found the opponent pieces toward king with a 
 // (one) blocking piece)
-function isCheckCondition(col_id: number, row_id: number, playerTurn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
+function isCheckCondition(col_id: number, row_id: number, playerTurn: string, initBoardGeneral: Piece[], boardInverseGeneral: {}[]){
 
     // do I have to know player turn here to understand which perspective I'm looking at instead of local_turn
 
@@ -4249,16 +4241,16 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
         throw new Error("for the given location, piece should've been found. In isCheckCondition")
     }
 
-    let piece_in = null
+    let piece_in: Piece = nullPiece
     for (let key in initBoardGeneral){
-        if (Object.values(initBoardGeneral[key])[0].name == piece){
+        if (initBoardGeneral[key].name == piece){
             piece_in = initBoardGeneral[key]
             break
         }
     }
 
-    let local_turn = Object.values(piece_in)[0].color
-    let piece_kind = Object.values(piece_in)[0].kind
+    let local_turn = piece_in.color
+    let piece_kind = piece_in.kind
 
     if (piece_kind == "pawn"){
 
@@ -4272,9 +4264,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
         let piece_target = getPiece(col_id+1, row_id + row_inc, true, boardInverseGeneral)
         if (piece_target != null){
             for (let key in initBoardGeneral){
-                if (Object.keys(initBoardGeneral[key])[0] == piece_target 
-                    && Object.values(initBoardGeneral[key])[0].kind == "king"
-                    && Object.values(initBoardGeneral[key])[0].color != local_turn){
+                if (initBoardGeneral[key].name == piece_target 
+                    && initBoardGeneral[key].kind == "king"
+                    && initBoardGeneral[key].color != local_turn){
                         return true
                 }
             }
@@ -4283,9 +4275,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
         piece_target = getPiece(col_id-1, row_id + row_inc, true, boardInverseGeneral)
         if (piece_target != null){
             for (let key in initBoardGeneral){
-                if (Object.keys(initBoardGeneral[key])[0] == piece_target 
-                    && Object.values(initBoardGeneral[key])[0].kind == "king"
-                    && Object.values(initBoardGeneral[key])[0].color != local_turn){
+                if (initBoardGeneral[key].name == piece_target 
+                    && initBoardGeneral[key].kind == "king"
+                    && initBoardGeneral[key].color != local_turn){
                         return true
                 }
             }
@@ -4301,9 +4293,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                         if (piece != null){ // there is no piece, you can draw
                             
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     return true
                                 }
                             }
@@ -4318,9 +4310,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                              // there is a piece, if it's not black -> draw
                     
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     return true
                                 }
                             }
@@ -4337,9 +4329,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                         if (piece != null){ // there is no piece, you can draw
                              // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     return true
                                 }
                             }
@@ -4352,9 +4344,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                         if (piece != null){ // there is no piece, you can draw
                              // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     return true
                                 }
                             }
@@ -4371,9 +4363,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                         if (piece != null){ // there is no piece, you can draw
                              // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     return true
                                 }
                             }
@@ -4387,9 +4379,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                             
                              // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     return true
                                 }
                             }
@@ -4407,9 +4399,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                             
                              // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     return true
                                 }
                             }
@@ -4424,9 +4416,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                             
                             // there is a piece, make sure it's not black
                             for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     return true
                                 }
                             }
@@ -4448,9 +4440,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                     if (piece != null){ // empty, draw it
                         
                         for (let key in initBoardGeneral){
-                            if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                            if (initBoardGeneral[key].name == piece 
+                                && initBoardGeneral[key].color != local_turn
+                                && initBoardGeneral[key].kind == "king"){
                                 
                                     return true
                             }
@@ -4466,9 +4458,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                         
                         
                         for (let key in initBoardGeneral){
-                            if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                            if (initBoardGeneral[key].name == piece 
+                                && initBoardGeneral[key].color != local_turn
+                                && initBoardGeneral[key].kind == "king"){
                                 
                                     return true
                             }
@@ -4484,9 +4476,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                         
                         
                         for (let key in initBoardGeneral){
-                            if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                            if (initBoardGeneral[key].name == piece 
+                                && initBoardGeneral[key].color != local_turn
+                                && initBoardGeneral[key].kind == "king"){
                                 
                                     return true
                             }
@@ -4502,9 +4494,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
                         
 
                         for (let key in initBoardGeneral){
-                            if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                            if (initBoardGeneral[key].name == piece 
+                                && initBoardGeneral[key].color != local_turn
+                                && initBoardGeneral[key].kind == "king"){
                                 
                                     return true
                             }
@@ -4536,9 +4528,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                             for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
 
                                         return true
 
@@ -4563,9 +4555,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                             for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
                                     
                                         return true
 
@@ -4590,9 +4582,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                             for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
 
                                         return true
 
@@ -4617,9 +4609,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                             for (let key in initBoardGeneral){
 
-                                if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                    && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                    && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                                if (initBoardGeneral[key].name == piece 
+                                    && initBoardGeneral[key].color != local_turn
+                                    && initBoardGeneral[key].kind == "king"){
 
                                         return true
                                 }
@@ -4658,9 +4650,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                         for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                            if (initBoardGeneral[key].name == piece 
+                                && initBoardGeneral[key].color != local_turn
+                                && initBoardGeneral[key].kind == "king"){
                                 
                                     return true
                             }
@@ -4684,9 +4676,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                         for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                            if (initBoardGeneral[key].name == piece 
+                                && initBoardGeneral[key].color != local_turn
+                                && initBoardGeneral[key].kind == "king"){
                                 
                                     return true
                             }
@@ -4710,9 +4702,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                         for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                            if (initBoardGeneral[key].name == piece 
+                                && initBoardGeneral[key].color != local_turn
+                                && initBoardGeneral[key].kind == "king"){
                                 
                                     return true
                             }
@@ -4736,9 +4728,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                         for (let key in initBoardGeneral){
 
-                            if (Object.keys(initBoardGeneral[key])[0] == piece 
-                                && Object.values(initBoardGeneral[key])[0].color != local_turn
-                                && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                            if (initBoardGeneral[key].name == piece 
+                                && initBoardGeneral[key].color != local_turn
+                                && initBoardGeneral[key].kind == "king"){
                                 
                                     return true
                             }
@@ -4761,9 +4753,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                     for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoardGeneral[key])[0] == piece 
-                            && Object.values(initBoardGeneral[key])[0].color != local_turn
-                            && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                        if (initBoardGeneral[key].name == piece 
+                            && initBoardGeneral[key].color != local_turn
+                            && initBoardGeneral[key].kind == "king"){
                             
                                 return true
                         }
@@ -4783,9 +4775,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                     for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoardGeneral[key])[0] == piece 
-                            && Object.values(initBoardGeneral[key])[0].color != local_turn
-                            && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                        if (initBoardGeneral[key].name == piece 
+                            && initBoardGeneral[key].color != local_turn
+                            && initBoardGeneral[key].kind == "king"){
                             
                                 return true
                         }
@@ -4806,9 +4798,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                     for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoardGeneral[key])[0] == piece 
-                            && Object.values(initBoardGeneral[key])[0].color != local_turn
-                            && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                        if (initBoardGeneral[key].name == piece 
+                            && initBoardGeneral[key].color != local_turn
+                            && initBoardGeneral[key].kind == "king"){
                             
                                 return true
                         }
@@ -4828,9 +4820,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
                     for (let key in initBoardGeneral){
 
-                        if (Object.keys(initBoardGeneral[key])[0] == piece 
-                            && Object.values(initBoardGeneral[key])[0].color != local_turn
-                            && Object.values(initBoardGeneral[key])[0].kind == "king"){
+                        if (initBoardGeneral[key].name == piece 
+                            && initBoardGeneral[key].color != local_turn
+                            && initBoardGeneral[key].kind == "king"){
                             
                                 return true
                         }
@@ -4848,15 +4840,15 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 /*
    This function checks our rooks, bishops, and queen(s) if they can reach (or eat) opponent's king, then it's (indirect) check condition
 */
-function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
+function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], boardInverseGeneral: {}[]){
 
     // get opponent's king
-    let opp_king
+    let opp_king: Piece = nullPiece
     for (let key in initBoardGeneral){
 
-        if (Object.values(initBoardGeneral[key])[0].color != turn && Object.values(initBoardGeneral[key])[0].kind == "king"){
-            let unknownKey = Object.keys(initBoardGeneral[key])[0]
-            opp_king = initBoardGeneral[key][unknownKey]
+        if (initBoardGeneral[key].color != turn && initBoardGeneral[key].kind == "king"){
+            
+            opp_king = initBoardGeneral[key]
             break;
         }
     }
@@ -4869,7 +4861,7 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
 
         let is_indirect_check_cause = true;
         let may_return = false;
-        let piece: any = Object.values(initBoardGeneral[key])[0]
+        let piece: Piece = initBoardGeneral[key]
         //console.log("piece in: ", piece.col, piece.row) // col: 4, row: 6
         
         if (piece.color == turn){
@@ -5159,19 +5151,15 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
                         piece_row--;
                         piece_col++;
                     }
-                }
-                
+                }   
             }
 
             if (may_return && is_indirect_check_cause == true){
 
                 return piece;
             }
-        }
-
-        
+        }   
     }
-
     return null;
 }
 
@@ -5221,7 +5209,7 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: {}[], boardInv
 function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispatch, allDrawState: boolean[][], setSelectedPiece: React.Dispatch, 
                        selectedPiece: Piece, turn: string, setTurn: React.Dispatch, setIsCheck: React.Dispatch, isCheck: boolean, 
                        checkingPiece: Piece, setCheckingPiece: React.Dispatch, colsAndRows: null|{row: number, col:number}[], 
-                       setColsAndRows: React.Dispatch, wsInstance: WebSocket|null, playerTurn: RefObject<string>, initBoardGeneral: RefObject<{}[]>, 
+                       setColsAndRows: React.Dispatch, wsInstance: WebSocket|null, playerTurn: RefObject<string>, initBoardGeneral: RefObject<Piece[]>, 
                        boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
     /*
         Onclick handler on squares. It draws the possible moves, and should handle the move
@@ -5269,7 +5257,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
             let is_indirect_check_local = isIndirectCheckCondition(turn, initBoardGeneral.current, boardInverseGeneral.current);
             console.log("the result of INDIRECT:", is_indirect_check_local);
 
-            if (is_check_local && is_indirect_check_local != null && is_check_local == is_indirect_check_local){
+            if (is_check_local && is_indirect_check_local != null && updated_piece == is_indirect_check_local){ // updated_piece == is_indirect_check_local -> correct ?
 
                 // WHAT DO WE DO?
                 throw new Error("Handle the double check condition");
@@ -5318,7 +5306,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
         for (let key in initBoardGeneral.current){ // key is just index here
         
             
-            if (Object.keys(initBoardGeneral.current[key])[0] == piece){
+            if (initBoardGeneral.current[key].name == piece){
             
                 piece_in = initBoardGeneral.current[key]
                 console.log("piece_in here: ",piece_in)
@@ -5352,7 +5340,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
 
             
                 // if both check occur in the same time, we have no other option than moving the king
-                if (is_check_local && is_indirect_check_local != null && is_check_local == is_indirect_check_local){
+                if (is_check_local && is_indirect_check_local != null && updated_piece == is_indirect_check_local){
 
                     // ONLY KING CAN MOVE
                     throw new Error("Handle the double check condition");
@@ -5444,7 +5432,7 @@ interface Move {
     Funtion to realize moves coming from server, receiving                                 
 */
 function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPiece: React.Dispatch, setColsAndRows: React.Dispatch,
-                            setTurn: React.Dispatch, turn: string, initboardGeneral: RefObject<{}[]>,
+                            setTurn: React.Dispatch, turn: string, initboardGeneral: RefObject<Piece[]>,
                             boardInverseGeneral: RefObject<{}[]>, playerTurn: RefObject<string>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
 
     console.log("OK now we need to do the move: ", move)
@@ -5492,7 +5480,7 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
     let piece_in = null
     for (let key in initboardGeneral.current){ // key is just index here
         
-        if (Object.keys(initboardGeneral.current[key])[0] == piece){
+        if (initboardGeneral.current[key].name == piece){
             
             piece_in = initboardGeneral.current[key]
             console.log("piece_in here: ",piece_in)
@@ -5535,7 +5523,7 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
             let is_indirect_check_local = isIndirectCheckCondition(old, initboardGeneral.current, boardInverseGeneral.current);
         
             
-            if (is_check_local && is_indirect_check_local != null && is_check_local == is_indirect_check_local){
+            if (is_check_local && is_indirect_check_local != null && updated_piece == is_indirect_check_local){
                 throw new Error();
             } else if (is_check_local) {
                 
@@ -5623,7 +5611,7 @@ export default function Board(){
         [...initDrawState]
     ) // initial state of possible moves
 
-    const initBoardGeneral = useRef<{}[]>(initBoard_fromWhite)
+    const initBoardGeneral = useRef<Piece[]>(initBoard_fromWhite)
     const boardInverseGeneral = useRef<{}[]>(boardInverse_fromWhite)
 
     const [selectedPiece, setSelectedPiece] = useState<Piece>({...nullPiece});
@@ -5817,7 +5805,7 @@ interface ColumnProps {
     setColsAndRows: React.Dispatch
     wsInstance: WebSocket | null
     playerTurn: RefObject<string>
-    initBoardGeneral: RefObject<{}[]>
+    initBoardGeneral: RefObject<Piece[]>
     boardInverseGeneral: RefObject<{}[]>
     setIsUpgradingMove: React.Dispatch
     isUpgradingMove: number
@@ -5905,7 +5893,7 @@ interface SquareProps{
     setColsAndRows: React.Dispatch
     wsInstance: WebSocket | null
     playerTurn: RefObject<string>
-    initBoardGeneral: RefObject<{}[]>
+    initBoardGeneral: RefObject<Piece[]>
     boardInverseGeneral: RefObject<{}[]>
     setIsUpgradingMove: React.Dispatch
     isUpgradingMove: number
