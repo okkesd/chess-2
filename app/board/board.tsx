@@ -3,8 +3,6 @@
 import { React, useState, createContext, useEffect, useRef, RefObject } from "react"
 const BOARD_SIZE = 8
 
-type PieceNames = "W_bishop_black" | "W_bishop_white" | "W_knight_1" | "W_knight_2" | "W_rook_1" | "W_rook_2" | "W_queen" | "W_king" | "B_bishop_black" | "B_bishop_white" | "B_knight_1" | "B_knight_2"| "B_rook_1" | "B_rook_2" | "B_queen" | "B_king" | "B_pawn_1" | "B_pawn_2" | "B_pawn_3" | "B_pawn_4" | "B_pawn_5" | "B_pawn_6" | "B_pawn_7" | "B_pawn_8" | "W_pawn_1" | "W_pawn_2" | "W_pawn_3" | "W_pawn_4" | "W_pawn_5" | "W_pawn_6" | "W_pawn_7" | "W_pawn_8"
-
 type BishopMoveable = {
   leftUp: boolean;
   rightUp: boolean;
@@ -47,80 +45,80 @@ interface Piece {
 }
 
 
-let initBoard_fromWhite: {[K in keyof PieceNames]: Piece}[] = [
-    {"W_bishop_black" : {"col": 2, "row": 7, "name": "W_bishop_black", "kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
-    {"W_bishop_white" : {"col": 5, "row": 7, "name": "W_bishop_white","kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
-    {"W_knight_1" : {"col": 1, "row" : 7, "name": "W_knight_1", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
-    {"W_knight_2" : {"col": 6, "row": 7, "name": "W_knight_2", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
-    {"W_rook_1" : {"col": 0, "row": 7, "name": "W_rook_1", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}}},
-    {"W_rook_2" : {"col": 7, "row": 7, "name": "W_rook_2", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}}},
-    {"W_queen" : {"col": 3, "row": 7, "name": "W_queen", "kind": "queen", "color": "white", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}}},
-    {"W_king" : {"col": 4, "row": 7, "name": "W_king", "kind": "king", "has_moved": false, "color": "white", "moveable": true}},
+let initBoard_fromWhite: Piece[] = [
+    {"col": 2, "row": 7, "name": "W_bishop_black", "kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}},
+    {"col": 5, "row": 7, "name": "W_bishop_white","kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}},
+    {"col": 1, "row" : 7, "name": "W_knight_1", "kind": "knight", "has_moved": false, "color": "white", "moveable": true},
+    {"col": 6, "row": 7, "name": "W_knight_2", "kind": "knight", "has_moved": false, "color": "white", "moveable": true},
+    {"col": 0, "row": 7, "name": "W_rook_1", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}},
+    {"col": 7, "row": 7, "name": "W_rook_2", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}},
+    {"col": 3, "row": 7, "name": "W_queen", "kind": "queen", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}},
+    {"col": 4, "row": 7, "name": "W_king", "kind": "king", "has_moved": false, "color": "white", "moveable": true},
 
-    {"B_bishop_black" : {"col": 5, "row": 0, "name": "B_bishop_black", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
-    {"B_bishop_white" : {"col": 2, "row": 0, "name": "B_bishop_white", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
-    {"B_knight_1" : {"col": 1, "row" : 0, "name": "B_knight_1", "kind": "knight", "has_moved": false, "color": "black", "moveable": true}},
-    {"B_knight_2" : {"col": 6, "row": 0, "name": "B_knight_2", "kind": "knight", "has_moved": false, "color": "black", "moveable": true}},
-    {"B_rook_1" : {"col": 0, "row": 0, "name": "B_rook_1", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}}},
-    {"B_rook_2" : {"col": 7, "row": 0, "name": "B_rook_2", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}}},
-    {"B_queen" : {"col": 3, "row": 0, "name": "B_queen", "kind": "queen", "color": "black", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}}},
-    {"B_king" : {"col": 4, "row": 0, "name": "B_king", "kind": "king", "has_moved": false, "color": "black", "moveable": true}},
+    {"col": 5, "row": 0, "name": "B_bishop_black", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}},
+    {"col": 2, "row": 0, "name": "B_bishop_white", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}},
+    {"col": 1, "row" : 0, "name": "B_knight_1", "kind": "knight", "has_moved": false, "color": "black", "moveable": true},
+    {"col": 6, "row": 0, "name": "B_knight_2", "kind": "knight", "has_moved": false, "color": "black", "moveable": true},
+    {"col": 0, "row": 0, "name": "B_rook_1", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}},
+    {"col": 7, "row": 0, "name": "B_rook_2", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}},
+    {"col": 3, "row": 0, "name": "B_queen", "kind": "queen", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}},
+    {"col": 4, "row": 0, "name": "B_king", "kind": "king", "has_moved": false, "color": "black", "moveable": true},
 
-    {"B_pawn_1" : {"col": 0, "row": 1, "name": "B_pawn_1", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_2" : {"col": 1, "row": 1, "name": "B_pawn_2", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_3" : {"col": 2, "row": 1, "name": "B_pawn_3", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_4" : {"col": 3, "row": 1, "name": "B_pawn_4", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_5" : {"col": 4, "row": 1, "name": "B_pawn_5", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_6" : {"col": 5, "row": 1, "name": "B_pawn_6", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_7" : {"col": 6, "row": 1, "name": "B_pawn_7", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_8" : {"col": 7, "row": 1, "name": "B_pawn_8", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"col": 0, "row": 1, "name": "B_pawn_1", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 1, "row": 1, "name": "B_pawn_2", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 2, "row": 1, "name": "B_pawn_3", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 3, "row": 1, "name": "B_pawn_4", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 4, "row": 1, "name": "B_pawn_5", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 5, "row": 1, "name": "B_pawn_6", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 6, "row": 1, "name": "B_pawn_7", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 7, "row": 1, "name": "B_pawn_8", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
 
-    {"W_pawn_1" : {"col": 0, "row": 6, "name": "W_pawn_1", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_2" : {"col": 1, "row": 6, "name": "W_pawn_2", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_3" : {"col": 2, "row": 6, "name": "W_pawn_3", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_4" : {"col": 3, "row": 6, "name": "W_pawn_4", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_5" : {"col": 4, "row": 6, "name": "W_pawn_5", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_6" : {"col": 5, "row": 6, "name": "W_pawn_6", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_7" : {"col": 6, "row": 6, "name": "W_pawn_7", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_8" : {"col": 7, "row": 6, "name": "W_pawn_8", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"col": 0, "row": 6, "name": "W_pawn_1", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 1, "row": 6, "name": "W_pawn_2", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 2, "row": 6, "name": "W_pawn_3", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 3, "row": 6, "name": "W_pawn_4", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 4, "row": 6, "name": "W_pawn_5", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 5, "row": 6, "name": "W_pawn_6", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 6, "row": 6, "name": "W_pawn_7", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 7, "row": 6, "name": "W_pawn_8", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
 ]
 
-let initBoard_fromBlack = [
-    {"W_bishop_black" : {"col": 5, "row": 0, "name": "W_bishop_black", "kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
-    {"W_bishop_white" : {"col": 2, "row": 0, "name": "W_bishop_white","kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
-    {"W_knight_1" : {"col": 1, "row": 0, "name": "W_knight_1", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
-    {"W_knight_2" : {"col": 6, "row": 0, "name": "W_knight_2", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
-    {"W_rook_1" : {"col": 0, "row": 0, "name": "W_rook_1", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}}},
-    {"W_rook_2" : {"col": 7, "row": 0, "name": "W_rook_2", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}}},
-    {"W_queen" : {"col": 4, "row": 0, "name": "W_queen", "kind": "queen", "color": "white", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}}},
-    {"W_king" : {"col": 3, "row": 0, "name": "W_king", "kind": "king", "has_moved": false, "color": "white", "moveable": true}},
+let initBoard_fromBlack : Piece[] = [
+    {"col": 5, "row": 0, "name": "W_bishop_black", "kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}},
+    {"col": 2, "row": 0, "name": "W_bishop_white","kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}},
+    {"col": 1, "row": 0, "name": "W_knight_1", "kind": "knight", "has_moved": false, "color": "white", "moveable": true},
+    {"col": 6, "row": 0, "name": "W_knight_2", "kind": "knight", "has_moved": false, "color": "white", "moveable": true},
+    {"col": 0, "row": 0, "name": "W_rook_1", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}},
+    {"col": 7, "row": 0, "name": "W_rook_2", "kind": "rook", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true}},
+    {"col": 4, "row": 0, "name": "W_queen", "kind": "queen", "has_moved": false, "color": "white", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}},
+    {"col": 3, "row": 0, "name": "W_king", "kind": "king", "has_moved": false, "color": "white", "moveable": true},
 
-    {"B_bishop_black" : {"col": 2, "row": 7, "name": "B_bishop_black", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
-    {"B_bishop_white" : {"col": 5, "row": 7, "name": "B_bishop_white", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}}},
-    {"B_knight_1" : {"col": 1, "row": 7, "name": "B_knight_1", "kind": "knight", "has_moved": false, "color": "black", "moveable": true}},
-    {"B_knight_2" : {"col": 6, "row": 7, "name": "B_knight_2", "kind": "knight", "has_moved": false, "color": "black", "moveable": true}},
-    {"B_rook_1" : {"col": 0, "row": 7, "name": "B_rook_1", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}}},
-    {"B_rook_2" : {"col": 7, "row": 7, "name": "B_rook_2", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}}},
-    {"B_queen" : {"col": 4, "row": 7, "name": "B_queen", "kind": "queen", "color": "black", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}}},
-    {"B_king" : {"col": 3, "row": 7, "name": "B_king", "kind": "king", "has_moved": false, "color": "black", "moveable": true}},
+    {"col": 2, "row": 7, "name": "B_bishop_black", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}},
+    {"col": 5, "row": 7, "name": "B_bishop_white", "kind": "bishop", "has_moved": false, "color": "black", "moveable": {leftUp: true, rightUp: true}},
+    {"col": 1, "row": 7, "name": "B_knight_1", "kind": "knight", "has_moved": false, "color": "black", "moveable": true},
+    {"col": 6, "row": 7, "name": "B_knight_2", "kind": "knight", "has_moved": false, "color": "black", "moveable": true},
+    {"col": 0, "row": 7, "name": "B_rook_1", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}},
+    {"col": 7, "row": 7, "name": "B_rook_2", "kind": "rook", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true}},
+    {"col": 4, "row": 7, "name": "B_queen", "kind": "queen", "has_moved": false, "color": "black", "moveable": {upDown: true, leftRight: true, leftUp: true, rightUp: true}},
+    {"col": 3, "row": 7, "name": "B_king", "kind": "king", "has_moved": false, "color": "black", "moveable": true},
 
-    {"B_pawn_1" : {"col": 0, "row": 6, "name": "B_pawn_1", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_2" : {"col": 1, "row": 6, "name": "B_pawn_2", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_3" : {"col": 2, "row": 6, "name": "B_pawn_3", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_4" : {"col": 3, "row": 6, "name": "B_pawn_4", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_5" : {"col": 4, "row": 6, "name": "B_pawn_5", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_6" : {"col": 5, "row": 6, "name": "B_pawn_6", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_7" : {"col": 6, "row": 6, "name": "B_pawn_7", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"B_pawn_8" : {"col": 7, "row": 6, "name": "B_pawn_8", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"col": 0, "row": 6, "name": "B_pawn_1", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 1, "row": 6, "name": "B_pawn_2", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 2, "row": 6, "name": "B_pawn_3", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 3, "row": 6, "name": "B_pawn_4", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 4, "row": 6, "name": "B_pawn_5", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 5, "row": 6, "name": "B_pawn_6", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 6, "row": 6, "name": "B_pawn_7", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 7, "row": 6, "name": "B_pawn_8", "kind": "pawn", "has_moved": false, "color": "black", "moveable": {leftEat: true, rightEat: true, forward: true}},
 
-    {"W_pawn_1" : {"col": 0, "row": 1, "name": "W_pawn_1", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_2" : {"col": 1, "row": 1, "name": "W_pawn_2", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_3" : {"col": 2, "row": 1, "name": "W_pawn_3", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_4" : {"col": 3, "row": 1, "name": "W_pawn_4", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_5" : {"col": 4, "row": 1, "name": "W_pawn_5", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_6" : {"col": 5, "row": 1, "name": "W_pawn_6", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_7" : {"col": 6, "row": 1, "name": "W_pawn_7", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
-    {"W_pawn_8" : {"col": 7, "row": 1, "name": "W_pawn_8", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}}},
+    {"col": 0, "row": 1, "name": "W_pawn_1", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 1, "row": 1, "name": "W_pawn_2", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 2, "row": 1, "name": "W_pawn_3", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 3, "row": 1, "name": "W_pawn_4", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 4, "row": 1, "name": "W_pawn_5", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 5, "row": 1, "name": "W_pawn_6", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 6, "row": 1, "name": "W_pawn_7", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
+    {"col": 7, "row": 1, "name": "W_pawn_8", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
 ]
 
 let nameToImage = {
@@ -355,16 +353,6 @@ let initDrawState = [
 
 let nullPiece = {col: -1, row: -1, name: "null", kind: "null", has_moved: false, color: "null", moveable: false}
 
-let initMovingArr = [
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-    ]
 
 function getPiece(col_id: number, row_id: number, get_name: boolean, boardInverseGeneral: {}[], debug?: Boolean|undefined){
     /*
@@ -404,7 +392,7 @@ function getPiece(col_id: number, row_id: number, get_name: boolean, boardInvers
 
 
 // clear init board
-function notKingAdjacent(col: number, row: number, turn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
+function notKingAdjacent(col: number, row: number, turn: string, initBoardGeneral: Piece[], boardInverseGeneral: {}[]){
     /*
         Helper function to check if given is a opponent king adjacent to prevent drawing that square
         Returns false if it's king adjacent, else true which passes to draw
@@ -414,7 +402,7 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     let piece = getPiece(col+1, row+1, true, boardInverseGeneral)
     if (piece != null){
         for (let key in initBoardGeneral){
-            let value = Object.values(initBoardGeneral[key])[0]
+            let value = initBoardGeneral[key]
             if (Object.keys(initBoardGeneral[key])[0] == piece && value.color != turn && value.kind == "king"){
                 return false
             }
