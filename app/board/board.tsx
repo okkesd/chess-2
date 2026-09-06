@@ -3,8 +3,51 @@
 import { React, useState, createContext, useEffect, useRef, RefObject } from "react"
 const BOARD_SIZE = 8
 
+type PieceNames = "W_bishop_black" | "W_bishop_white" | "W_knight_1" | "W_knight_2" | "W_rook_1" | "W_rook_2" | "W_queen" | "W_king" | "B_bishop_black" | "B_bishop_white" | "B_knight_1" | "B_knight_2"| "B_rook_1" | "B_rook_2" | "B_queen" | "B_king" | "B_pawn_1" | "B_pawn_2" | "B_pawn_3" | "B_pawn_4" | "B_pawn_5" | "B_pawn_6" | "B_pawn_7" | "B_pawn_8" | "W_pawn_1" | "W_pawn_2" | "W_pawn_3" | "W_pawn_4" | "W_pawn_5" | "W_pawn_6" | "W_pawn_7" | "W_pawn_8"
 
-let initBoard_fromWhite: {}[] = [
+type BishopMoveable = {
+  leftUp: boolean;
+  rightUp: boolean;
+};
+
+type KingMoveable = boolean;
+
+type KnightMoveable = boolean
+
+type RookMoveable = {
+    upDown: boolean;
+    leftRight: boolean;
+}
+
+type QueenMoveable = {
+    upDown: boolean;
+    leftRight: boolean;
+    leftUp: boolean;
+    rightUp: boolean;
+}
+
+type PawnMoveable = {
+    leftEat: boolean
+    rightEat: boolean
+    forward: boolean
+}
+
+
+type Moveable = BishopMoveable | KingMoveable | KnightMoveable | RookMoveable | QueenMoveable | PawnMoveable;
+
+
+interface Piece {
+    col: number;
+    row: number;
+    name: string;
+    kind: string;
+    has_moved: boolean;
+    color: string;
+    moveable: Moveable;
+}
+
+
+let initBoard_fromWhite: {[K in keyof PieceNames]: Piece}[] = [
     {"W_bishop_black" : {"col": 2, "row": 7, "name": "W_bishop_black", "kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
     {"W_bishop_white" : {"col": 5, "row": 7, "name": "W_bishop_white","kind": "bishop", "has_moved": false, "color": "white", "moveable": {leftUp: true, rightUp: true}}},
     {"W_knight_1" : {"col": 1, "row" : 7, "name": "W_knight_1", "kind": "knight", "has_moved": false, "color": "white", "moveable": true}},
@@ -358,15 +401,7 @@ function getPiece(col_id: number, row_id: number, get_name: boolean, boardInvers
     return null
 }
 
-interface Piece {
-    col: number;
-    row: number;
-    name: string;
-    kind: string;
-    has_moved: boolean;
-    color: string;
-    moveable: any;
-}
+
 
 // clear init board
 function notKingAdjacent(col: number, row: number, turn: string, initBoardGeneral: {}[], boardInverseGeneral: {}[]){
