@@ -1,7 +1,13 @@
 "use client"
 
-import { React, useState, createContext, useEffect, useRef, RefObject } from "react"
+import { useState, createContext, useEffect, useRef, RefObject, Dispatch , SetStateAction , JSX } from "react"
 const BOARD_SIZE = 8
+
+type PieceNames =
+  "W_bishop_black" | "W_bishop_white" | "W_knight_1" | "W_knight_2" | "W_rook_1" | "W_rook_2" | "W_queen" | "W_king" |
+  "B_bishop_black" | "B_bishop_white" | "B_knight_1" | "B_knight_2" | "B_rook_1" | "B_rook_2" | "B_queen" | "B_king" |
+  "B_pawn_1" | "B_pawn_2" | "B_pawn_3" | "B_pawn_4" | "B_pawn_5" | "B_pawn_6" | "B_pawn_7" | "B_pawn_8" |
+  "W_pawn_1" | "W_pawn_2" | "W_pawn_3" | "W_pawn_4" | "W_pawn_5" | "W_pawn_6" | "W_pawn_7" | "W_pawn_8";
 
 type BishopMoveable = {
   leftUp: boolean;
@@ -121,7 +127,7 @@ let initBoard_fromBlack : Piece[] = [
     {"col": 7, "row": 1, "name": "W_pawn_8", "kind": "pawn", "has_moved": false, "color": "white", "moveable": {leftEat: true, rightEat: true, forward: true}},
 ]
 
-let nameToImage = {
+let nameToImage: {[K in PieceNames]: string} = {
     "W_bishop_black" : "wB.svg",
     "W_bishop_white" : "wB.svg",
     "W_knight_1" : "wN.svg",
@@ -160,183 +166,188 @@ let nameToImage = {
     "B_pawn_8" : "bP.svg",
 }
 
-let boardInverse_fromWhite = [
+type Rows = "r0" | "r1" | "r2" | "r3" | "r4" | "r5" | "r6" | "r7"
+type OneColumn = {
+    [K in Rows]: string
+}
+
+let boardInverse_fromWhite: OneColumn[] = [
     {
-        r0 : "B_rook_1",
-        r1 : "B_pawn_1",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "W_pawn_1",
-        r7 : "W_rook_1",
+        "r0" : "B_rook_1",
+        "r1" : "B_pawn_1",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "W_pawn_1",
+        "r7" : "W_rook_1",
     },
 
     {
-        r0 : "B_knight_1",
-        r1 : "B_pawn_2",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "W_pawn_2",
-        r7 : "W_knight_1",
+        "r0" : "B_knight_1",
+        "r1" : "B_pawn_2",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "W_pawn_2",
+        "r7" : "W_knight_1",
     },
 
     {
-        r0 : "B_bishop_white",
-        r1 : "B_pawn_3",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "W_pawn_3",
-        r7 : "W_bishop_black",
+        "r0" : "B_bishop_white",
+        "r1" : "B_pawn_3",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "W_pawn_3",
+        "r7" : "W_bishop_black",
     },
 
     {
-        r0 : "B_queen",
-        r1 : "B_pawn_4",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "W_pawn_4",
-        r7 : "W_queen",
+        "r0" : "B_queen",
+        "r1" : "B_pawn_4",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "W_pawn_4",
+        "r7" : "W_queen",
     },
 
     {
-        r0 : "B_king",
-        r1 : "B_pawn_5",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "W_pawn_5",
-        r7 : "W_king",
+        "r0" : "B_king",
+        "r1" : "B_pawn_5",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "W_pawn_5",
+        "r7" : "W_king",
     },
 
     {
-        r0 : "B_bishop_black",
-        r1 : "B_pawn_6",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "W_pawn_6",
-        r7 : "W_bishop_white",
+        "r0" : "B_bishop_black",
+        "r1" : "B_pawn_6",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "W_pawn_6",
+        "r7" : "W_bishop_white",
     },
 
     {
-        r0 : "B_knight_2",
-        r1 : "B_pawn_7",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "W_pawn_7",
-        r7 : "W_knight_2",
+        "r0" : "B_knight_2",
+        "r1" : "B_pawn_7",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "W_pawn_7",
+        "r7" : "W_knight_2",
     },
 
     {
-        r0 : "B_rook_2",
-        r1 : "B_pawn_8",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "W_pawn_8",
-        r7 : "W_rook_2",
+        "r0" : "B_rook_2",
+        "r1" : "B_pawn_8",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "W_pawn_8",
+        "r7" : "W_rook_2",
     }
 ]
 
-let boardInverse_fromBlack = [
+let boardInverse_fromBlack : OneColumn[] = [
     {
-        r0 : "W_rook_1",
-        r1 : "W_pawn_1",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "B_pawn_1",
-        r7 : "B_rook_1",
+        "r0" : "W_rook_1",
+        "r1" : "W_pawn_1",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "B_pawn_1",
+        "r7" : "B_rook_1",
     },
 
     {
-        r0 : "W_knight_1",
-        r1 : "W_pawn_2",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "B_pawn_2",
-        r7 : "B_knight_1",
+        "r0" : "W_knight_1",
+        "r1" : "W_pawn_2",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "B_pawn_2",
+        "r7" : "B_knight_1",
     },
 
     {
-        r0 : "W_bishop_white",
-        r1 : "W_pawn_3",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "B_pawn_3",
-        r7 : "B_bishop_black",
+        "r0" : "W_bishop_white",
+        "r1" : "W_pawn_3",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "B_pawn_3",
+        "r7" : "B_bishop_black",
     },
 
     {
-        r0 : "W_king",
-        r1 : "W_pawn_4",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "B_pawn_4",
-        r7 : "B_king",
+        "r0" : "W_king",
+        "r1" : "W_pawn_4",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "B_pawn_4",
+        "r7" : "B_king",
     },
 
     {
-        r0 : "W_queen",
-        r1 : "W_pawn_5",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "B_pawn_5",
-        r7 : "B_queen",
+        "r0" : "W_queen",
+        "r1" : "W_pawn_5",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "B_pawn_5",
+        "r7" : "B_queen",
     },
 
     {
-        r0 : "W_bishop_black",
-        r1 : "W_pawn_6",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "B_pawn_6",
-        r7 : "B_bishop_white",
+        "r0" : "W_bishop_black",
+        "r1" : "W_pawn_6",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "B_pawn_6",
+        "r7" : "B_bishop_white",
     },
 
     {
-        r0 : "W_knight_2",
-        r1 : "W_pawn_7",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "B_pawn_7",
-        r7 : "B_knight_2",
+        "r0" : "W_knight_2",
+        "r1" : "W_pawn_7",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "B_pawn_7",
+        "r7" : "B_knight_2",
     },
 
     {
-        r0 : "W_rook_2",
-        r1 : "W_pawn_8",
-        r2 : "empty",
-        r3 : "empty",
-        r4 : "empty",
-        r5 : "empty",
-        r6 : "B_pawn_8",
-        r7 : "B_rook_2",
+        "r0" : "W_rook_2",
+        "r1" : "W_pawn_8",
+        "r2" : "empty",
+        "r3" : "empty",
+        "r4" : "empty",
+        "r5" : "empty",
+        "r6" : "B_pawn_8",
+        "r7" : "B_rook_2",
     }
 ]
 
@@ -354,7 +365,7 @@ let initDrawState = [
 let nullPiece = {col: -1, row: -1, name: "null", kind: "null", has_moved: false, color: "null", moveable: false}
 
 
-function getPiece(col_id: number, row_id: number, get_name: boolean, boardInverseGeneral: {}[], debug?: Boolean|undefined){
+function getPiece(col_id: number, row_id: number, get_name: boolean, boardInverseGeneral: OneColumn[], debug?: Boolean|undefined) : PieceNames | string | null{
     /*
         Get the piece name or image path by given col_id and row_id
     */
@@ -368,19 +379,19 @@ function getPiece(col_id: number, row_id: number, get_name: boolean, boardInvers
         console.log("localBoard INverse in getPiece: ", localBoardInverseGeneral)
     }
 
-    let obj = localBoardInverseGeneral[col_id]
+    let obj: OneColumn = localBoardInverseGeneral[col_id]
     if (debug) {
         console.log("obj in getPiece: ", obj)
     }
     
     
-    for (let key in obj){
+    for (const key of Object.keys(obj) as Rows[]){
         if (debug){
             console.log("key is : ", key)
             console.log("element is :",obj[key])
         }
         if (Number(String(key)[1]) == row_id && obj[key] != "empty"){
-            let name = obj[key]
+            let name = obj[key] as PieceNames
             
             let file_path = nameToImage[name]
             return get_name ? name : file_path
@@ -392,7 +403,7 @@ function getPiece(col_id: number, row_id: number, get_name: boolean, boardInvers
 
 
 // clear init board
-function notKingAdjacent(col: number, row: number, turn: string, initBoardGeneral: Piece[], boardInverseGeneral: {}[]){
+function notKingAdjacent(col: number, row: number, turn: string, initBoardGeneral: Piece[], boardInverseGeneral: OneColumn[]){
     /*
         Helper function to check if given is a opponent king adjacent to prevent drawing that square
         Returns false if it's king adjacent, else true which passes to draw
@@ -491,7 +502,7 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
 
 // clear init board
 // NOTE: This should be traversing the alive pieces of opponent !Important
-function notEatable(col: number, row: number, turn: string, initBoardGeneral: Piece[], boardInverseGeneral: {}[]){
+function notEatable(col: number, row: number, turn: string, initBoardGeneral: Piece[], boardInverseGeneral: OneColumn[]){
     /*
         Helper function for king to not draw eatable squares
         Returns true if the given square is not Eatable by oppponent, else false which prevents drawing
@@ -1310,7 +1321,7 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
 
 // NOTE: In here probably we need to know the playerTurn too in order to get the correct squares between checking piece and our king
 // currently it comes but seems like it inverse, not correct squares. Job for the weekend!!!
-function setMoveablePieces(playerTurn: string, checkingPiece: Piece, setColsAndRows: React.Dispatch, initBoardGeneral: Piece[]){
+function setMoveablePieces(playerTurn: string, checkingPiece: Piece, setColsAndRows: Dispatch<SetStateAction<null|{row:number, col: number}[]>>, initBoardGeneral: Piece[]){
 
     console.log("LOGS:\nturn:", playerTurn, "checkingPiece.color: ", checkingPiece.color, "\ncheckingPiece:", checkingPiece)
 
@@ -1545,17 +1556,6 @@ console.log("king is in right down")
     // or we can save these cols_and_rows and use it when drawing the possible moves
 }
 
-interface drawPossibleMovesProps extends Piece {
-    setDrawState: React.Dispatch
-    turn: string
-    isCheck: boolean
-    colsAndRows: null|{row: number, col:number}[] // {row: number, col:number}[]
-    player_color: string
-    is_it_blocked: boolean
-    initBoardGeneral: Piece[]
-    boardInverseGeneral: {}[]
-}
-
 // !IMPORTANT
 // there could be a bizarre move in the check situation, a piece blocked by a possible check thread could be able to move to 
 // block another thread, this move won't give the turn to opponent -> is that bullsh*t since it makes checkmate almost impossible ?
@@ -1583,12 +1583,10 @@ interface drawPossibleMovesProps extends Piece {
 interface isNotBlockedProps extends Piece {
     turn: string
     initBoardGeneral: RefObject<Piece[]>
-    boardInverseGeneral: {}[]
+    boardInverseGeneral: OneColumn[]
 }
 
-// clear board inverse
-// clear init board
-// for now it's working
+// check if this function works correctly - !IMPORTANT
 function isNotBlocked({col, 
     row, 
     name, 
@@ -1632,7 +1630,7 @@ function isNotBlocked({col,
             // for king
             while (piece_row < turn_king.row){
 
-                for (let key in obj){
+                for (const key of Object.keys(obj) as Rows[]){
 
                     if (Number(String(key)[1]) == piece_row && obj[key] != "empty"){ // if there is another piece between make false
                         no_piece_king = false
@@ -1648,7 +1646,7 @@ function isNotBlocked({col,
             let piece_row_2 = row-1
             while (piece_row_2 >= 0){
 
-                for (let key in obj){
+                for (const key of Object.keys(obj) as Rows[]){
 
                     if (Number(String(key)[1]) == piece_row_2){
 
@@ -1687,7 +1685,7 @@ function isNotBlocked({col,
 
             while (piece_row > turn_king.row){
 
-                for (let key in obj){
+                for (const key of Object.keys(obj) as Rows[]){
 
                     if (Number(String(key)[1]) == piece_row && obj[key] != "empty"){ // if there is another piece between make false
                         no_piece_king = false
@@ -1701,7 +1699,7 @@ function isNotBlocked({col,
             let piece_row_2 = row+1
             while (piece_row_2 <= 7){
 
-                for (let key in obj){
+                for (const key of Object.keys(obj) as Rows[]){
 
                     if (Number(String(key)[1]) == piece_row_2){
 
@@ -1882,7 +1880,7 @@ function isNotBlocked({col,
             // for king
             while (piece_col < turn_king.col){
 
-                for (let key in boardInverseGeneral[piece_col]){
+                for (const key of Object.keys(boardInverseGeneral[piece_col]) as Rows[]){
 
                     if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                         no_piece_king = false
@@ -1898,7 +1896,7 @@ function isNotBlocked({col,
             let piece_col_2 = col-1
             while (piece_col_2 >= 0){
 
-                for (let key in boardInverseGeneral[piece_col_2]){
+                for (const key of Object.keys(boardInverseGeneral[piece_col_2]) as Rows[]){
 
                     if (Number(String(key)[1]) == piece_row){
                         console.log("something found in row,col: ", piece_row, piece_col_2)
@@ -1939,7 +1937,7 @@ function isNotBlocked({col,
             // for king
             while (piece_col > turn_king.col){
 
-                for (let key in boardInverseGeneral[piece_col]){
+                for (const key of Object.keys(boardInverseGeneral[piece_col]) as Rows[]){
 
                     if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                         no_piece_king = false
@@ -1955,7 +1953,7 @@ function isNotBlocked({col,
             let piece_col_2 = col+1
             while (piece_col_2 <= 7){
 
-                for (let key in boardInverseGeneral[piece_col_2]){
+                for (const key of Object.keys(boardInverseGeneral[piece_col_2]) as Rows[]){
 
                     if (Number(String(key)[1]) == piece_row){
                         console.log("something found in row,col: ", piece_row, piece_col_2)
@@ -2138,7 +2136,7 @@ function isNotBlocked({col,
 
                 while (piece_col < turn_king.col){
 
-                    for (let key in boardInverseGeneral[piece_col]){
+                    for (const key of Object.keys(boardInverseGeneral[piece_col]) as Rows[]){
 
                         if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                             no_piece_king = false
@@ -2159,7 +2157,7 @@ function isNotBlocked({col,
 
                 while (piece_col_2 >= 0 && piece_row_2 >= 0){
 
-                    for (let key in boardInverseGeneral[piece_col_2]){
+                    for (const key of Object.keys(boardInverseGeneral[piece_col_2]) as Rows[]){
 
                         if (Number(String(key)[1]) == piece_row_2 && boardInverseGeneral[piece_col_2][key] != "empty"){
                             let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
@@ -2168,7 +2166,7 @@ function isNotBlocked({col,
                                 
                                 if (initBoardGeneral.current[key].name == piece){
 
-                                    console.log("keys : ", initBoardGeneral.current[key]).name
+                                    console.log("keys : ", initBoardGeneral.current[key].name)
                                     console.log("info: ", initBoardGeneral.current[key])
                                     console.log("piece: ", piece)
 
@@ -2200,7 +2198,7 @@ function isNotBlocked({col,
 
                 while (piece_col > turn_king.col){
 
-                    for (let key in boardInverseGeneral[piece_col]){
+                    for (const key of Object.keys(boardInverseGeneral[piece_col]) as Rows[]){
 
                         if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                             no_piece_king = false
@@ -2221,7 +2219,7 @@ function isNotBlocked({col,
 
                 while (piece_col_2 <= 7){
 
-                    for (let key in boardInverseGeneral[piece_col_2]){
+                    for (const key of Object.keys(boardInverseGeneral[piece_col_2]) as Rows[]){
 
                         if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col_2][key] != "empty"){
                             let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
@@ -2400,7 +2398,7 @@ function isNotBlocked({col,
 
                 while (piece_col > turn_king.col && piece_row < turn_king.row){
 
-                    for (let key in boardInverseGeneral[piece_col]){
+                    for (const key of Object.keys(boardInverseGeneral[piece_col]) as Rows[]){
 
                         if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                             no_piece_king = false
@@ -2420,7 +2418,7 @@ function isNotBlocked({col,
 
                 while (piece_col_2 <= 7 && piece_row_2 >= 0){
 
-                    for (let key in boardInverseGeneral[piece_col_2]){
+                    for (const key of Object.keys(boardInverseGeneral[piece_col_2]) as Rows[]){
                         console.log("piece_row_2: ", piece_row_2, "piece_col_2", piece_col_2)
 
                         if (Number(String(key)[1]) == piece_row_2 && boardInverseGeneral[piece_col_2][key] != "empty"){
@@ -2429,7 +2427,7 @@ function isNotBlocked({col,
                             for (let key in initBoardGeneral.current){
                                 
                                 if (initBoardGeneral.current[key].name == piece){
-                                    console.log("keys : ", initBoardGeneral.current[key]).name
+                                    console.log("keys : ", initBoardGeneral.current[key].name)
                                     console.log("info: ", initBoardGeneral.current[key])
                                     console.log("piece: ", piece)
 
@@ -2464,7 +2462,7 @@ function isNotBlocked({col,
 
                 while (piece_col < turn_king.col && piece_row > turn_king.row){
 
-                    for (let key in boardInverseGeneral[piece_col]){
+                    for (const key of Object.keys(boardInverseGeneral[piece_col]) as Rows[]){
 
                         if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col][key] != "empty"){ // if there is another piece between make false
                             no_piece_king = false
@@ -2484,7 +2482,7 @@ function isNotBlocked({col,
 
                 while (piece_col_2 >= 0 && piece_row_2 <= 7){
 
-                    for (let key in boardInverseGeneral[piece_col_2]){
+                    for (const key of Object.keys(boardInverseGeneral[piece_col_2]) as Rows[]){
 
                         if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col_2][key] != "empty"){
                             let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
@@ -2675,7 +2673,7 @@ function fireGameOver(turn: string){
 }
 
 
-function noPieceBetween(from_col: number, from_row: number, to_col: number, to_row: number, BoardInverseGeneral: {}[]): boolean{
+function noPieceBetween(from_col: number, from_row: number, to_col: number, to_row: number, BoardInverseGeneral: OneColumn[]): boolean{
 
     if ((from_col == to_col) && (from_row == to_row)){
         throw new Error("The same position given to noPieceBetween")
@@ -2794,6 +2792,17 @@ function noPieceBetween(from_col: number, from_row: number, to_col: number, to_r
     return true
 }
 
+interface drawPossibleMovesProps extends Piece {
+    setDrawState: Dispatch<SetStateAction<boolean[][]>>
+    turn: string
+    isCheck: boolean
+    colsAndRows: null|{row: number, col:number}[] // {row: number, col:number}[]
+    playerTurn: string
+    is_it_blocked: boolean
+    initBoardGeneral: Piece[]
+    boardInverseGeneral: OneColumn[]
+}
+
 // clean init board
 // we're gonna change the if conditions to include also player_color when deciding inc or dec
 // we're gonna also change the initial setup for the different player_color s
@@ -2809,7 +2818,7 @@ function drawPossibleMoves(
     turn,
     isCheck,
     colsAndRows,
-    player_color, // player's color
+    playerTurn, // player's color
     initBoardGeneral,
     boardInverseGeneral,
     is_it_blocked} : drawPossibleMovesProps
@@ -2821,12 +2830,13 @@ function drawPossibleMoves(
     console.log("drawPossibleMoves : isCheck: ", isCheck, "cols_and_rows: ", colsAndRows, "moveable: ", moveable)
     console.log("kind is :", kind)
     if (kind == "pawn"){
+        let pawnMoveable = moveable as PawnMoveable
 
         if (has_moved == true){ // draw 1 square
 
             let col_inc
             let row_inc
-            if ((color == "black" && player_color == "white") || (color == "white" && player_color == "black")){ // draw in decendant order of rows
+            if ((color == "black" && playerTurn == "white") || (color == "white" && playerTurn == "black")){ // draw in decendant order of rows
 
                 col_inc = 1
                 row_inc = 1   
@@ -2845,7 +2855,7 @@ function drawPossibleMoves(
                     
                     let piece = getPiece(col, row + row_inc, true, boardInverseGeneral)
                     
-                    if (row + row_inc < 8 && moveable.forward){ // draw only if the next square is empty
+                    if (row + row_inc < 8 && pawnMoveable.forward){ // draw only if the next square is empty
                         
                         
                         if (piece == null){ 
@@ -2853,7 +2863,7 @@ function drawPossibleMoves(
                         }
                     }
                     
-                    if (col + col_inc < 8 && row + row_inc < 8 && moveable.rightEat){
+                    if (col + col_inc < 8 && row + row_inc < 8 && pawnMoveable.rightEat){
                         console.log("col and col_inc: ", col, col_inc)
                         
                         console.log("get piece for col: ", col + col_inc, "row: ", row + row_inc)
@@ -2871,7 +2881,7 @@ function drawPossibleMoves(
 
                     } 
 
-                    if (col - col_inc >= 0 && row +row_inc <= 7 && moveable.leftEat){
+                    if (col - col_inc >= 0 && row +row_inc <= 7 && pawnMoveable.leftEat){
                         console.log("get piece for col: ", col - col_inc, "row: ", row + row_inc)
                         let piece = getPiece(col - col_inc, row + row_inc, true, boardInverseGeneral)
 
@@ -2888,7 +2898,7 @@ function drawPossibleMoves(
         } else { // draw 2 square
 
             let row_inc
-            if ((color == "black" && player_color == "white") || (color == "white" && player_color == "black")){ // draw in decendant order of rows
+            if ((color == "black" && playerTurn == "white") || (color == "white" && playerTurn == "black")){ // draw in decendant order of rows
 
                 row_inc = 1
                 
@@ -2908,7 +2918,7 @@ function drawPossibleMoves(
                     let piece = getPiece(col, row+row_inc, true, boardInverseGeneral)
                     console.log("get piece for col: ", col, "row: ", row + row_inc, "piece: ", piece)
                     console.log("cols and rows is: ", colsAndRows)
-                    if (piece == null && moveable.forward){
+                    if (piece == null && pawnMoveable.forward){
 
                         isIn(col, row+row_inc, colsAndRows) ? candidate[col][row+row_inc] = true: undefined;    
 
@@ -2920,7 +2930,7 @@ function drawPossibleMoves(
                     }
                     
                     // eat in cross square
-                    if (col-1 >= 0 && moveable.leftEat){
+                    if (col-1 >= 0 && pawnMoveable.leftEat){
                         
                         piece = getPiece(col-1, row+row_inc, true, boardInverseGeneral)
                         for (let key in initBoardGeneral){
@@ -2932,7 +2942,7 @@ function drawPossibleMoves(
                     }
 
                     // eat in cross square
-                    if (col+1 <= 7 && moveable.rightEat) {
+                    if (col+1 <= 7 && pawnMoveable.rightEat) {
 
                         piece = getPiece(col+1, row+row_inc, true, boardInverseGeneral)
                         for (let key in initBoardGeneral){
@@ -2947,7 +2957,7 @@ function drawPossibleMoves(
                 })
         }
     } else if (kind == "knight"){
-        //if (color == "black"){
+        
 
             setDrawState((old: boolean[][]) => {
                 let candidate = [...old]
@@ -3092,7 +3102,7 @@ function drawPossibleMoves(
         
     } else if (kind == "rook"){
 
-            //if (color == "black"){
+            const rookMoveable = moveable as RookMoveable
                 setDrawState((old: boolean[][]) => {
                     let candidates = [...old]
 
@@ -3102,7 +3112,7 @@ function drawPossibleMoves(
                     let row_loc_2 = row +1
                     let col_loc = col -1;
                     let col_loc_2 = col +1;
-                    while (row_loc >= 0 && moveable.upDown){ // to the up
+                    while (row_loc >= 0 && rookMoveable.upDown){ // to the up
                         
                         let piece = getPiece(col, row_loc, true, boardInverseGeneral)
                         if (piece == null){ // empty, draw it
@@ -3120,7 +3130,7 @@ function drawPossibleMoves(
                         row_loc--;
                     }
 
-                    while (row_loc_2 <= 7 && moveable.upDown){ // to the down 
+                    while (row_loc_2 <= 7 && rookMoveable.upDown){ // to the down 
                         
                         let piece = getPiece(col, row_loc_2, true, boardInverseGeneral);
                         if (piece == null) {
@@ -3139,7 +3149,7 @@ function drawPossibleMoves(
                         row_loc_2++;
                     }
 
-                    while (col_loc >= 0 && moveable.leftRight){ // to the left
+                    while (col_loc >= 0 && rookMoveable.leftRight){ // to the left
                         
                         let piece = getPiece(col_loc, row, true, boardInverseGeneral);
                         if (piece == null) {
@@ -3158,7 +3168,7 @@ function drawPossibleMoves(
                         col_loc--;
                     }
 
-                    while (col_loc_2 <= 7 && moveable.leftRight){ // to the right
+                    while (col_loc_2 <= 7 && rookMoveable.leftRight){ // to the right
                         
                         let piece = getPiece(col_loc_2, row, true, boardInverseGeneral);
                         if (piece == null) {
@@ -3182,7 +3192,7 @@ function drawPossibleMoves(
             
     } else if (kind == "bishop"){
 
-        //if (color == "black"){
+        const bishopMoveable = moveable as BishopMoveable
 
             setDrawState((old: boolean[][]) => {
 
@@ -3198,7 +3208,7 @@ function drawPossibleMoves(
                 let row_loc_3 = row-1
                 let row_loc_4 = row+1
                 
-                while (col_loc >= 0 && moveable.leftUp){ // to the left-up side
+                while (col_loc >= 0 && bishopMoveable.leftUp){ // to the left-up side
 
                     if (row_loc >= 0){
 
@@ -3223,7 +3233,7 @@ function drawPossibleMoves(
                     row_loc--;
                 }
 
-                while (col_loc_2 >= 0 && moveable.rightUp){ // to the left-down side
+                while (col_loc_2 >= 0 && bishopMoveable.rightUp){ // to the left-down side
 
                     if (row_loc_2 <= 7){
 
@@ -3248,7 +3258,7 @@ function drawPossibleMoves(
                     row_loc_2++;
                 }
 
-                while (col_loc_3 <= 7 && moveable.rightUp){ // to the right-up side
+                while (col_loc_3 <= 7 && bishopMoveable.rightUp){ // to the right-up side
 
                     if (row_loc_3 >= 0){
 
@@ -3273,7 +3283,7 @@ function drawPossibleMoves(
                     row_loc_3--;
                 }
 
-                while (col_loc_4 <= 7 && moveable.leftUp){ // to the right-down side
+                while (col_loc_4 <= 7 && bishopMoveable.leftUp){ // to the right-down side
 
                     if (row_loc_4 <= 7){
 
@@ -3303,6 +3313,8 @@ function drawPossibleMoves(
         
     } else if (kind == "queen"){
 
+        const queenMoveable = moveable as QueenMoveable
+
         setDrawState((old: boolean[][]) => {
 
             let candidates = [...old]
@@ -3322,7 +3334,7 @@ function drawPossibleMoves(
             let row_loc_5 = row+1
             let row_loc_6 = row-1
 
-            while (col_loc >= 0 && moveable.leftUp){ // the left-up side
+            while (col_loc >= 0 && queenMoveable.leftUp){ // the left-up side
 
                 if (row_loc >= 0){
 
@@ -3347,7 +3359,7 @@ function drawPossibleMoves(
                 row_loc--;
             }
 
-            while (col_loc_2 >= 0 && moveable.rightUp){ // the left-down side
+            while (col_loc_2 >= 0 && queenMoveable.rightUp){ // the left-down side
 
                 if (row_loc_2 <= 7){
 
@@ -3372,7 +3384,7 @@ function drawPossibleMoves(
                 row_loc_2++;
             }
 
-            while (col_loc_3 <= 7 && moveable.rightUp){ // the right-up side
+            while (col_loc_3 <= 7 && queenMoveable.rightUp){ // the right-up side
 
                 if (row_loc_3 >= 0){
 
@@ -3397,7 +3409,7 @@ function drawPossibleMoves(
                 row_loc_3--;
             }
 
-            while (col_loc_4 <= 7 && moveable.leftUp){ // the right-down side
+            while (col_loc_4 <= 7 && queenMoveable.leftUp){ // the right-down side
 
                 if (row_loc_4 <= 7){
 
@@ -3423,7 +3435,7 @@ function drawPossibleMoves(
             }
 
 
-            while (col_loc_5 <= 7 && moveable.leftRight){ // to right
+            while (col_loc_5 <= 7 && queenMoveable.leftRight){ // to right
 
                 let piece = getPiece(col_loc_5, row, true, boardInverseGeneral)
                 console.log("queen right at: ", col_loc_5,row, )
@@ -3444,7 +3456,7 @@ function drawPossibleMoves(
                 col_loc_5++;
             }
 
-            while (col_loc_6 >= 0 && moveable.leftRight){ // to left
+            while (col_loc_6 >= 0 && queenMoveable.leftRight){ // to left
 
                 let piece = getPiece(col_loc_6, row, true, boardInverseGeneral)
 
@@ -3465,7 +3477,7 @@ function drawPossibleMoves(
                 col_loc_6--;
             }
 
-            while (row_loc_5 <= 7 && moveable.upDown){ // to down
+            while (row_loc_5 <= 7 && queenMoveable.upDown){ // to down
 
                 let piece = getPiece(col, row_loc_5, true, boardInverseGeneral)
                 
@@ -3487,7 +3499,7 @@ function drawPossibleMoves(
                 row_loc_5++;
             }
 
-            while (row_loc_6 >= 0 && moveable.upDown){ // to up
+            while (row_loc_6 >= 0 && queenMoveable.upDown){ // to up
 
                 let piece = getPiece(col, row_loc_6, true, boardInverseGeneral)
 
@@ -3594,15 +3606,16 @@ function drawPossibleMoves(
                 // for castle move (to the right)
                 if (!has_moved){
                     let rook_2 = getPiece(7, 7, true, boardInverseGeneral, false)
+                    let rook_2_piece: Piece = nullPiece
                     // how do we get the piece ?
                     for (let key in initBoardGeneral){ // key is just index here
         
-                        if (Object.keys(initBoardGeneral[key])[0] == rook_2 && Object.values(initBoardGeneral[key])[0].color == turn){
-                            rook_2 = Object.values(initBoardGeneral[key])[0];
+                        if (initBoardGeneral[key].name == rook_2 && initBoardGeneral[key].color == turn){
+                            rook_2_piece = (initBoardGeneral[key]);
                         }
                     }
 
-                    if (rook_2 && rook_2.has_moved == false){
+                    if (rook_2 && rook_2_piece.has_moved == false){
 
                         if (noPieceBetween(col, row, 7, 7, boardInverseGeneral)){
     
@@ -3759,15 +3772,16 @@ function drawPossibleMoves(
                 if (!has_moved){
 
                     let rook_1 = getPiece(0, 7, true, boardInverseGeneral, false)
+                    let rook_1_piece: Piece = nullPiece
 
                     for (let key in initBoardGeneral){ // key is just index here
         
-                        if (Object.keys(initBoardGeneral[key])[0] == rook_1 && Object.values(initBoardGeneral[key])[0].color == turn){
-                            rook_1 = Object.values(initBoardGeneral[key])[0];
+                        if (initBoardGeneral[key].name == rook_1 && initBoardGeneral[key].color == turn){
+                            rook_1_piece = initBoardGeneral[key];
                         }
                     }
 
-                    if (rook_1 && rook_1.has_moved == false && noPieceBetween(col, row, 0, 7, boardInverseGeneral)){
+                    if (rook_1 && rook_1_piece.has_moved == false && noPieceBetween(col, row, 0, 7, boardInverseGeneral)){
 
                         // use opponentCantReach to check no threat for the path of king
                         let is_clear = true
@@ -3860,9 +3874,9 @@ function drawPossibleMoves(
 
 // clear initboard
 // NOTE: Check if move is makeable - if it's drawn, it's makeable
-function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch | null, selectedPiece: Piece,
+function makeMove(col_id: number, row_id: number, setDrawState: Dispatch<SetStateAction<boolean[][]>> | null, selectedPiece: Piece,
                    wsInstance: WebSocket|null, initBoardGeneral: RefObject<Piece[]>,
-                   boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number, isCastle?: Boolean) : any{
+                   boardInverseGeneral: RefObject<OneColumn[]>, setIsUpgradingMove: Dispatch<SetStateAction<number>>, isUpgradingMove: number, isCastle?: Boolean) : any{
 
     // first clear the board
     if (setDrawState != null) { // if it's null, it means we're doing the opponent's move
@@ -3925,9 +3939,9 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
             for (let key in initBoardGeneral.current){ // key is just index here
         
                 if (initBoardGeneral.current[key].name == rook && initBoardGeneral.current[key].color == selectedPiece.color){
-                    rook = initBoardGeneral.current[key];
+                    
                     // somehow update the rook
-                    castle_updated_piece = makeMove(col_id+1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
+                    castle_updated_piece = makeMove(col_id+1, row_id, setDrawState, {...initBoardGeneral.current[key]}, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
 
                     console.log("castle updated piece: ", castle_updated_piece)
                 }
@@ -3942,9 +3956,9 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
             for (let key in initBoardGeneral.current){ // key is just index here
         
                 if (initBoardGeneral.current[key].name == rook && initBoardGeneral.current[key].color == selectedPiece.color){
-                    rook = initBoardGeneral.current[key];
+                    
                     // somehow update the rook
-                    castle_updated_piece = makeMove(col_id-1, row_id, setDrawState, rook, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
+                    castle_updated_piece = makeMove(col_id-1, row_id, setDrawState, {...initBoardGeneral.current[key]}, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
 
                     console.log("castle updated piece: ", castle_updated_piece)
                 }
@@ -3966,7 +3980,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     let sourceObj = newBoardInverseLocal[selected_col]
 
     let obj = newBoardInverseLocal[col_id]
-    for (let key in obj){
+    for (const key of Object.keys(obj) as Rows[]){
         if (Number(String(key)[1]) == row_id){
 
             obj[key] = !pawn_upgrade ? selectedPiece.name : `${selectedPiece.name}_upgraded_${choice}`
@@ -4073,7 +4087,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: React.Dispatch |
     }
 }
 
-function clearBoard(setDrawState: React.Dispatch){
+function clearBoard(setDrawState: Dispatch<SetStateAction<boolean[][]>>){
 
     setDrawState([
             [false, false, false, false, false, false, false, false],
@@ -4092,7 +4106,7 @@ function clearBoard(setDrawState: React.Dispatch){
 
 // clear init board
 function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInstance: WebSocket|null, initBoardGeneral: RefObject<Piece[]>
-                    , boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
+                    , boardInverseGeneral: RefObject<OneColumn[]>, setIsUpgradingMove: Dispatch<SetStateAction<number>>, isUpgradingMove: number){
     /*
         Function that runs when a piece is taken, col_id, row_id is the location of the eaten piece, selected piece is the one that eats
             If wsInstance is null, it means we're executing move coming from opponent, no need to send it back
@@ -4152,7 +4166,7 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
     let localBoardInverse = boardInverseGeneral.current
         let obj = localBoardInverse[selectedPiece.col]
 
-        for (let key in obj){
+        for (const key of Object.keys(obj) as Rows[]){
             if (Number(String(key)[1]) == selectedPiece.row){ // find the old piece and make it empty
                 
                 obj[key] = "empty" 
@@ -4164,7 +4178,7 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
     
         let second_obj = localBoardInverse[col_id]
     
-        for (let key in second_obj){
+        for (const key of Object.keys(second_obj) as Rows[]){
             if (Number(String(key)[1]) == row_id){ // find the eaten piece and make it's place the selected piece
                 second_obj[key] = !pawn_upgrade ? selectedPiece.name : `${selectedPiece.name}_upgraded_${choice}`    
             }
@@ -4227,7 +4241,7 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 // another piece is now threating the king other than moving piece). For this you'd have to check for every opponent's other piece
 // if it has a clear direction to the king (similar to what we did in setMoveablePieces where we found the opponent pieces toward king with a 
 // (one) blocking piece)
-function isCheckCondition(col_id: number, row_id: number, playerTurn: string, initBoardGeneral: Piece[], boardInverseGeneral: {}[]){
+function isCheckCondition(col_id: number, row_id: number, playerTurn: string, initBoardGeneral: Piece[], boardInverseGeneral: OneColumn[]){
 
     // do I have to know player turn here to understand which perspective I'm looking at instead of local_turn
 
@@ -4840,7 +4854,7 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 /*
    This function checks our rooks, bishops, and queen(s) if they can reach (or eat) opponent's king, then it's (indirect) check condition
 */
-function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], boardInverseGeneral: {}[]){
+function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], boardInverseGeneral: OneColumn[]){
 
     // get opponent's king
     let opp_king: Piece = nullPiece
@@ -5194,6 +5208,9 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], board
       all above is done except:
       - checkmate conditions -> write it completetly in fireGameOver()
 
+      - do we check knight's moveable when drawPossibleMoves
+      - isNotBlocked may not be returning a boolean always, which should be
+
       - code reorganization
 
       --- later ? (after backend in rust)
@@ -5206,11 +5223,11 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], board
       - withdraw move
       - bizarre moves of FFA (Fatih Furkan Altınkaya) 
 */
-function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispatch, allDrawState: boolean[][], setSelectedPiece: React.Dispatch, 
-                       selectedPiece: Piece, turn: string, setTurn: React.Dispatch, setIsCheck: React.Dispatch, isCheck: boolean, 
-                       checkingPiece: Piece, setCheckingPiece: React.Dispatch, colsAndRows: null|{row: number, col:number}[], 
-                       setColsAndRows: React.Dispatch, wsInstance: WebSocket|null, playerTurn: RefObject<string>, initBoardGeneral: RefObject<Piece[]>, 
-                       boardInverseGeneral: RefObject<{}[]>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
+function onclickSquare(col_id: number, row_id: number, setDrawState: Dispatch<SetStateAction<boolean[][]>>, allDrawState: boolean[][], setSelectedPiece: Dispatch<SetStateAction<Piece>>, 
+                       selectedPiece: Piece, turn: string, setTurn: Dispatch<SetStateAction<string>>, setIsCheck: Dispatch<SetStateAction<boolean>>, isCheck: boolean, 
+                       checkingPiece: Piece, setCheckingPiece: Dispatch<SetStateAction<Piece>>, colsAndRows: null|{row: number, col:number}[], 
+                       setColsAndRows: Dispatch<SetStateAction<null|{row:number, col: number}[]>>, wsInstance: WebSocket|null, playerTurn: RefObject<string>, initBoardGeneral: RefObject<Piece[]>, 
+                       boardInverseGeneral: RefObject<OneColumn[]>, setIsUpgradingMove: Dispatch<SetStateAction<number>>, isUpgradingMove: number){
     /*
         Onclick handler on squares. It draws the possible moves, and should handle the move
         Notes: could be two separate function -> draw possible moves and leave, handle the move
@@ -5317,7 +5334,7 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
         if (piece_in == null){
             console.log("current situation of initboardGeneral: ", initBoardGeneral.current)
             throw new Error("The piece is not found, it should've been found. Function: onClickSquare")
-        } else if (Object.values(piece_in)[0].color != turn) { // opponent piece
+        } else if (piece_in.color != turn) { // opponent piece
 
             if (allDrawState[col_id][row_id] == true) {
 
@@ -5394,23 +5411,23 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: React.Dispa
                 clearBoard(setDrawState);
                 
                 // select the piece
-                setSelectedPiece({...Object.values(piece_in)[0]});
+                setSelectedPiece({...piece_in});
                 
 
-                console.log(Object.values(piece_in)[0])
+                console.log(piece_in)
                 
                 let localBoardInverse = [...boardInverseGeneral.current]
                 console.log("local board Inverse before error: ", localBoardInverse)
-                let is_it_blocked = isNotBlocked({...Object.values(piece_in)[0], turn, initBoardGeneral, boardInverseGeneral: localBoardInverse})
+                let is_it_blocked = isNotBlocked({...piece_in, turn, initBoardGeneral, boardInverseGeneral: localBoardInverse})
                 console.log("Ok, is it blocked ? : ", is_it_blocked)
 
                 let localInitBoardGeneral = [...initBoardGeneral.current]
-                let args = {...Object.values(piece_in)[0], setDrawState, turn, isCheck, colsAndRows, is_it_blocked, playerTurn, 
+                let args = {...piece_in, setDrawState, turn, isCheck, colsAndRows, is_it_blocked, playerTurn: playerTurn.current, 
                              initBoardGeneral: localInitBoardGeneral, boardInverseGeneral: localBoardInverse}
                 // handle this issue later ^^^^^^^^^^^^^
                 console.log(args)
 
-                // IN here there is a mistake on drawing the pawn that could eat right
+                // BUG IN ARGS
                 drawPossibleMoves(args)
             }
             
@@ -5431,9 +5448,9 @@ interface Move {
 /*
     Funtion to realize moves coming from server, receiving                                 
 */
-function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPiece: React.Dispatch, setColsAndRows: React.Dispatch,
-                            setTurn: React.Dispatch, turn: string, initboardGeneral: RefObject<Piece[]>,
-                            boardInverseGeneral: RefObject<{}[]>, playerTurn: RefObject<string>, setIsUpgradingMove: React.Dispatch, isUpgradingMove: number){
+function makeOpponentMove(move: Move, setIsCheck: Dispatch<SetStateAction<boolean>>, setCheckingPiece: Dispatch<SetStateAction<Piece>>, setColsAndRows: Dispatch<SetStateAction<null|{row:number, col: number}[]>>,
+                            setTurn: Dispatch<SetStateAction<string>>, turn: string, initboardGeneral: RefObject<Piece[]>,
+                            boardInverseGeneral: RefObject<OneColumn[]>, playerTurn: RefObject<string>, setIsUpgradingMove: Dispatch<SetStateAction<number>>, isUpgradingMove: number){
 
     console.log("OK now we need to do the move: ", move)
 
@@ -5488,7 +5505,7 @@ function makeOpponentMove(move: Move, setIsCheck: React.Dispatch, setCheckingPie
         }
     }
     if (piece_in == null) {console.log("There should be an ERROR"); return;}
-    let custom_selected_piece = {...Object.values(piece_in)[0]}
+    let custom_selected_piece = {...piece_in}
     console.log("For opponent custom selected piece is: ", custom_selected_piece)
     console.log("moving to col:", move.to_col, " to row: ", move.to_row)
 
@@ -5612,7 +5629,7 @@ export default function Board(){
     ) // initial state of possible moves
 
     const initBoardGeneral = useRef<Piece[]>(initBoard_fromWhite)
-    const boardInverseGeneral = useRef<{}[]>(boardInverse_fromWhite)
+    const boardInverseGeneral = useRef<OneColumn[]>(boardInverse_fromWhite)
 
     const [selectedPiece, setSelectedPiece] = useState<Piece>({...nullPiece});
 
@@ -5745,7 +5762,7 @@ export default function Board(){
     for (let i = 0; i<BOARD_SIZE; i++){
         columns.push(i)
     }
-    let displayColumns: React.JSX.Element = []
+    let displayColumns: JSX.Element[] = []
 
     
     columns.map((elem, index) => {        
@@ -5792,22 +5809,22 @@ interface ColumnProps {
     id: number;
     allDrawState: boolean[][];
     drawState: boolean[];
-    setDrawState: React.Dispatch<React.SetStateAction<boolean[][]>>
-    setSelectedPiece: React.Dispatch
+    setDrawState: Dispatch<SetStateAction<boolean[][]>>
+    setSelectedPiece: Dispatch<SetStateAction<Piece>>
     selectedPiece: Piece
     turn: string
-    setTurn: React.Dispatch
-    setIsCheck: React.Dispatch
+    setTurn: Dispatch<SetStateAction<string>>
+    setIsCheck: Dispatch<SetStateAction<boolean>>
     isCheck: boolean
     checkingPiece: Piece
-    setCheckingPiece: React.Dispatch
+    setCheckingPiece: Dispatch<SetStateAction<Piece>>
     colsAndRows: null|{row:number, col:number}[]
-    setColsAndRows: React.Dispatch
+    setColsAndRows: Dispatch<SetStateAction<null|{row:number, col: number}[]>>
     wsInstance: WebSocket | null
     playerTurn: RefObject<string>
     initBoardGeneral: RefObject<Piece[]>
-    boardInverseGeneral: RefObject<{}[]>
-    setIsUpgradingMove: React.Dispatch
+    boardInverseGeneral: RefObject<OneColumn[]>
+    setIsUpgradingMove: Dispatch<SetStateAction<number>>
     isUpgradingMove: number
     isMovingArrColumn: boolean[]
     setIsMoving: (col: number, row: number, to_what: boolean, x:number, y:number) => void
@@ -5823,7 +5840,7 @@ function Column({id, allDrawState, drawState, setDrawState, setSelectedPiece, se
         squares.push(i)
     }
 
-    let displaySquare: React.JSX.Element = []
+    let displaySquare: JSX.Element[] = []
 
     
     squares.map((elem, index) => {
@@ -5878,24 +5895,24 @@ interface SquareProps{
     row_id: number;
     color: string;
     label_color: string;
-    setDrawState: React.Dispatch<React.SetStateAction<boolean[][]>>;
+    setDrawState: Dispatch<SetStateAction<boolean[][]>>;
     drawState: boolean;
     allDrawState: boolean[][];
-    setSelectedPiece: React.Dispatch
+    setSelectedPiece: Dispatch<SetStateAction<Piece>>
     selectedPiece: Piece;
     turn: string;
-    setTurn: React.Dispatch
-    setIsCheck: React.Dispatch
+    setTurn: Dispatch<SetStateAction<string>>
+    setIsCheck: Dispatch<SetStateAction<boolean>>
     isCheck: boolean
     checkingPiece: Piece
-    setCheckingPiece: React.Dispatch
+    setCheckingPiece: Dispatch<SetStateAction<Piece>>
     colsAndRows: null|{row:number, col:number}[]
-    setColsAndRows: React.Dispatch
+    setColsAndRows: Dispatch<SetStateAction<null|{row:number, col: number}[]>>
     wsInstance: WebSocket | null
     playerTurn: RefObject<string>
     initBoardGeneral: RefObject<Piece[]>
-    boardInverseGeneral: RefObject<{}[]>
-    setIsUpgradingMove: React.Dispatch
+    boardInverseGeneral: RefObject<OneColumn[]>
+    setIsUpgradingMove: Dispatch<SetStateAction<number>>
     isUpgradingMove: number
     isMovingSquare: boolean
     setIsMoving: (col: number, row: number, to_what: boolean, x:number, y:number) => void
@@ -5957,7 +5974,7 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
         }
     }
 
-    const isOpponent = piece != null && piece_in != null && piece_in[piece_name].color != turn // String(piece).startsWith("w")
+    const isOpponent = piece != null && piece_in != null && piece_in.color != turn // String(piece).startsWith("w")
     const showCaptureMarker = drawState && isOpponent
     const showDotMarker = drawState && piece == null
     const showHighlight = drawState && piece != null && !isOpponent
@@ -5965,7 +5982,7 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
     const bgColor = showHighlight ? "bg-chess-highlight" : color
     const bgHover = showCaptureMarker ? "hover:bg-[#84794E]" : ""
 
-    const isKingChecked = piece != null && isCheck && turn == piece_in[piece_name].color && piece_in[piece_name].kind == "king"
+    const isKingChecked = piece != null && isCheck && piece_in != null && turn == piece_in.color && piece_in.kind == "king"
     if (isKingChecked) console.log("check camee!!!!")
 
     function handleMouseUp(e: React.MouseEvent){
@@ -6002,7 +6019,7 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
           )}
         
           {piece != null && 
-          <Piece piece={piece} key={col_id*10 + row_id} isMovingPiece={isMovingSquare} setIsMoving={setIsMoving} col_id={col_id} row_id={row_id} mouseLoc={mouseLoc}/>}
+          <PieceComponent piece={piece} key={col_id*10 + row_id} isMovingPiece={isMovingSquare} setIsMoving={setIsMoving} col_id={col_id} row_id={row_id} mouseLoc={mouseLoc}/>}
           {col_id == 7 && (
             <span className={`${label_color} text-xs absolute top-0 right-0 p-1 z-20`}>
               {8 - row_id}
@@ -6023,7 +6040,7 @@ function Square({col_id, row_id, color, label_color, setDrawState, drawState, al
     )
 }
 // <img src={piece} className="relative z-20" />
-interface PieceProps {
+interface PieceComponentProps {
     piece: string
     isMovingPiece: boolean
     setIsMoving: (col: number, row: number, to_what: boolean, x:number, y:number) => void
@@ -6032,10 +6049,7 @@ interface PieceProps {
     mouseLoc: {x:number, y:number}
 }
 
-function Piece({piece, isMovingPiece, setIsMoving, col_id, row_id, mouseLoc} : PieceProps){
-    
-
- 
+function PieceComponent({piece, isMovingPiece, setIsMoving, col_id, row_id, mouseLoc} : PieceComponentProps){
 
   let moving_styles = isMovingPiece ? {position: "fixed", left: mouseLoc.x - 45, top: mouseLoc.y - 45, height: 90, width: 90, pointerEvents: "none", zIndex: 1000} :
      {position: "relative", left: 0, top: 0}
@@ -6047,4 +6061,3 @@ function Piece({piece, isMovingPiece, setIsMoving, col_id, row_id, mouseLoc} : P
         </div>
     )
 }
-//restingPos.current = {x: e.clientX, y: e.clientY}; 
