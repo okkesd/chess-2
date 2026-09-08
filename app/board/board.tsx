@@ -4215,12 +4215,9 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
         throw new Error("for the given location, piece should've been found. In isCheckCondition")
     }
 
-    let piece_in: Piece = nullPiece
-    for (let key in initBoardGeneral){
-        if (initBoardGeneral[key].name == piece){
-            piece_in = initBoardGeneral[key]
-            break
-        }
+    let piece_in = findPieceByName(piece, initBoardGeneral)
+    if (!piece_in){
+        throw new Error(`Piece should've been found, but not found: ${piece}`)
     }
 
     let local_turn = piece_in.color
@@ -4237,575 +4234,355 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 
         let piece_target = getPiece(col_id+1, row_id + row_inc, true, boardInverseGeneral)
         if (piece_target != null){
-            for (let key in initBoardGeneral){
-                if (initBoardGeneral[key].name == piece_target 
-                    && initBoardGeneral[key].kind == "king"
-                    && initBoardGeneral[key].color != local_turn){
-                        return true
-                }
-            }
+            
+            let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece_target && piece_inside.kind == "king" && piece_inside.color != local_turn)
+            if (can_return_true) return true
         }
 
         piece_target = getPiece(col_id-1, row_id + row_inc, true, boardInverseGeneral)
         if (piece_target != null){
-            for (let key in initBoardGeneral){
-                if (initBoardGeneral[key].name == piece_target 
-                    && initBoardGeneral[key].kind == "king"
-                    && initBoardGeneral[key].color != local_turn){
-                        return true
-                }
-            }
+            
+            let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece_target && piece_inside.kind == "king" && piece_inside.color != local_turn)
+            if (can_return_true) return true
         }
     } else if (piece_kind == "knight"){
 
 
         if (col_id - 2 >= 0){
 
-                    if (row_id +1 <= 7){
-
-                        let piece = getPiece(col_id-2, row_id+1, true, boardInverseGeneral)
-                        if (piece != null){ // there is no piece, you can draw
-                            
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    return true
-                                }
-                            }
-                        }
-
-                        
-                    }
-                    if (row_id -1 >= 0){
-
-                        let piece = getPiece(col_id-2, row_id-1, true, boardInverseGeneral)
-                        if (piece != null){ // there is no piece, draw
-                             // there is a piece, if it's not black -> draw
+            if (row_id +1 <= 7){
+                
+                let piece = getPiece(col_id-2, row_id+1, true, boardInverseGeneral)
+                if (piece != null){ // there is no piece, you can draw
                     
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    return true
-                                }
-                            }
-                        }
-                        
-                    }
-
-                }  
-                if (col_id +2 <= 7){
-
-                    if (row_id +1 <= 7){
-                        let piece = getPiece(col_id+2, row_id+1, true, boardInverseGeneral)
-
-                        if (piece != null){ // there is no piece, you can draw
-                             // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    return true
-                                }
-                            }
-                        }
-                        
-                    }
-                    if (row_id -1 >= 0){
-                        let piece = getPiece(col_id+2, row_id-1, true, boardInverseGeneral)
-
-                        if (piece != null){ // there is no piece, you can draw
-                             // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    return true
-                                }
-                            }
-                        }
-                        
-                    }
-                } 
-
-                if (row_id +2 <= 7){
-
-                    if (col_id -1 >= 0){
-                        let piece = getPiece(col_id-1, row_id+2, true, boardInverseGeneral)
-
-                        if (piece != null){ // there is no piece, you can draw
-                             // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    return true
-                                }
-                            }
-                        }
-                        
-                    }
-                    if (col_id +1 <= 7){
-                        let piece = getPiece(col_id+1, row_id+2, true, boardInverseGeneral)
-
-                        if (piece != null){ // there is no piece, you can draw
-                            
-                             // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    return true
-                                }
-                            }
-                        }
-                        
-                    }
-
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
                 }
-                if (row_id -2 >= 0){
+            }
+            if (row_id -1 >= 0){
+                
+                let piece = getPiece(col_id-2, row_id-1, true, boardInverseGeneral)
+                if (piece != null){ // there is no piece, draw
+                    // there is a piece, if it's not black -> draw
+            
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                }   
+            }
+        }  
+        if (col_id +2 <= 7){
+            if (row_id +1 <= 7){
 
-                    if (col_id -1 >= 0){
-                        let piece = getPiece(col_id-1, row_id-2, true, boardInverseGeneral)
-
-                        if (piece != null){ // there is no piece, you can draw
-                            
-                             // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    return true
-                                }
-                            }
-                        }
-                        
-                        
-                    }
-                    if (col_id +1 <= 7){
-                        let piece = getPiece(col_id+1, row_id-2, true, boardInverseGeneral)
-
-                        if (piece != null){ // there is no piece, you can draw
-                            
-                            // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    return true
-                                }
-                            }
-                        }
-                        
-                        
-                    }
+                let piece = getPiece(col_id+2, row_id+1, true, boardInverseGeneral)
+                if (piece != null){ // there is no piece, you can draw
+                    // there is a piece, make sure it's not black
+                
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
                 }
+            }
+            if (row_id -1 >= 0){
+
+                let piece = getPiece(col_id+2, row_id-1, true, boardInverseGeneral)
+                if (piece != null){ // there is no piece, you can draw
+                    // there is a piece, make sure it's not black
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                }
+            }   
+        }
+        if (row_id +2 <= 7){
+            if (col_id -1 >= 0){
+
+                let piece = getPiece(col_id-1, row_id+2, true, boardInverseGeneral)
+                if (piece != null){ // there is no piece, you can draw
+                     // there is a piece, make sure it's not black
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                }
+                
+            }
+            if (col_id +1 <= 7){
+
+                let piece = getPiece(col_id+1, row_id+2, true, boardInverseGeneral)
+                if (piece != null){ // there is no piece, you can draw
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                }
+                
+            }
+        }
+        if (row_id -2 >= 0){
+            if (col_id -1 >= 0){
+
+                let piece = getPiece(col_id-1, row_id-2, true, boardInverseGeneral)
+                if (piece != null){ // there is no piece, you can draw
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                }
+            }
+            if (col_id +1 <= 7){
+
+                let piece = getPiece(col_id+1, row_id-2, true, boardInverseGeneral)
+                if (piece != null){ // there is no piece, you can draw
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
+                }
+            }
+        }
     } else if (piece_kind == "rook"){
 
 
         let row_loc = row_id -1
-                let row_loc_2 = row_id +1
-                let col_loc = col_id -1;
-                let col_loc_2 = col_id +1;
-                while (row_loc >= 0){ // to the left
-                    
-                    let piece = getPiece(col_id, row_loc, true, boardInverseGeneral)
-                    if (piece != null){ // empty, draw it
-                        
-                        for (let key in initBoardGeneral){
-                            if (initBoardGeneral[key].name == piece 
-                                && initBoardGeneral[key].color != local_turn
-                                && initBoardGeneral[key].kind == "king"){
-                                
-                                    return true
-                            }
-                        }
-                        break;
-                    }
-                    row_loc--;
-                }
-                while (row_loc_2 <= 7){ // to the down 
-                    
-                    let piece = getPiece(col_id, row_loc_2, true, boardInverseGeneral);
-                    if (piece != null) {
-                        
-                        
-                        for (let key in initBoardGeneral){
-                            if (initBoardGeneral[key].name == piece 
-                                && initBoardGeneral[key].color != local_turn
-                                && initBoardGeneral[key].kind == "king"){
-                                
-                                    return true
-                            }
-                        }
-                        break;
-                    }
-                    row_loc_2++;
-                }
-                while (col_loc >= 0){ // to the up
-                    
-                    let piece = getPiece(col_loc, row_id, true, boardInverseGeneral);
-                    if (piece != null) {
-                        
-                        
-                        for (let key in initBoardGeneral){
-                            if (initBoardGeneral[key].name == piece 
-                                && initBoardGeneral[key].color != local_turn
-                                && initBoardGeneral[key].kind == "king"){
-                                
-                                    return true
-                            }
-                        }
-                        break;
-                    }
-                    col_loc--;
-                }
-                while (col_loc_2 <= 7){ // to the right
-                    
-                    let piece = getPiece(col_loc_2, row_id, true, boardInverseGeneral);
-                    if (piece != null) {
-                        
+        let row_loc_2 = row_id +1
+        let col_loc = col_id -1;
+        let col_loc_2 = col_id +1;
+        while (row_loc >= 0){ // to the left
+            
+            let piece = getPiece(col_id, row_loc, true, boardInverseGeneral)
+            if (piece != null){ // empty, draw it
+                
+                let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
+                
+                break
+            }
+            row_loc--;
+        }
+        while (row_loc_2 <= 7){ // to the down 
+            
+            let piece = getPiece(col_id, row_loc_2, true, boardInverseGeneral);
+            if (piece != null) {
+                
+                
+                let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
+            
+                break
+            }
+            row_loc_2++;
+        }
+        while (col_loc >= 0){ // to the up
+            
+            let piece = getPiece(col_loc, row_id, true, boardInverseGeneral);
+            if (piece != null) {
+                
+                
+                let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
+                  
+                break
+            }
+            col_loc--;
+        }
+        while (col_loc_2 <= 7){ // to the right
+            
+            let piece = getPiece(col_loc_2, row_id, true, boardInverseGeneral);
+            if (piece != null) {
+                
+                let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
 
-                        for (let key in initBoardGeneral){
-                            if (initBoardGeneral[key].name == piece 
-                                && initBoardGeneral[key].color != local_turn
-                                && initBoardGeneral[key].kind == "king"){
-                                
-                                    return true
-                            }
-                        }
-                        break;
-                    }
-                    col_loc_2++;
-                }
+                break;
+            }
+            col_loc_2++;
+        }
     } else if (piece_kind == "bishop"){
 
         let col_loc = col_id-1
-                let col_loc_2 = col_id-1
-                let col_loc_3 = col_id+1
-                let col_loc_4 = col_id+1
-                let row_loc = row_id-1
-                let row_loc_2 = row_id+1
-                let row_loc_3 = row_id-1
-                let row_loc_4 = row_id+1
-                
-                while (col_loc >= 0){ // to the left-up side
-
-                    if (row_loc >= 0){
-
-                        // get piece
-                        let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
-
-                        if (piece != null){
-                            
-
-                            for (let key in initBoardGeneral){
-
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-
-                                        return true
-
-                                }
-                            }
-                            break
-                        }
-                    }
-                    col_loc--;
-                    row_loc--;
+        let col_loc_2 = col_id-1
+        let col_loc_3 = col_id+1
+        let col_loc_4 = col_id+1
+        let row_loc = row_id-1
+        let row_loc_2 = row_id+1
+        let row_loc_3 = row_id-1
+        let row_loc_4 = row_id+1
+        
+        while (col_loc >= 0){ // to the left-up side
+            if (row_loc >= 0){
+                // get piece
+                let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
+                if (piece != null){
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                    break
                 }
+            }
+            col_loc--;
+            row_loc--;
+        }
+        while (col_loc_2 >= 0){ // to the left-down side
+            if (row_loc_2 <= 7){
+                // get piece
+                let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
+                if (piece != null){
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
 
-                while (col_loc_2 >= 0){ // to the left-down side
-
-                    if (row_loc_2 <= 7){
-
-                        // get piece
-                        let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
-
-                        if (piece != null){
-                            
-
-                            for (let key in initBoardGeneral){
-
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-                                    
-                                        return true
-
-                                }
-                            }
-                            break
-                        }
-                    }
-                    col_loc_2--;
-                    row_loc_2++;
+                    break
                 }
-
-                while (col_loc_3 <= 7){ // to the right-up side
-
-                    if (row_loc_3 >= 0){
-
-                        // get piece
-                        let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
-
-                        if (piece != null){
-                            
-
-                            for (let key in initBoardGeneral){
-
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-
-                                        return true
-
-                                }
-                            }
-                            break
-                        }
-                    }
-                    col_loc_3++;
-                    row_loc_3--;
+            }
+            col_loc_2--;
+            row_loc_2++;
+        }
+        while (col_loc_3 <= 7){ // to the right-up side
+            if (row_loc_3 >= 0){
+                // get piece
+                let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
+                if (piece != null){
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                    
+                    break
                 }
-
-                while (col_loc_4 <= 7){ // to the right-down side
-
-                    if (row_loc_4 <= 7){
-
-                        // get piece
-                        let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
-
-                        if (piece != null){
-                            
-
-                            for (let key in initBoardGeneral){
-
-                                if (initBoardGeneral[key].name == piece 
-                                    && initBoardGeneral[key].color != local_turn
-                                    && initBoardGeneral[key].kind == "king"){
-
-                                        return true
-                                }
-                            }
-                            break
-                        }
-                    }
-                    col_loc_4++;
-                    row_loc_4++;
+            }
+            col_loc_3++;
+            row_loc_3--;
+        }
+        while (col_loc_4 <= 7){ // to the right-down side
+            if (row_loc_4 <= 7){
+                // get piece
+                let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
+                if (piece != null){
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                    
+                    break
                 }
+            }
+            col_loc_4++;
+            row_loc_4++;
+        }
     } else if (piece_kind == "queen"){
 
 
         let col_loc = col_id-1
-            let col_loc_2 = col_id-1;
-            let col_loc_3 = col_id+1
-            let col_loc_4 = col_id+1
-            let col_loc_5 = col_id+1
-            let col_loc_6 = col_id-1
+        let col_loc_2 = col_id-1;
+        let col_loc_3 = col_id+1
+        let col_loc_4 = col_id+1
+        let col_loc_5 = col_id+1
+        let col_loc_6 = col_id-1
+        let row_loc = row_id-1
+        let row_loc_2 = row_id+1
+        let row_loc_3 = row_id-1
+        let row_loc_4 = row_id+1
+        let row_loc_5 = row_id+1
+        let row_loc_6 = row_id-1
+        while (col_loc >= 0){ // the left-up side
+            if (row_loc >= 0){
 
-            let row_loc = row_id-1
-            let row_loc_2 = row_id+1
-            let row_loc_3 = row_id-1
-            let row_loc_4 = row_id+1
-            let row_loc_5 = row_id+1
-            let row_loc_6 = row_id-1
+                let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
+                if (piece != null){
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
 
-            while (col_loc >= 0){ // the left-up side
-
-                if (row_loc >= 0){
-
-                    let piece = getPiece(col_loc, row_loc, true, boardInverseGeneral);
-
-                    if (piece != null){
-                        
-
-                        for (let key in initBoardGeneral){
-
-                            if (initBoardGeneral[key].name == piece 
-                                && initBoardGeneral[key].color != local_turn
-                                && initBoardGeneral[key].kind == "king"){
-                                
-                                    return true
-                            }
-                        }
-                        break
-                    }
+                    break
                 }
-
-                col_loc--;
-                row_loc--;
             }
+            col_loc--;
+            row_loc--;
+        }
+        while (col_loc_2 >= 0){ // the left-down side
+            if (row_loc_2 <= 7){
 
-            while (col_loc_2 >= 0){ // the left-down side
+                let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
+                if (piece != null){
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
 
-                if (row_loc_2 <= 7){
-
-                    let piece = getPiece(col_loc_2, row_loc_2, true, boardInverseGeneral);
-
-                    if (piece != null){
-                        
-
-                        for (let key in initBoardGeneral){
-
-                            if (initBoardGeneral[key].name == piece 
-                                && initBoardGeneral[key].color != local_turn
-                                && initBoardGeneral[key].kind == "king"){
-                                
-                                    return true
-                            }
-                        }
-                        break
-                    }
+                    break
                 }
-
-                col_loc_2--;
-                row_loc_2++;
             }
+            col_loc_2--;
+            row_loc_2++;
+        }
+        while (col_loc_3 <= 7){ // the right-up side
+            if (row_loc_3 >= 0){
 
-            while (col_loc_3 <= 7){ // the right-up side
-
-                if (row_loc_3 >= 0){
-
-                    let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
-
-                    if (piece != null){
-                        
-
-                        for (let key in initBoardGeneral){
-
-                            if (initBoardGeneral[key].name == piece 
-                                && initBoardGeneral[key].color != local_turn
-                                && initBoardGeneral[key].kind == "king"){
-                                
-                                    return true
-                            }
-                        }
-                        break
-                    }
+                let piece = getPiece(col_loc_3, row_loc_3, true, boardInverseGeneral);
+                if (piece != null){
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
+                    
+                    break
                 }
-
-                col_loc_3++;
-                row_loc_3--;
             }
+            col_loc_3++;
+            row_loc_3--;
+        }
+        while (col_loc_4 <= 7){ // the right-down side
+            if (row_loc_4 <= 7){
 
-            while (col_loc_4 <= 7){ // the right-down side
+                let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
+                if (piece != null){
+                    
+                    let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                    if (can_return_true) return true
 
-                if (row_loc_4 <= 7){
-
-                    let piece = getPiece(col_loc_4, row_loc_4, true, boardInverseGeneral);
-
-                    if (piece != null){
-                        
-
-                        for (let key in initBoardGeneral){
-
-                            if (initBoardGeneral[key].name == piece 
-                                && initBoardGeneral[key].color != local_turn
-                                && initBoardGeneral[key].kind == "king"){
-                                
-                                    return true
-                            }
-                        }
-                        break
-                    }
+                    break
                 }
-
-                col_loc_4++;
-                row_loc_4++;
             }
-
-
-            while (col_loc_5 <= 7){ // to right
-
-                let piece = getPiece(col_loc_5, row_id, true, boardInverseGeneral)
+            col_loc_4++;
+            row_loc_4++;
+        }
+        while (col_loc_5 <= 7){ // to right
+            let piece = getPiece(col_loc_5, row_id, true, boardInverseGeneral)
+            
+            if (piece != null){
                 
-                if (piece != null){
-                    
+                let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
 
-                    for (let key in initBoardGeneral){
-
-                        if (initBoardGeneral[key].name == piece 
-                            && initBoardGeneral[key].color != local_turn
-                            && initBoardGeneral[key].kind == "king"){
-                            
-                                return true
-                        }
-                    }
-                    break
-                }
-
-                col_loc_5++;
+                break
             }
+            col_loc_5++;
+        }
+        while (col_loc_6 >= 0){ // to left
 
-            while (col_loc_6 >= 0){ // to left
-
-                let piece = getPiece(col_loc_6, row_id, true, boardInverseGeneral)
-
-                if (piece != null){
-                    
-
-                    for (let key in initBoardGeneral){
-
-                        if (initBoardGeneral[key].name == piece 
-                            && initBoardGeneral[key].color != local_turn
-                            && initBoardGeneral[key].kind == "king"){
-                            
-                                return true
-                        }
-                    }
-                    break
-                }
-
-                col_loc_6--;
-            }
-
-            while (row_loc_5 <= 7){ // to down
-
-                let piece = getPiece(col_id, row_loc_5, true, boardInverseGeneral)
+            let piece = getPiece(col_loc_6, row_id, true, boardInverseGeneral)
+            if (piece != null){
                 
-
-                if (piece != null){
-                    
-
-                    for (let key in initBoardGeneral){
-
-                        if (initBoardGeneral[key].name == piece 
-                            && initBoardGeneral[key].color != local_turn
-                            && initBoardGeneral[key].kind == "king"){
-                            
-                                return true
-                        }
-                    }
-                    break
-                }
-
-                row_loc_5++;
+                let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
+                
+                break
             }
+            col_loc_6--;
+        }
+        while (row_loc_5 <= 7){ // to down
+            let piece = getPiece(col_id, row_loc_5, true, boardInverseGeneral)
+            
+            if (piece != null){
+                
+                let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
 
-            while (row_loc_6 >= 0){ // to up
-
-                let piece = getPiece(col_id, row_loc_6, true, boardInverseGeneral)
-
-                if (piece != null){
-                    
-
-                    for (let key in initBoardGeneral){
-
-                        if (initBoardGeneral[key].name == piece 
-                            && initBoardGeneral[key].color != local_turn
-                            && initBoardGeneral[key].kind == "king"){
-                            
-                                return true
-                        }
-                    }
-                    break
-                }
-
-                row_loc_6--;
+                break
             }
+            row_loc_5++;
+        }
+        while (row_loc_6 >= 0){ // to up
+            let piece = getPiece(col_id, row_loc_6, true, boardInverseGeneral)
+            if (piece != null){
+                
+                let can_return_true = initBoardGeneral.some(piece_inside => piece_inside.name == piece && piece_inside.kind == "king" && piece_inside.color != local_turn)
+                if (can_return_true) return true
+                
+                break
+            }
+            row_loc_6--;
+        }
     }
 
     return false
