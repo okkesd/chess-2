@@ -3868,8 +3868,6 @@ function drawPossibleMoves(
     }
 }
 
-// clear initboard
-// NOTE: Check if move is makeable - if it's drawn, it's makeable
 function makeMove(col_id: number, row_id: number, setDrawState: Dispatch<SetStateAction<boolean[][]>> | null, selectedPiece: Piece,
                    wsInstance: WebSocket|null, initBoardGeneral: RefObject<Piece[]>,
                    boardInverseGeneral: RefObject<OneColumn[]>, setIsUpgradingMove: Dispatch<SetStateAction<number>>, isUpgradingMove: number, isCastle?: Boolean) : any{
@@ -3926,40 +3924,36 @@ function makeMove(col_id: number, row_id: number, setDrawState: Dispatch<SetStat
     let castle_updated_piece
     let castle = ""
     if (selectedPiece.kind == "king"){
+        let rook = null
+        let col_id_to = col_id-1
+
         if (selectedPiece.col - col_id > 1){
 
             castle = "left"
             console.log("castle to left: ")
-            let rook = getPiece(0, 7, true, boardInverseGeneral.current, false)
+            rook = getPiece(0, 7, true, boardInverseGeneral.current, false)
 
-            for (let key in initBoardGeneral.current){ // key is just index here
-        
-                if (initBoardGeneral.current[key].name == rook && initBoardGeneral.current[key].color == selectedPiece.color){
-                    
-                    // somehow update the rook
-                    castle_updated_piece = makeMove(col_id+1, row_id, setDrawState, {...initBoardGeneral.current[key]}, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
-
-                    console.log("castle updated piece: ", castle_updated_piece)
-                }
-            }
+            col_id_to = col_id+1
 
         } else if (selectedPiece.col - col_id < -1){
             
             castle = "right"
             console.log("castle to right: ")
-            let rook = getPiece(7, 7, true, boardInverseGeneral.current, false)
+            rook = getPiece(7, 7, true, boardInverseGeneral.current, false)
 
-            for (let key in initBoardGeneral.current){ // key is just index here
-        
-                if (initBoardGeneral.current[key].name == rook && initBoardGeneral.current[key].color == selectedPiece.color){
-                    
-                    // somehow update the rook
-                    castle_updated_piece = makeMove(col_id-1, row_id, setDrawState, {...initBoardGeneral.current[key]}, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)
-
-                    console.log("castle updated piece: ", castle_updated_piece)
-                }
-            }
+            col_id_to = col_id-1
         }
+
+        initBoardGeneral.current.map(piece_inside => {
+            if (piece_inside.name == rook && piece_inside.color == selectedPiece.color){
+
+                // somehow update the rook
+                castle_updated_piece = makeMove(col_id_to, row_id, setDrawState, {...piece_inside}, wsInstance, initBoardGeneral, boardInverseGeneral, setIsUpgradingMove, isUpgradingMove, true)                    
+
+                console.log("castle updated piece: ", castle_updated_piece)
+            }
+        })
+
     }
 
     // move the piece, remove from one square, add to another square
@@ -3997,52 +3991,30 @@ function makeMove(col_id: number, row_id: number, setDrawState: Dispatch<SetStat
     let piece = getPiece(col_id, row_id, true, newBoardInverseLocal); 
     console.log("what piece is: ",piece)
 
-    
-    // has_moved
-    let localInitBoardGeneral = [...initBoardGeneral.current]
-    for (let key in localInitBoardGeneral){ // key is just index here
-        
-        if ((localInitBoardGeneral[key].name == piece) || (pawn_upgrade && localInitBoardGeneral[key].name == `${selectedPiece.name}`)){
-            
-            console.log("changing has moved")
+    // a cleaner approach than iterating on copied initBoardGeneral object
+    initBoardGeneral.current.map(piece_inside => {
 
-            
-                let newInitBoardLocal = [...localInitBoardGeneral]
-                newInitBoardLocal[key].has_moved = true
-                newInitBoardLocal[key].col = col_id
-                newInitBoardLocal[key].row = row_id
+        if (piece_inside.name == piece || (pawn_upgrade && piece_inside.name == selectedPiece.name)){
 
-                if (pawn_upgrade) {
+            piece_inside.has_moved = true
+            piece_inside.col = col_id
+            piece_inside.row = row_id
 
-                    newInitBoardLocal[key].kind = choice // to be changed as selection of user - later
-                    newInitBoardLocal[key].name = `${selectedPiece.name}_upgraded_${newInitBoardLocal[key].kind}` // name + upgraded + kind
-                    newInitBoardLocal[key].moveable = moveables
-                    // can we change the key of initboardGeneral, it stays as W_pawn_4. If can't we shouldn't be using the key, instead we can use name value
-                    console.log("pawn goes to queen: ", newInitBoardLocal[key])
+            if (pawn_upgrade) {
 
-                    //newInitBoardLocal[key][unknownKey+`_upgraded_${choice}`] = newInitBoardLocal[key]
-                    updated_piece = newInitBoardLocal[key]
+                piece_inside.kind = choice // to be changed as selection of user - later
+                piece_inside.name = `${selectedPiece.name}_upgraded_${piece_inside.kind}` // name + upgraded + kind
+                piece_inside.moveable = moveables
 
-                    //delete newInitBoardLocal[key]
-                } else {
+                console.log("pawn goes to queen: ", piece_inside)
+            }
+            updated_piece = piece_inside
 
-                    updated_piece = newInitBoardLocal[key]
-                }
-
-                
-                
-                console.log("Update piece inside is : ", updated_piece)
-            
-            initBoardGeneral.current = newInitBoardLocal
-            
-            
-
-            console.log("current piece data: ", initBoardGeneral.current[key])
-            console.log("col is : ", col_id," row is : ", row_id)
-            
-            break;
         }
-    }
+
+        return piece_inside
+    })
+
     boardInverseGeneral.current = [...newBoardInverseLocal];
 
     console.log("After changing board Invere General: ", boardInverseGeneral)
@@ -4083,7 +4055,7 @@ function makeMove(col_id: number, row_id: number, setDrawState: Dispatch<SetStat
     }
 }
 
-function clearBoard(setDrawState: Dispatch<SetStateAction<boolean[][]>>){
+function clearBoard(setDrawState: Dispatch<SetStateAction<boolean[][]>>) : void {
 
     setDrawState([
             [false, false, false, false, false, false, false, false],
@@ -4095,12 +4067,9 @@ function clearBoard(setDrawState: Dispatch<SetStateAction<boolean[][]>>){
             [false, false, false, false, false, false, false, false],
             [false, false, false, false, false, false, false, false]
         ]);
-    return;
 }
 
-// after take piece, we should remove it from initboards cause later in the game there are dead pieces that actually blocks checks etc
 
-// clear init board
 function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInstance: WebSocket|null, initBoardGeneral: RefObject<Piece[]>
                     , boardInverseGeneral: RefObject<OneColumn[]>, setIsUpgradingMove: Dispatch<SetStateAction<number>>, isUpgradingMove: number){
     /*
@@ -4182,38 +4151,27 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
     boardInverseGeneral.current = localBoardInverse
     
 
-
+    // a more clean way instead of iterating on initBoardGeneral.current
     let updated_piece
-    for (let elem in initBoardGeneral.current){
-        if (initBoardGeneral.current[elem].name == selectedPiece.name){ // find the selectedPiece and change info
+    initBoardGeneral.current.map(piece => {
+        if (piece.name == selectedPiece.name){
+            piece.has_moved = true
+            piece.col = col_id
+            piece.row = row_id
 
-            let localInitBoard = initBoardGeneral.current
-                localInitBoard[elem].has_moved = true
-                localInitBoard[elem].col = col_id
-                localInitBoard[elem].row = row_id
-
-                if (pawn_upgrade){
+            if (pawn_upgrade){
                  
-                    localInitBoard[elem].kind = choice // to be changed as selection of user - later
-                    localInitBoard[elem].name = `${selectedPiece.name}_upgraded_${localInitBoard[elem].kind}` // name + upgraded + kind
-                    localInitBoard[elem].moveable = moveables
-                    // can we change the elem of initboardGeneral, it stays as W_pawn_4. If can't we shouldn't be using the elem, instead we can use name value
-                    console.log("pawn goes to queen: ", localInitBoard[elem])
-
-                    //localInitBoard[elem][unknownelem+`_upgraded_${choice}`] = localInitBoard[elem]
-                    updated_piece = localInitBoard[elem]
-
-                    //delete localInitBoard[key]
-                } else {
-                    updated_piece = localInitBoard[elem]
-                }
-
+                piece.kind = choice // to be changed as selection of user - later
+                piece.name = `${selectedPiece.name}_upgraded_${piece.kind}` // name + upgraded + kind
+                piece.moveable = moveables
+                    
+                console.log("pawn goes to queen: ", piece)
+            }
+            updated_piece = piece
                 
-
-            initBoardGeneral.current = [...localInitBoard]
-            
         }
-    }
+        return piece
+    })
 
     if (updated_piece == null) {console.log("Big error in take piece !!!!")}
 
@@ -4233,6 +4191,12 @@ function takePiece(col_id: number, row_id: number, selectedPiece: Piece, wsInsta
 
     return updated_piece
 }
+
+function findPieceByName(name: string, initBoardGeneral: Piece[]) : Piece | undefined {
+    
+    return initBoardGeneral.find(p => p.name == name)
+}
+
 // This currently only checks the checks from recently moved piece, not by others (i.e. the opening checks where you move a piece and
 // another piece is now threating the king other than moving piece). For this you'd have to check for every opponent's other piece
 // if it has a clear direction to the king (similar to what we did in setMoveablePieces where we found the opponent pieces toward king with a 
