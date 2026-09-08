@@ -1596,9 +1596,9 @@ function isNotBlocked({col,
     moveable,
     turn,
     initBoardGeneral,
-    boardInverseGeneral}: isNotBlockedProps){
+    boardInverseGeneral}: isNotBlockedProps) : void {
 
-    if (kind == "king") return true
+    if (kind == "king") return
 
     console.log("isNotBlocked: name: ", name, "kind: ", kind, "row,col : ", row, col)
     console.log("boardInverseLocal in olay mahali but upper: ", boardInverseGeneral)
@@ -1861,8 +1861,6 @@ function isNotBlocked({col,
                 }
             }
         }
-        // return false, so blocked piece, then you should be checking moveables of the given piece afterwards, we modified it
-        return false
 
     } else if (row == turn_king.row){ // same row
 
@@ -2798,7 +2796,6 @@ interface drawPossibleMovesProps extends Piece {
     isCheck: boolean
     colsAndRows: null|{row: number, col:number}[] // {row: number, col:number}[]
     playerTurn: string
-    is_it_blocked: boolean
     initBoardGeneral: Piece[]
     boardInverseGeneral: OneColumn[]
 }
@@ -2820,8 +2817,7 @@ function drawPossibleMoves(
     colsAndRows,
     playerTurn, // player's color
     initBoardGeneral,
-    boardInverseGeneral,
-    is_it_blocked} : drawPossibleMovesProps
+    boardInverseGeneral} : drawPossibleMovesProps
 ){
     /*
         Draws the possible moves according to the color, has_moved, kind from the square (col and row)
@@ -5208,9 +5204,6 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], board
       all above is done except:
       - checkmate conditions -> write it completetly in fireGameOver()
 
-      - do we check knight's moveable when drawPossibleMoves
-      - isNotBlocked may not be returning a boolean always, which should be
-
       - code reorganization
 
       --- later ? (after backend in rust)
@@ -5418,16 +5411,14 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: Dispatch<Se
                 
                 let localBoardInverse = [...boardInverseGeneral.current]
                 console.log("local board Inverse before error: ", localBoardInverse)
-                let is_it_blocked = isNotBlocked({...piece_in, turn, initBoardGeneral, boardInverseGeneral: localBoardInverse})
-                console.log("Ok, is it blocked ? : ", is_it_blocked)
+                isNotBlocked({...piece_in, turn, initBoardGeneral, boardInverseGeneral: localBoardInverse}) // this sets moveables of the clicked piece
 
                 let localInitBoardGeneral = [...initBoardGeneral.current]
-                let args = {...piece_in, setDrawState, turn, isCheck, colsAndRows, is_it_blocked, playerTurn: playerTurn.current, 
+                let args = {...piece_in, setDrawState, turn, isCheck, colsAndRows, playerTurn: playerTurn.current, 
                              initBoardGeneral: localInitBoardGeneral, boardInverseGeneral: localBoardInverse}
-                // handle this issue later ^^^^^^^^^^^^^
+                
                 console.log(args)
 
-                // BUG IN ARGS
                 drawPossibleMoves(args)
             }
             
