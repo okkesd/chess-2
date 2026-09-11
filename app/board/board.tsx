@@ -412,89 +412,62 @@ function notKingAdjacent(col: number, row: number, turn: string, initBoardGenera
     // right down
     let piece = getPiece(col+1, row+1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoardGeneral){
-            let value = initBoardGeneral[key]
-            if (value.name == piece && value.color != turn && value.kind == "king"){
-                return false
-            }
-        }
+        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind == "king"))
+        if (piece_found == true) return false
     }
 
     // right
     piece = getPiece(col+1, row, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoardGeneral){
-            let value = initBoardGeneral[key]
-            if (value.name == piece && value.color != turn && value.kind == "king"){
-                return false
-            }
-        }
+        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind == "king"))
+        if (piece_found == true) return false
     }
 
     // right up
     piece = getPiece(col+1, row-1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoardGeneral){
-            let value = initBoardGeneral[key]
-            if (value.name == piece && value.color != turn && value.kind == "king"){
-                return false
-            }
-        }
+        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind == "king"))
+        if (piece_found == true) return false
     }
 
     // down
     piece = getPiece(col, row+1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoardGeneral){
-            let value = initBoardGeneral[key]
-            if (value.name == piece && value.color != turn && value.kind == "king"){
-                return false
-            }
-        }
+        
+        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind == "king"))
+        if (piece_found == true) return false
     }
 
     // up
     piece = getPiece(col, row-1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoardGeneral){
-            let value = initBoardGeneral[key]
-            if (value.name == piece && value.color != turn && value.kind == "king"){
-                return false
-            }
-        }
+        
+        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind == "king"))
+        if (piece_found == true) return false
     }
 
     // left down
     piece = getPiece(col-1, row+1, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoardGeneral){
-            let value = initBoardGeneral[key]
-            if (value.name == piece && value.color != turn && value.kind == "king"){
-                return false
-            }
-        }
+        
+        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind == "king"))
+        if (piece_found == true) return false
     }
 
     // left
     piece = getPiece(col-1, row, true, boardInverseGeneral)
     if (piece != null){
-        for (let key in initBoardGeneral){
-            let value = initBoardGeneral[key]
-            if (value.name == piece && value.color != turn && value.kind == "king"){
-                return false
-            }
-        }
+
+        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind == "king"))
+        if (piece_found == true) return false
     }
 
     // left up
     piece = getPiece(col-1, row-1, true, boardInverseGeneral) 
     if (piece != null){
-        for (let key in initBoardGeneral){
-            let value = initBoardGeneral[key]
-            if (value.name == piece && value.color != turn && value.kind == "king"){
-                return false
-            }
-        }
+        
+        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind == "king"))
+        if (piece_found == true) return false
     }
 
     return true
@@ -529,20 +502,11 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
     console.log("piece_color is: ", piece_color)
     for (let op_piece in opponent_pieces){
 
-        let piece_col_loc = 1
-        let piece_row_loc = 1
-        let piece_op: Piece = nullPiece // not sure of this
-        for (let key in initBoardGeneral){
+        let piece_op = initBoardGeneral.find(piece_inside => (piece_inside.name == opponent_pieces[op_piece]))
+        if (!piece_op) throw new Error("piece_op is not found in notEatable")
 
-            if (initBoardGeneral[key].name == opponent_pieces[op_piece]){
-                piece_op = initBoardGeneral[key]
-                piece_col_loc = initBoardGeneral[key].col
-                piece_row_loc = initBoardGeneral[key].row
-                break
-            }
-        }
-
-        
+        let piece_col_loc = piece_op.col
+        let piece_row_loc = piece_op.row
 
         if (piece_op.kind == "bishop"){
             
@@ -572,20 +536,19 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                         } else {
 
                             let to_continue = false
-                            for (let key in initBoardGeneral){
 
-                                if (initBoardGeneral[key].name == piece){
-                                    
-                                    if (initBoardGeneral[key].color == piece_color){
-        
-                                        if (col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
-        
-                                    } else if (initBoardGeneral[key].kind == "king"){
-                                        to_continue = true
-                                    }
-                                    break
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                            if (piece_found){
+
+                                if (piece_found.color == piece_color){
+
+                                    if (col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
+
+                                } else if (piece_found.kind == "king"){
+                                    to_continue = true
                                 }
                             }
+
                             if (!to_continue) break
                         }
                     }
@@ -607,24 +570,21 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                             
                             if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from bishop left-down"); return false;}
                         } else {
-                            let to_continue = false
-                            for (let key in initBoardGeneral){
 
-                                if (initBoardGeneral[key].name == piece){
-                                    
-                                    if (initBoardGeneral[key].color == piece_color){
-        
-                                        if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
-        
-                                    } else if (initBoardGeneral[key].kind == "king"){
-                                        to_continue = true
-                                    }
-                                    break
-                                    
+                            let to_continue = false
+                            
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                            if (piece_found){
+
+                                if (piece_found.color == piece_color){
+
+                                    if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
+
+                                } else if (piece_found.kind == "king"){
+                                    to_continue = true
                                 }
                             }
                             if (!to_continue) break
-                            
                         }
                     }
                     col_loc_2--;
@@ -644,18 +604,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                         } else {
 
                             let to_continue = false
-                            for (let key in initBoardGeneral){
 
-                                if (initBoardGeneral[key].name == piece){
-                                    
-                                    if (initBoardGeneral[key].color == piece_color){
-        
-                                        if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", piece); return false;}
-        
-                                    } else if (initBoardGeneral[key].kind == "king") {
-                                        to_continue = true
-                                    }
-                                    break
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                            if (piece_found){
+
+                                if (piece_found.color == piece_color){
+
+                                    if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", piece); return false;}
+
+                                } else if (piece_found.kind == "king"){
+                                    to_continue = true
                                 }
                             }
                             if (!to_continue) break
@@ -678,18 +636,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                         } else {
 
                             let to_continue = false
-                            for (let key in initBoardGeneral){
+                            
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                            if (piece_found){
 
-                                if (initBoardGeneral[key].name == piece){
-                                    
-                                    if (initBoardGeneral[key].color == piece_color){
-        
-                                        if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", piece); return false;}
-        
-                                    } else if (initBoardGeneral[key].kind == "king") {
-                                        to_continue = true
-                                    }
-                                    break
+                                if (piece_found.color == piece_color){
+
+                                    if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", piece); return false;}
+
+                                } else if (piece_found.kind == "king"){
+                                    to_continue = true
                                 }
                             }
                             if (!to_continue) break
@@ -714,11 +670,11 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                             
                             if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
                             
-                                    if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", piece); return false;}
-                                }
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+        
+                                if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", piece); return false;}
                             }
                         }
 
@@ -733,11 +689,10 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
 
                         } else { // there is a piece, if it's not black -> draw
                     
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
-                                    
-                                    if (piece_col_loc-2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", piece); return false;}
-                                }
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+        
+                                if (piece_col_loc-2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", piece); return false;}
                             }
                         }
                         
@@ -753,14 +708,15 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                             
                             if (piece_col_loc+2 == col && piece_row_loc+1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
-                                    
-                                    if (piece_col_loc+2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", piece); return false;}
-                                }
+                            
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+        
+                                if (piece_col_loc+2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", piece); return false;}
+                            
                             }
-                        }
                         
+                        }
                     }
                     if (piece_row_loc -1 >= 0){
                         let piece = getPiece(piece_col_loc+2, piece_row_loc-1, true, boardInverseGeneral)
@@ -769,17 +725,15 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                             
                             if (piece_col_loc+2 == col && piece_row_loc-1 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
-                                    
-                                    if (piece_col_loc+2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", piece); return false;}
-                                }
+                            
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+        
+                                if (piece_col_loc+2 == col && piece_row_loc-1 == row) {console.log("notEatable from ", piece); return false;}
                             }
                         }
-                        
-                    }
-                } 
-
+                    } 
+                }
                 if (piece_row_loc +2 <= 7){
 
                     if (piece_col_loc -1 >= 0){
@@ -795,8 +749,12 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                                     if (piece_col_loc-1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", piece); return false;}
                                 }
                             }
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+        
+                                if (piece_col_loc-2 == col && piece_row_loc+1 == row) {console.log("notEatable from ", piece); return false;}
+                            }
                         }
-                        
                     }
                     if (piece_col_loc +1 <= 7){
                         let piece = getPiece(piece_col_loc+1, piece_row_loc+2, true, boardInverseGeneral)
@@ -805,11 +763,11 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                             
                             if (piece_col_loc+1 == col && piece_row_loc+2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
-                                    
-                                    if (piece_col_loc+1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", piece); return false;}
-                                }
+                            
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+        
+                                if (piece_col_loc+1 == col && piece_row_loc+2 == row) {console.log("notEatable from ", piece); return false;}
                             }
                         }
                         
@@ -825,11 +783,11 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                             
                             if (piece_col_loc-1 == col && piece_row_loc-2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
-                                    
-                                    if (piece_col_loc == col-1 && piece_row_loc-2 == row) {console.log("notEatable from ", piece); return false;}
-                                }
+                            
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+        
+                                if (piece_col_loc-1 == col && piece_row_loc-2 == row) {console.log("notEatable from ", piece); return false;}
                             }
                         }
                         
@@ -842,15 +800,13 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                             
                             if (piece_col_loc+1 == col && piece_row_loc-2 == row) {console.log("notEatable from knight"); return false;}
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
-                                    
-                                    if (piece_col_loc+1 == col && piece_row_loc-2 == row) {console.log("notEatable from ", piece); return false;}
-                                }
+                            
+                            let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+        
+                                if (piece_col_loc+1 == col && piece_row_loc-2 == row) {console.log("notEatable from ", piece); return false;}
                             }
                         }
-                        
-                        
                     }
                 }
         } else if (piece_op.kind == "rook"){
@@ -871,18 +827,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                 } else {
 
                     let to_continue = false
-                    for (let key in initBoardGeneral){
-                        if (initBoardGeneral[key].name == piece){
-                            
-                            if (initBoardGeneral[key].color == piece_color){
-        
-                                if (piece_col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
+                    
+                    let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                    if (piece_found){
 
-                            } else if (initBoardGeneral[key].kind == "king"){
-                                to_continue = true
-                            }
-                            
-                            break;
+                        if (piece_found.color == piece_color){
+
+                            if (piece_col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
+
+                        } else if (piece_found.kind == "king"){
+                            to_continue = true
                         }
                     }
                     if (!to_continue) break;
@@ -897,18 +851,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                     if (piece_col_loc == col && row_loc_2 == row) {console.log("notEatable from rook"); return false;};
                 } else {
                     let to_continue = false
-                    for (let key in initBoardGeneral){
-                        if (initBoardGeneral[key].name == piece){
-                            
-                            if (initBoardGeneral[key].color == piece_color){
-        
-                                if (piece_col_loc == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
+                    
+                    let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                    if (piece_found){
 
-                            } else if (initBoardGeneral[key].kind == "king") {
-                                to_continue = true
-                            }
-                            
-                            break;
+                        if (piece_found.color == piece_color){
+
+                            if (piece_col_loc == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
+
+                        } else if (piece_found.kind == "king"){
+                            to_continue = true
                         }
                     }
                     if (!to_continue) break;
@@ -925,17 +877,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                 } else {
 
                     let to_continue = false
-                    for (let key in initBoardGeneral){
-                        if (initBoardGeneral[key].name == piece){
+                    
+                    let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                    if (piece_found){
 
-                            if (initBoardGeneral[key].color == piece_color){
-        
-                                if (col_loc == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
+                        if (piece_found.color == piece_color){
 
-                            } else if (initBoardGeneral[key].kind == "king") {
-                                to_continue = true
-                            }
-                            break;
+                            if (col_loc == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
+
+                        } else if (piece_found.kind == "king"){
+                            to_continue = true
                         }
                     }
                     if (!to_continue) break;
@@ -952,18 +903,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                 } else {
 
                     let to_continue = false
-                    for (let key in initBoardGeneral){
-                        if (initBoardGeneral[key].name == piece){
-                            
-                            if (initBoardGeneral[key].color == piece_color){
-        
-                                if (col_loc_2 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
+                    
+                    let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                    if (piece_found){
 
-                            } else if (initBoardGeneral[key].kind == "king") {
-                                to_continue = true
-                            }
-                            
-                            break;
+                        if (piece_found.color == piece_color){
+
+                            if (col_loc_2 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
+
+                        } else if (piece_found.kind == "king"){
+                            to_continue = true
                         }
                     }
                     if (!to_continue) break;
@@ -1000,18 +949,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                     } else {
 
                         let to_continue = false
-                        for (let key in initBoardGeneral){
-
-                            if (initBoardGeneral[key].name == piece){
-                                
-                                if (initBoardGeneral[key].color == piece_color){
-        
-                                    if (col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
+                        
+                        let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                        if (piece_found){
     
-                                } else if (initBoardGeneral[key].kind == "king") {
-                                    to_continue = true
-                                }
-                                break
+                            if (piece_found.color == piece_color){
+    
+                                if (col_loc == col && row_loc == row) {console.log("notEatable from ", piece); return false;}
+    
+                            } else if (piece_found.kind == "king"){
+                                to_continue = true
                             }
                         }
                         if (!to_continue) break;
@@ -1034,18 +981,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                     } else {
 
                         let to_continue = false
-                        for (let key in initBoardGeneral){
 
-                            if (initBoardGeneral[key].name == piece){
-                                
-                                if (initBoardGeneral[key].color == piece_color){
-        
-                                    if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
+                        let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                        if (piece_found){
     
-                                } else if (initBoardGeneral[key].kind == "king") {
-                                    to_continue = true
-                                }
-                                break
+                            if (piece_found.color == piece_color){
+    
+                                if (col_loc_2 == col && row_loc_2 == row) {console.log("notEatable from ", piece); return false;}
+    
+                            } else if (piece_found.kind == "king"){
+                                to_continue = true
                             }
                         }
                         if (!to_continue) break; 
@@ -1068,19 +1013,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                     } else {
 
                         let to_continue = false
-                        for (let key in initBoardGeneral){
 
-                            if (initBoardGeneral[key].name == piece){
-                                
-                                if (initBoardGeneral[key].color == piece_color){
-        
-                                    if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", piece); return false;}
+                        let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                        if (piece_found){
     
-                                } else if (initBoardGeneral[key].kind == "king") {
-                                    to_continue = true
-                                }
-                                
-                                break
+                            if (piece_found.color == piece_color){
+    
+                                if (col_loc_3 == col && row_loc_3 == row) {console.log("notEatable from ", piece); return false;}
+    
+                            } else if (piece_found.kind == "king"){
+                                to_continue = true
                             }
                         }
                         if (!to_continue) break; 
@@ -1103,19 +1045,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                     } else {
 
                         let to_continue = false
-                        for (let key in initBoardGeneral){
-
-                            if (initBoardGeneral[key].name == piece){
-                                
-                                if (initBoardGeneral[key].color == piece_color){
-        
-                                    if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", piece); return false;}
+                        
+                        let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                        if (piece_found){
     
-                                } else if (initBoardGeneral[key].kind == "king") {
-                                    to_continue = true
-                                }
-                                
-                                break
+                            if (piece_found.color == piece_color){
+    
+                                if (col_loc_4 == col && row_loc_4 == row) {console.log("notEatable from ", piece); return false;}
+    
+                            } else if (piece_found.kind == "king"){
+                                to_continue = true
                             }
                         }
                         if (!to_continue) break; 
@@ -1137,18 +1076,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                 } else {
 
                     let to_continue = false
-                    for (let key in initBoardGeneral){
+                    
+                    let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                    if (piece_found){
 
-                        if (initBoardGeneral[key].name == piece){
-                            
-                            if (initBoardGeneral[key].color == piece_color){
-        
-                                if (col_loc_5 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
+                        if (piece_found.color == piece_color){
 
-                            } else if (initBoardGeneral[key].kind == "king") {
-                                to_continue = true
-                            }
-                            break
+                            if (col_loc_5 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
+
+                        } else if (piece_found.kind == "king"){
+                            to_continue = true
                         }
                     }
                     if (!to_continue) break; 
@@ -1167,18 +1104,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                 } else {
 
                     let to_continue = false
-                    for (let key in initBoardGeneral){
+                    
+                    let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                    if (piece_found){
 
-                        if (initBoardGeneral[key].name == piece){
-                            
-                            if (initBoardGeneral[key].color == piece_color){
-        
-                                if (col_loc_6 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
+                        if (piece_found.color == piece_color){
 
-                            } else if (initBoardGeneral[key].kind == "king") {
-                                to_continue = true
-                            }
-                            break
+                            if (col_loc_6 == col && piece_row_loc == row) {console.log("notEatable from ", piece); return false;}
+
+                        } else if (piece_found.kind == "king"){
+                            to_continue = true
                         }
                     }
                     if (!to_continue) break; 
@@ -1198,18 +1133,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                 } else {
 
                     let to_continue = false
-                    for (let key in initBoardGeneral){
+                    
+                    let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                    if (piece_found){
 
-                        if (initBoardGeneral[key].name == piece){
-                            
-                            if (initBoardGeneral[key].color == piece_color){
+                        if (piece_found.color == piece_color){
 
-                                if (piece_col_loc == col && row_loc_5 == row) {console.log("notEatable from ", piece); return false;}
+                            if (piece_col_loc == col && row_loc_5 == row) {console.log("notEatable from ", piece); return false;}
 
-                            } else if (initBoardGeneral[key].kind == "king") {
-                                to_continue = true
-                            }
-                            break
+                        } else if (piece_found.kind == "king"){
+                            to_continue = true
                         }
                     }
                     if (!to_continue) break; 
@@ -1227,18 +1160,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                 } else {
 
                     let to_continue = false
-                    for (let key in initBoardGeneral){
 
-                        if (initBoardGeneral[key].name == piece){
-                            
-                            if (initBoardGeneral[key].color == piece_color){
-        
-                                if (piece_col_loc == col && row_loc_6 == row) {console.log("notEatable from ", piece); return false;}
+                    let piece_found = initBoardGeneral.find(piece_inside => (piece_inside.name == piece))
+                    if (piece_found){
 
-                            } else if (initBoardGeneral[key].kind == "king") {
-                                to_continue = true
-                            }
-                            break
+                        if (piece_found.color == piece_color){
+
+                            if (piece_col_loc == col && row_loc_6 == row) {console.log("notEatable from ", piece); return false;}
+
+                        } else if (piece_found.kind == "king"){
+                            to_continue = true
                         }
                     }
                     if (!to_continue) break; 
@@ -1253,20 +1184,16 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
             // for black pawns, it's either (col_loc-1, row_loc+1) || (col_loc+1, row_loc+1) (from white perspective, check to white king)
             // therefore we need the turn
 
-            //if (turn == "black"){ // for check to black king
-                
                 if (piece_col_loc + 1 < 8 && piece_row_loc + 1 < 8){
                             
                     let piece = getPiece(piece_col_loc + 1, piece_row_loc + 1, true, boardInverseGeneral)
                     if (piece == null){
                         if (piece_col_loc +1 == col && piece_row_loc +1 == row) {return false;}
                     }
-                    for (let key in initBoardGeneral){ // key is just index here
-    
-                        if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
-                            
-                            if (piece_col_loc +1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", piece); return false;}
-                        }
+                    
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                    if (piece_found){
+                        if (piece_col_loc +1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", piece); return false;}
                     }
                 } 
                 if (piece_col_loc - 1 >= 0 && piece_row_loc +1 < 8){
@@ -1274,44 +1201,12 @@ function notEatable(col: number, row: number, turn: string, initBoardGeneral: Pi
                     if (piece == null){
                         if (piece_col_loc-1 == col && piece_row_loc +1 == row) {return false;}
                     
-                    for (let key in initBoardGeneral){ // key is just index here        
-                        if (initBoardGeneral[key].name == piece && initBoardGeneral[key].color != turn){
-                            
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
                             if (piece_col_loc-1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", piece); return false;}
                         }
                     }
                 }
-                }
-
-            /*} else { // for check to white king
-
-                if (piece_col_loc + 1 < 8 && piece_row_loc + 1 < 8){
-                            
-                    let piece = getPiece(piece_col_loc + 1, piece_row_loc + 1, true, boardInverseGeneral)
-                    if (piece == null){
-                        if (piece_col_loc +1 == col && piece_row_loc +1 == row) {return false;}
-                    }
-                    for (let key in initBoardGeneral){ // key is just index here
-    
-                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                            
-                            if (piece_col_loc +1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
-                        }
-                    }
-                } 
-                if (piece_col_loc - 1 >= 0 && piece_row_loc +1 < 8){
-                    let piece = getPiece(piece_col_loc - 1, piece_row_loc +1, true, boardInverseGeneral)
-                    if (piece == null){
-                        if (piece_col_loc-1 == col && piece_row_loc +1 == row) {return false;}
-                    }
-                    for (let key in initBoardGeneral){ // key is just index here        
-                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                            
-                            if (piece_col_loc-1 == col && piece_row_loc +1 == row) {console.log("notEatable from ", Object.values(piece)[0].kind); return false;}
-                        }
-                    }
-                }
-            }*/
         }
     }
 
@@ -1326,15 +1221,9 @@ function setMoveablePieces(playerTurn: string, checkingPiece: Piece, setColsAndR
     console.log("LOGS:\nturn:", playerTurn, "checkingPiece.color: ", checkingPiece.color, "\ncheckingPiece:", checkingPiece)
 
     // save the king, we probably need it later
-    let turn_king = null
-    for (let key in initBoardGeneral){
-        if (initBoardGeneral[key].kind == "king" && initBoardGeneral[key].color != checkingPiece.color){
+    let turn_king = initBoardGeneral.find(piece_inside => (piece_inside.kind == "king" && piece_inside.color != checkingPiece.color))
 
-                turn_king = initBoardGeneral[key]
-                break;
-            }
-    }
-    if (turn_king == null){
+    if (!turn_king){
         throw new Error("King not found! Strange. function setMoveablePieces")
     }
     let cols_and_rows = []
@@ -1605,15 +1494,8 @@ function isNotBlocked({col,
 
 
     // find the king
-    let turn_king: Piece = nullPiece
-    for (let key in initBoardGeneral.current){
-
-        if (initBoardGeneral.current[key].color == color && initBoardGeneral.current[key].kind == "king"){
-            
-            turn_king = initBoardGeneral.current[key]
-            break;
-        }
-    }
+    let turn_king = initBoardGeneral.current.find(piece_inside => (piece_inside.color == color && piece_inside.kind == "king"))
+    if (!turn_king) throw new Error("Couldn't find turn king in isNotBlocked")
 
     // find the direction
     if (col == turn_king.col){ // same column
@@ -1653,18 +1535,14 @@ function isNotBlocked({col,
                         if (obj[key] != "empty") {
 
                             let piece_there = getPiece(col, piece_row_2, true, boardInverseGeneral)
-                            for (let key in initBoardGeneral.current){
-                                if (initBoardGeneral.current[key].name == piece_there){
-                                
-                                    if ((initBoardGeneral.current[key].kind == "rook" || initBoardGeneral.current[key].kind == "queen")
-                                        && initBoardGeneral.current[key].color != color){
-                                        opponent_exists = true
-                                        break
-                                    } else {
-                                        no_piece_opponent = false
-                                        break
-                                    }
-                                    
+                            
+                            let piece_found = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece_there))
+                            if (piece_found){
+
+                                if (["rook", "queen"].includes(piece_found.kind) && piece_found.color != color){
+                                    opponent_exists = true
+                                } else {
+                                    no_piece_opponent = false
                                 }
                             }
                         }
@@ -1706,18 +1584,14 @@ function isNotBlocked({col,
                         if (obj[key] != "empty") {
 
                             let piece_there = getPiece(col, piece_row_2, true, boardInverseGeneral)
-                            for (let key in initBoardGeneral.current){
-                                if (initBoardGeneral.current[key].name == piece_there){
-                                
-                                    if ((initBoardGeneral.current[key].kind == "rook" || initBoardGeneral.current[key].kind == "queen")
-                                        && initBoardGeneral.current[key].color != color){
-                                        opponent_exists = true
-                                        break
-                                    } else {
-                                        no_piece_opponent = false
-                                        break
-                                    }
-                                    
+                            
+                            let piece_found = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece_there))
+                            if (piece_found){
+
+                                if (["rook", "queen"].includes(piece_found.kind) && piece_found.color != color){
+                                    opponent_exists = true
+                                } else {
+                                    no_piece_opponent = false
                                 }
                             }
                         }
@@ -1739,125 +1613,59 @@ function isNotBlocked({col,
 
         if (kind == "pawn"){
 
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-
-                    if (early_return_condition){
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {leftEat: true, rightEat: true, forward: true}    
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-
-                    } else {
-                        
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {leftEat: false, rightEat: false, forward: true}
-                        initBoardGeneral.current = [...localInitBoard]
-                        
-                        break
-                    }
-                    
+                if (early_return_condition){
+                    piece_found.moveable = {leftEat: true, rightEat: true, forward: true}
+                } else {
+                    piece_found.moveable = {leftEat: false, rightEat: false, forward: true}
                 }
             }
         } else if (kind == "knight"){
         
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-
-                    if (early_return_condition){
-                        
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = true
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-                    } else {
-
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = false
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-                    }
+                if (early_return_condition){
+                    piece_found.moveable = true
+                } else {
+                    piece_found.moveable = false
                 }
             }
         } else if (kind == "bishop"){
             
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-                    
-                    if (early_return_condition){
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {leftUp: true, rightUp: true}
-                        initBoardGeneral.current = [...localInitBoard]
-                        
-                        break
-
-                    } else {
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {leftUp: false, rightUp: false}
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-                    }
-                    
+                if (early_return_condition){
+                    piece_found.moveable = {leftUp: true, rightUp: true}
+                } else {
+                    piece_found.moveable = {leftUp: false, rightUp: false}
                 }
             }
+
         } else if (kind == "rook"){
 
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-
-                    if (early_return_condition){
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {upDown: true, leftRight: true}
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-
-                    } else {
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {upDown: true, leftRight: false}
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-                    }
-                    
+                if (early_return_condition){
+                    piece_found.moveable = {upDown: true, leftRight: true}
+                } else {
+                    piece_found.moveable = {upDown: true, leftRight: false}
                 }
             }
+
         } else if (kind == "queen"){
             
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-
-                    if (early_return_condition){
-                        console.log("queen is NOT blocked, only updown allowed!!!")
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-
-                    } else {
-                        console.log("queen is blocked, only updown allowed!!!")
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {upDown: true, leftRight: false, leftUp: false, rightUp: false}
-                        initBoardGeneral.current = [...localInitBoard]
-                        
-                        break
-                    }
-                    
+                if (early_return_condition){
+                    piece_found.moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                } else {
+                    piece_found.moveable = {upDown: true, leftRight: false, leftUp: false, rightUp: false}
                 }
             }
         }
@@ -1902,20 +1710,14 @@ function isNotBlocked({col,
 
                             let piece_there = getPiece(piece_col_2, piece_row, true, boardInverseGeneral)
                             console.log(piece_there)
-                            for (let key in initBoardGeneral.current){
-                                if (initBoardGeneral.current[key].name == piece_there){
-                                console.log("a piece found: ", piece_there)
+                            
+                            let piece_found = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece_there))
+                            if (piece_found){
 
-                                    if ((initBoardGeneral.current[key].kind == "rook" || initBoardGeneral.current[key].kind == "queen")
-                                        && initBoardGeneral.current[key].color != color){
-
-                                        opponent_exists = true
-                                        break
-                                    } else {
-                                        no_piece_opponent = false
-                                        break
-                                    }
-                                    
+                                if (["rook", "queen"].includes(piece_found.kind) && piece_found.color != color){
+                                    opponent_exists = true
+                                } else {
+                                    no_piece_opponent = false
                                 }
                             }
                         }
@@ -1959,20 +1761,14 @@ function isNotBlocked({col,
 
                             let piece_there = getPiece(piece_col_2, piece_row, true, boardInverseGeneral)
                             console.log(piece_there)
-                            for (let key in initBoardGeneral.current){
-                                if (initBoardGeneral.current[key].name == piece_there){
-                                console.log("a piece found: ", piece_there)
+                            
+                            let piece_found = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece_there))
+                            if (piece_found){
 
-                                    if ((initBoardGeneral.current[key].kind == "rook" || initBoardGeneral.current[key].kind == "queen")
-                                        && initBoardGeneral.current[key].color != color){
-
-                                        opponent_exists = true
-                                        break
-                                    } else {
-                                        no_piece_opponent = false
-                                        break
-                                    }
-                                    
+                                if (["rook", "queen"].includes(piece_found.kind) && piece_found.color != color){
+                                    opponent_exists = true
+                                } else {
+                                    no_piece_opponent = false
                                 }
                             }
                         }
@@ -1994,124 +1790,61 @@ function isNotBlocked({col,
 
         if (kind == "pawn"){
 
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-
-                    if (early_return_condition){
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {leftEat: true, rightEat: true, forward: true}    
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-
-                    } else {
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {leftEat: false, rightEat: false, forward: false}
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-                    }
-                    
+                if (early_return_condition){
+                    piece_found.moveable = {leftEat: true, rightEat: true, forward: true}
+                } else {
+                    piece_found.moveable = {leftEat: false, rightEat: false, forward: false}
                 }
             }
+
         } else if (kind == "knight"){
-        
-            for (let key in initBoardGeneral.current){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                    if (early_return_condition){
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = true
-                        initBoardGeneral.current = [...localInitBoard]
-                        
-                        break
-
-                    } else {
-
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = false
-                        initBoardGeneral.current = [...localInitBoard]
-                        
-                        break
-                    }
+                if (early_return_condition){
+                    piece_found.moveable = true
+                } else {
+                    piece_found.moveable = false
                 }
             }
+            
         } else if (kind == "bishop"){
             
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-                    
-                    if (early_return_condition){
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {leftUp: true, rightUp: true}
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-
-                    } else {
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {leftUp: false, rightUp: false}
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-                    }
-                    
+                if (early_return_condition){
+                    piece_found.moveable = {leftUp: true, rightUp: true}
+                } else {
+                    piece_found.moveable = {leftUp: false, rightUp: false}
                 }
             }
+
         } else if (kind == "rook"){
 
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-
-                    if (early_return_condition){
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {upDown: true, leftRight: true}
-                        initBoardGeneral.current = [...localInitBoard]
-                        
-                        break
-
-                    } else {
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {upDown: false, leftRight: true}
-                        initBoardGeneral.current = [...localInitBoard]
-                        
-                        break
-                    }
-                    
+                if (early_return_condition){
+                    piece_found.moveable = {upDown: true, leftRight: true}
+                } else {
+                    piece_found.moveable = {upDown: false, leftRight: true}
                 }
             }
+
         } else if (kind == "queen"){
             
-            for (let key in initBoardGeneral.current){
+            let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+            if (piece_found){
 
-                if (initBoardGeneral.current[key].name == name){
-                    
-
-                    if (early_return_condition){
-                        console.log("queen is NOT blocked, only updown allowed!!!")
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
-                        initBoardGeneral.current = [...localInitBoard]
-
-                        break
-
-                    } else {
-                        console.log("queen is blocked, only updown allowed!!!")
-                        let localInitBoard = [...initBoardGeneral.current]
-                        localInitBoard[key].moveable = {upDown: false, leftRight: true, leftUp: false, rightUp: false}
-                        initBoardGeneral.current = [...localInitBoard]
-                        
-                        break
-                    }
-                    
+                if (early_return_condition){
+                    piece_found.moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                } else {
+                    piece_found.moveable = {upDown: false, leftRight: true, leftUp: false, rightUp: false}
                 }
             }
         }
@@ -2160,23 +1893,13 @@ function isNotBlocked({col,
                         if (Number(String(key)[1]) == piece_row_2 && boardInverseGeneral[piece_col_2][key] != "empty"){
                             let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
                             
-                            for (let key in initBoardGeneral.current){
-                                
-                                if (initBoardGeneral.current[key].name == piece){
+                            let piece_found = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece))
+                            if (piece_found){
 
-                                    console.log("keys : ", initBoardGeneral.current[key].name)
-                                    console.log("info: ", initBoardGeneral.current[key])
-                                    console.log("piece: ", piece)
-
-                                    if ((initBoardGeneral.current[key].kind == "queen" || initBoardGeneral.current[key].kind == "bishop") 
-                                        && initBoardGeneral.current[key].color != color){
-                                    
-                                        opponent_exists = true
-                                        break
-                                    } else {
-                                        no_piece_opponent = false
-                                        break
-                                    }
+                                if (["bishop", "queen"].includes(piece_found.kind) && piece_found.color != color){
+                                    opponent_exists = true
+                                } else {
+                                    no_piece_opponent = false
                                 }
                             }
 
@@ -2221,20 +1944,14 @@ function isNotBlocked({col,
 
                         if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col_2][key] != "empty"){
                             let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
-                            
-                            for (let key in initBoardGeneral.current){
-                                
-                                if (initBoardGeneral.current[key].name == piece){
 
-                                    if ((initBoardGeneral.current[key].kind == "queen" || initBoardGeneral.current[key].kind == "bishop") 
-                                        && initBoardGeneral.current[key].color != color){
-                                    
-                                        opponent_exists = true
-                                        break
-                                    } else {
-                                        no_piece_opponent = false
-                                        break
-                                    }
+                            let piece_found = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece))
+                            if (piece_found){
+
+                                if (["bishop", "queen"].includes(piece_found.kind) && piece_found.color != color){
+                                    opponent_exists = true
+                                } else {
+                                    no_piece_opponent = false
                                 }
                             }
 
@@ -2257,125 +1974,58 @@ function isNotBlocked({col,
 
             if (kind == "pawn"){
 
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-    
-                        if (early_return_condition){
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {leftEat: true, rightEat: true, forward: true}    
-                            initBoardGeneral.current = [...localInitBoard]
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
 
-                            break
-    
-                        } else {
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {leftEat: true, rightEat: false, forward: false}
-                            initBoardGeneral.current = [...localInitBoard]
-
-                            break
-                        }
-                        
+                    if (early_return_condition){
+                        piece_found.moveable = {leftEat: true, rightEat: true, forward: true}
+                    } else {
+                        piece_found.moveable = {leftEat: true, rightEat: false, forward: false}
                     }
                 }
-            } else if (kind == "knight"){
-            
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-    
-                        if (early_return_condition){
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = true
-                            initBoardGeneral.current = [...localInitBoard]
-                            
-                            break
-    
-                        } else {
-    
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = false
-                            initBoardGeneral.current = [...localInitBoard]
 
-                            break
-                        }
+            } else if (kind == "knight"){
+
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
+
+                    if (early_return_condition){
+                        piece_found.moveable = true
+                    } else {
+                        piece_found.moveable = false
                     }
                 }
             } else if (kind == "bishop"){
                 
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-                        
-                        if (early_return_condition){
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {leftUp: true, rightUp: true}
-                            initBoardGeneral.current = [...localInitBoard]
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
 
-                            break
-    
-                        } else {
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {leftUp: true, rightUp: false}
-                            initBoardGeneral.current = [...localInitBoard]
-                                
-                            break
-                        }
-                        
+                    if (early_return_condition){
+                        piece_found.moveable = {leftUp: true, rightUp: true}
+                    } else {
+                        piece_found.moveable = {leftUp: true, rightUp: false}
                     }
                 }
             } else if (kind == "rook"){
     
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-    
-                        if (early_return_condition){
-                            
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {upDown: true, leftRight: true}
-                            initBoardGeneral.current = [...localInitBoard]
-                                
-                            break
-    
-                        } else {
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {upDown: false, leftRight: false}
-                            initBoardGeneral.current = [...localInitBoard]
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
 
-                            break
-                        }
-                        
+                    if (early_return_condition){
+                        piece_found.moveable = {upDown: true, leftRight: true}
+                    } else {
+                        piece_found.moveable = {upDown: false, leftRight: false}
                     }
                 }
             } else if (kind == "queen"){
                 
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-    
-                        if (early_return_condition){
-                            console.log("queen is NOT blocked, only updown allowed!!!")
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
-                            initBoardGeneral.current = [...localInitBoard]
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
 
-                            break
-    
-                        } else {
-                            console.log("queen is blocked, only updown allowed!!!")
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {upDown: false, leftRight: false, leftUp: true, rightUp: false}
-                            initBoardGeneral.current = [...localInitBoard]
-
-                            break
-                        }
-                        
+                    if (early_return_condition){
+                        piece_found.moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                    } else {
+                        piece_found.moveable = {upDown: false, leftRight: false, leftUp: true, rightUp: false}
                     }
                 }
             }
@@ -2422,25 +2072,14 @@ function isNotBlocked({col,
                         if (Number(String(key)[1]) == piece_row_2 && boardInverseGeneral[piece_col_2][key] != "empty"){
                             let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
                             
-                            for (let key in initBoardGeneral.current){
-                                
-                                if (initBoardGeneral.current[key].name == piece){
-                                    console.log("keys : ", initBoardGeneral.current[key].name)
-                                    console.log("info: ", initBoardGeneral.current[key])
-                                    console.log("piece: ", piece)
+                            let piece_found = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece))
+                            if (piece_found){
 
-                                    if ((initBoardGeneral.current[key].kind == "queen" || initBoardGeneral.current[key].kind == "bishop") 
-                                        && initBoardGeneral.current[key].color != color){
-                                    
-                                        opponent_exists = true
-                                        break
-                                    } else {
-                                        no_piece_opponent = false
-                                        break
-                                    }
+                                if (["bishop", "queen"].includes(piece_found.kind) && piece_found.color != color){
+                                    opponent_exists = true
+                                } else {
+                                    no_piece_opponent = false
                                 }
-                                
-                                
                             }
 
                         }
@@ -2485,19 +2124,13 @@ function isNotBlocked({col,
                         if (Number(String(key)[1]) == piece_row && boardInverseGeneral[piece_col_2][key] != "empty"){
                             let piece = getPiece(piece_col_2, piece_row_2, true, boardInverseGeneral)
                             
-                            for (let key in initBoardGeneral.current){
-                                
-                                if (initBoardGeneral.current[key].name == piece){
-                                    if ((initBoardGeneral.current[key].kind == "queen" || initBoardGeneral.current[key].kind == "bishop") 
-                                        && initBoardGeneral.current[key].color != color){
-                                    
-                                        opponent_exists = true
-                                        break
-                                    } else {
-                                        no_piece_opponent = false
-                                        break
-                                    }
+                            let piece_found = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece))
+                            if (piece_found){
 
+                                if (["bishop", "queen"].includes(piece_found.kind) && piece_found.color != color){
+                                    opponent_exists = true
+                                } else {
+                                    no_piece_opponent = false
                                 }
                             }
 
@@ -2515,131 +2148,65 @@ function isNotBlocked({col,
                 console.log("early return, should be cleaned up, no_piece_king:", no_piece_king, "opponent_exists: ", opponent_exists, "no_piece_opponent: ", no_piece_opponent)
                 early_return_condition = true
             }
-            
-
 
             if (kind == "pawn"){
 
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-    
-                        if (early_return_condition){
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {leftEat: true, rightEat: true, forward: true}    
-                            initBoardGeneral.current = [...localInitBoard]
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
 
-                            break
-    
-                        } else {
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {leftEat: false, rightEat: true, forward: false}
-                            initBoardGeneral.current = [...localInitBoard]
-
-                            break
-                        }
-                        
+                    if (early_return_condition){
+                        piece_found.moveable = {leftEat: true, rightEat: true, forward: true}    
+                    } else {
+                        piece_found.moveable = {leftEat: false, rightEat: true, forward: false}
                     }
                 }
+
             } else if (kind == "knight"){
             
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-    
-                        if (early_return_condition){
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = true
-                            initBoardGeneral.current = [...localInitBoard]
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
 
-                            break
-    
-                        } else {
-    
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = false
-                            initBoardGeneral.current = [...localInitBoard]
-
-                            break
-                        }
+                    if (early_return_condition){
+                        piece_found.moveable = true
+                    } else {
+                        piece_found.moveable = false
                     }
                 }
+
             } else if (kind == "bishop"){
                 
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-                        
-                        if (early_return_condition){
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {leftUp: true, rightUp: true}
-                            initBoardGeneral.current = [...localInitBoard]
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
 
-                            break
-    
-                        } else {
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {leftUp: false, rightUp: true}
-                            initBoardGeneral.current = [...localInitBoard]
-
-                            break
-                        }
-                        
+                    if (early_return_condition){
+                        piece_found.moveable = {leftUp: true, rightUp: true}
+                    } else {
+                        piece_found.moveable = {leftUp: false, rightUp: true}
                     }
                 }
+
+
             } else if (kind == "rook"){
-    
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-    
-                        if (early_return_condition){
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {upDown: true, leftRight: true}
-                            initBoardGeneral.current = [...localInitBoard]
 
-                            break
-    
-                        } else {
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {upDown: false, leftRight: false}
-                            initBoardGeneral.current = [...localInitBoard]
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
 
-                            break
-                        }
-                        
+                    if (early_return_condition){
+                        piece_found.moveable = {upDown: true, leftRight: true}
+                    } else {
+                        piece_found.moveable = {upDown: false, leftRight: false}
                     }
                 }
+
             } else if (kind == "queen"){
-                
-                for (let key in initBoardGeneral.current){
-    
-                    if (initBoardGeneral.current[key].name == name){
-                        
-    
-                        if (early_return_condition){
-                            console.log("queen is NOT blocked, only updown allowed!!!")
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
-                            initBoardGeneral.current = [...localInitBoard]
-                                
-                            
-                            break
-    
-                        } else {
-                            console.log("queen is blocked, only updown allowed!!!")
-                            let localInitBoard = [...initBoardGeneral.current]
-                            localInitBoard[key].moveable = {upDown: false, leftRight: false, leftUp: false, rightUp: true}
-                            initBoardGeneral.current = [...localInitBoard]
-                                
-                            
-                            break
-                        }
-                        
+
+                let piece_found = initBoardGeneral.current.find(piece_inside => piece_inside.name == name)
+                if (piece_found){
+
+                    if (early_return_condition){
+                        piece_found.moveable = {upDown: true, leftRight: true, leftUp: true, rightUp: true}
+                    } else {
+                        piece_found.moveable = {upDown: false, leftRight: false, leftUp: false, rightUp: true}
                     }
                 }
             }
@@ -2853,7 +2420,6 @@ function drawPossibleMoves(
                     
                     if (row + row_inc < 8 && pawnMoveable.forward){ // draw only if the next square is empty
                         
-                        
                         if (piece == null){ 
                             isIn(col, row+row_inc, colsAndRows) ? candidate[col][row+row_inc] = true : undefined;
                         }
@@ -2866,13 +2432,9 @@ function drawPossibleMoves(
                         let piece = getPiece(col + col_inc, row + row_inc, true, boardInverseGeneral)
                         console.log("current initBoardGeneral in drawPossibleMoves: ", initBoardGeneral)
 
-                        for (let key in initBoardGeneral){ // key is just index here
-        
-                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                console.log("ok checking is in")
-
-                                isIn(col+col_inc, row+row_inc, colsAndRows) ? candidate[col + col_inc][row+row_inc] = true: undefined;
-                            }
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
+                            isIn(col+col_inc, row+row_inc, colsAndRows) ? candidate[col+col_inc][row+row_inc] = true : undefined
                         }
 
                     } 
@@ -2881,12 +2443,9 @@ function drawPossibleMoves(
                         console.log("get piece for col: ", col - col_inc, "row: ", row + row_inc)
                         let piece = getPiece(col - col_inc, row + row_inc, true, boardInverseGeneral)
 
-                        for (let key in initBoardGeneral){ // key is just index here
-        
-                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-
-                                isIn(col-col_inc, row+row_inc, colsAndRows) ? candidate[col - col_inc][row + row_inc] = true: undefined;
-                            }
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
+                            isIn(col-col_inc, row+row_inc, colsAndRows) ? candidate[col-col_inc][row+row_inc] = true : undefined
                         }
                     }
                     return candidate
@@ -2929,11 +2488,10 @@ function drawPossibleMoves(
                     if (col-1 >= 0 && pawnMoveable.leftEat){
                         
                         piece = getPiece(col-1, row+row_inc, true, boardInverseGeneral)
-                        for (let key in initBoardGeneral){
-                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                isIn(col-1, row+row_inc, colsAndRows) ? candidate[col-1][row+row_inc] = true : undefined
-                                break
-                            }
+                        
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
+                            isIn(col-1, row+row_inc, colsAndRows) ? candidate[col-1][row+row_inc] = true : undefined
                         }
                     }
 
@@ -2941,10 +2499,10 @@ function drawPossibleMoves(
                     if (col+1 <= 7 && pawnMoveable.rightEat) {
 
                         piece = getPiece(col+1, row+row_inc, true, boardInverseGeneral)
-                        for (let key in initBoardGeneral){
-                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                isIn(col+1, row+row_inc, colsAndRows) ? candidate[col+1][row+row_inc] = true: undefined 
-                            }
+                        
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
+                            isIn(col+1, row+row_inc, colsAndRows) ? candidate[col+1][row+row_inc] = true : undefined
                         }
                         
                     }
@@ -2968,10 +2526,10 @@ function drawPossibleMoves(
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col-2, row+1, colsAndRows) ? candidate[col-2][row+1] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col-2, row+1, colsAndRows) ? candidate[col-2][row+1] = true: undefined
-                                }
+                            
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col-2, row+1, colsAndRows) ? candidate[col-2][row+1] = true : undefined
                             }
                         }
 
@@ -2985,10 +2543,9 @@ function drawPossibleMoves(
 
                         } else { // there is a piece, if it's not black -> draw
                     
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col-2, row-1, colsAndRows) ? candidate[col-2][row-1] = true: undefined
-                                }
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col-2, row-1, colsAndRows) ? candidate[col-2][row-1] = true : undefined
                             }
                         }
                         
@@ -3003,10 +2560,10 @@ function drawPossibleMoves(
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col+2, row+1, colsAndRows) ? candidate[col+2][row+1] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col+2, row+1, colsAndRows) ? candidate[col+2][row+1] = true: undefined
-                                }
+                            
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col+2, row+1, colsAndRows) ? candidate[col+2][row+1] = true : undefined
                             }
                         }
                         
@@ -3017,10 +2574,10 @@ function drawPossibleMoves(
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col+2, row-1, colsAndRows) ? candidate[col+2][row-1] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col+2, row-1, colsAndRows) ? candidate[col+2][row-1] = true: undefined
-                                }
+
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col+2, row-1, colsAndRows) ? candidate[col+2][row-1] = true : undefined
                             }
                         }
                         
@@ -3035,10 +2592,10 @@ function drawPossibleMoves(
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col-1, row+2, colsAndRows) ? candidate[col-1][row+2] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col-1, row+2, colsAndRows) ? candidate[col-1][row+2] = true: undefined
-                                }
+
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col-1, row+2, colsAndRows) ? candidate[col-1][row+2] = true : undefined
                             }
                         }
                         
@@ -3049,10 +2606,10 @@ function drawPossibleMoves(
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col+1, row+2, colsAndRows) ? candidate[col+1][row+2] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col+1, row+2, colsAndRows) ? candidate[col+1][row+2] = true: undefined
-                                }
+                            
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col+1, row+2, colsAndRows) ? candidate[col+1][row+2] = true : undefined
                             }
                         }
                         
@@ -3067,10 +2624,10 @@ function drawPossibleMoves(
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col-1, row-2, colsAndRows) ? candidate[col-1][row-2] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col-1, row-2, colsAndRows) ? candidate[col-1][row-2] = true: undefined
-                                }
+
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col-1, row-2, colsAndRows) ? candidate[col-1][row-2] = true : undefined
                             }
                         }
                         
@@ -3082,10 +2639,10 @@ function drawPossibleMoves(
                         if (piece == null){ // there is no piece, you can draw
                             isIn(col+1, row-2, colsAndRows) ? candidate[col+1][row-2] = true: undefined
                         } else { // there is a piece, make sure it's not black
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col+1, row-2, colsAndRows) ? candidate[col+1][row-2] = true : undefined
-                                }
+
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col+1, row-2, colsAndRows) ? candidate[col+1][row-2] = true : undefined
                             }
                         }
                         
@@ -3115,11 +2672,9 @@ function drawPossibleMoves(
                             isIn(col, row_loc, colsAndRows) ? candidates[col][row_loc] = true: undefined
                         } else {
 
-                            for (let key in initBoardGeneral){
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col, row_loc, colsAndRows) ? candidates[col][row_loc] = true : undefined
-                                    break;
-                                }
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col, row_loc, colsAndRows) ? candidates[col][row_loc] = true : undefined
                             }
                             break;
                         }
@@ -3132,13 +2687,10 @@ function drawPossibleMoves(
                         if (piece == null) {
                             isIn(col, row_loc_2, colsAndRows) ? candidates[col][row_loc_2] = true: undefined
                         } else {
-
-                            for (let key in initBoardGeneral){
-
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col, row_loc_2, colsAndRows) ? candidates[col][row_loc_2] = true : undefined;
-                                    break;
-                                }
+                            
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col, row_loc_2, colsAndRows) ? candidates[col][row_loc_2] = true : undefined
                             }
                             break;
                         }
@@ -3152,12 +2704,9 @@ function drawPossibleMoves(
                             isIn(col_loc, row, colsAndRows) ? candidates[col_loc][row] = true: undefined
                         } else {
 
-                            for (let key in initBoardGeneral){
-
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col_loc, row, colsAndRows) ? candidates[col_loc][row] = true: undefined;
-                                    break;
-                                }
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col_loc, row, colsAndRows) ? candidates[col_loc][row] = true : undefined
                             }
                             break;
                         }
@@ -3171,12 +2720,9 @@ function drawPossibleMoves(
                             isIn(col_loc_2, row, colsAndRows) ? candidates[col_loc_2][row] = true: undefined
                         } else {
 
-                            for (let key in initBoardGeneral){
-
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col_loc_2, row, colsAndRows) ? candidates[col_loc_2][row] = true: undefined;
-                                    break;
-                                }
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col_loc_2, row, colsAndRows) ? candidates[col_loc_2][row] = true : undefined
                             }
                             break;
                         }
@@ -3215,12 +2761,9 @@ function drawPossibleMoves(
                             isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true : undefined
                         } else {
 
-                            for (let key in initBoardGeneral){
-
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true: undefined
-                                    break
-                                }
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true : undefined
                             }
                             break
                         }
@@ -3240,12 +2783,9 @@ function drawPossibleMoves(
                             isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
                         } else {
 
-                            for (let key in initBoardGeneral){
-
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
-                                    break
-                                }
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
                             }
                             break
                         }
@@ -3265,12 +2805,9 @@ function drawPossibleMoves(
                             isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true : undefined
                         } else {
 
-                            for (let key in initBoardGeneral){
-
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true: undefined
-                                    break
-                                }
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true : undefined
                             }
                             break
                         }
@@ -3290,12 +2827,9 @@ function drawPossibleMoves(
                             isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true : undefined
                         } else {
 
-                            for (let key in initBoardGeneral){
-
-                                if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                    isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true: undefined
-                                    break
-                                }
+                            let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                            if (piece_found){
+                                isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true : undefined
                             }
                             break
                         }
@@ -3340,12 +2874,9 @@ function drawPossibleMoves(
                         isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true: undefined
                     } else {
 
-                        for (let key in initBoardGeneral){
-
-                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true : undefined
-                                break
-                            }
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
+                            isIn(col_loc, row_loc, colsAndRows) ? candidates[col_loc][row_loc] = true : undefined
                         }
                         break
                     }
@@ -3365,12 +2896,9 @@ function drawPossibleMoves(
                         isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
                     } else {
 
-                        for (let key in initBoardGeneral){
-
-                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
-                                break
-                            }
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
+                            isIn(col_loc_2, row_loc_2, colsAndRows) ? candidates[col_loc_2][row_loc_2] = true : undefined
                         }
                         break
                     }
@@ -3389,13 +2917,10 @@ function drawPossibleMoves(
                     if (piece == null){
                         isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true : undefined
                     } else {
-
-                        for (let key in initBoardGeneral){
-
-                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true: undefined
-                                break
-                            }
+                        
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
+                            isIn(col_loc_3, row_loc_3, colsAndRows) ? candidates[col_loc_3][row_loc_3] = true : undefined
                         }
                         break
                     }
@@ -3415,12 +2940,9 @@ function drawPossibleMoves(
                         isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true : undefined
                     } else {
 
-                        for (let key in initBoardGeneral){
-
-                            if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                                isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true : undefined
-                                break
-                            }
+                        let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                        if (piece_found){
+                            isIn(col_loc_4, row_loc_4, colsAndRows) ? candidates[col_loc_4][row_loc_4] = true : undefined
                         }
                         break
                     }
@@ -3439,12 +2961,9 @@ function drawPossibleMoves(
                     isIn(col_loc_5, row, colsAndRows) ? candidates[col_loc_5][row] = true : undefined
                 } else {
 
-                    for (let key in initBoardGeneral){
-
-                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                            isIn(col_loc_5, row, colsAndRows) ? candidates[col_loc_5][row] = true: undefined
-                            break
-                        }
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                    if (piece_found){
+                        isIn(col_loc_5, row, colsAndRows) ? candidates[col_loc_5][row] = true : undefined
                     }
                     break
                 }
@@ -3460,12 +2979,9 @@ function drawPossibleMoves(
                     isIn(col_loc_6, row, colsAndRows) ? candidates[col_loc_6][row] = true : undefined
                 } else {
 
-                    for (let key in initBoardGeneral){
-
-                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                            isIn(col_loc_6, row, colsAndRows) ? candidates[col_loc_6][row] = true: undefined
-                            break
-                        }
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                    if (piece_found){
+                        isIn(col_loc_6, row, colsAndRows) ? candidates[col_loc_6][row] = true : undefined
                     }
                     break
                 }
@@ -3482,12 +2998,9 @@ function drawPossibleMoves(
                     isIn(col, row_loc_5, colsAndRows) ? candidates[col][row_loc_5] = true : undefined
                 } else {
 
-                    for (let key in initBoardGeneral){
-
-                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                            isIn(col, row_loc_5, colsAndRows) ? candidates[col][row_loc_5] = true : undefined
-                            break
-                        }
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                    if (piece_found){
+                        isIn(col, row_loc_5, colsAndRows) ? candidates[col][row_loc_5] = true : undefined
                     }
                     break
                 }
@@ -3503,13 +3016,11 @@ function drawPossibleMoves(
                     isIn(col, row_loc_6, colsAndRows) ? candidates[col][row_loc_6] = true : undefined
                 } else {
 
-                    for (let key in initBoardGeneral){
-
-                        if (Object.keys(initBoardGeneral[key])[0] == piece && Object.values(initBoardGeneral[key])[0].color != turn){
-                            isIn(col, row_loc_6, colsAndRows) ? candidates[col][row_loc_6] = true : undefined
-                            break
-                        }
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn))
+                    if (piece_found){
+                        isIn(col, row_loc_6, colsAndRows) ? candidates[col][row_loc_6] = true : undefined
                     }
+
                     break
                 }
 
@@ -3553,18 +3064,13 @@ function drawPossibleMoves(
                     }
                     
                 } else {
-                    for (let key in initBoardGeneral){
-    
-                
-                        if ( Object.keys(initBoardGeneral[key])[0] == piece 
-                            && Object.values(initBoardGeneral[key])[0].color != turn
-                            && Object.values(initBoardGeneral[key])[0].kind != "king"
-                            && notKingAdjacent(col, row+1, turn, initBoardGeneral, boardInverseGeneral)
-                            && notEatable(col, row+1, turn, initBoardGeneral, boardInverseGeneral)){
-    
-                                candidates[col][row+1] = true
-                                has_move = true
-                        }
+
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece && piece_inside.color != turn && piece_inside.kind != "king"
+                                                                             && notKingAdjacent(col, row+1, turn, initBoardGeneral, boardInverseGeneral)
+                                                                             && notEatable(col, row+1, turn, initBoardGeneral, boardInverseGeneral)))
+                    if (piece_found){
+                        candidates[col][row+1] = true
+                        has_move = true
                     }
                 }
             }
@@ -3583,35 +3089,23 @@ function drawPossibleMoves(
                         }
                     }
                 } else {
-    
-                    for (let key in initBoardGeneral){
-                        if ( Object.keys(initBoardGeneral[key])[0] == piece_2
-                            && Object.values(initBoardGeneral[key])[0].color != turn
-                            && Object.values(initBoardGeneral[key])[0].kind != "king"
-                            && notKingAdjacent(col+1, row, turn, initBoardGeneral, boardInverseGeneral)
-                            && notEatable(col+1, row, turn, initBoardGeneral, boardInverseGeneral)){
-                    
-                                candidates[col+1][row] = true
-                                has_move = true
 
-                                console.log("in right++")
-                        }
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece_2 && piece_inside.color != turn && piece_inside.kind != "king"
+                                                                             && notKingAdjacent(col+1, row, turn, initBoardGeneral, boardInverseGeneral)
+                                                                             && notEatable(col+1, row, turn, initBoardGeneral, boardInverseGeneral)))
+                    if (piece_found){
+                        candidates[col+1][row] = true
+                        has_move = true
                     }
                 }
 
                 // for castle move (to the right)
                 if (!has_moved){
                     let rook_2 = getPiece(7, 7, true, boardInverseGeneral, false)
-                    let rook_2_piece: Piece = nullPiece
-                    // how do we get the piece ?
-                    for (let key in initBoardGeneral){ // key is just index here
-        
-                        if (initBoardGeneral[key].name == rook_2 && initBoardGeneral[key].color == turn){
-                            rook_2_piece = (initBoardGeneral[key]);
-                        }
-                    }
-
-                    if (rook_2 && rook_2_piece.has_moved == false){
+                    
+                    let rook_2_piece = initBoardGeneral.find(piece_inside => (piece_inside.name == rook_2 && piece_inside.color == turn))
+                    
+                    if (rook_2_piece && rook_2_piece.has_moved == false){
 
                         if (noPieceBetween(col, row, 7, 7, boardInverseGeneral)){
     
@@ -3657,18 +3151,13 @@ function drawPossibleMoves(
                     }
     
                 } else {
-    
-                    for (let key in initBoardGeneral){
-    
-                        if ( Object.keys(initBoardGeneral[key])[0] == piece_3
-                            && Object.values(initBoardGeneral[key])[0].color != turn
-                            && Object.values(initBoardGeneral[key])[0].kind != "king"
-                            && notKingAdjacent(col+1, row+1, turn, initBoardGeneral, boardInverseGeneral)
-                            && notEatable(col+1, row+1, turn, initBoardGeneral, boardInverseGeneral)){
-                        
-                                candidates[col+1][row+1] = true
-                                has_move = true
-                        }
+
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece_3 && piece_inside.color != turn && piece_inside.kind != "king"
+                                                                             && notKingAdjacent(col+1, row+1, turn, initBoardGeneral, boardInverseGeneral)
+                                                                             && notEatable(col+1, row+1, turn, initBoardGeneral, boardInverseGeneral)))
+                    if (piece_found){
+                        candidates[col+1][row+1] = true
+                        has_move = true
                     }
                 }
             }
@@ -3687,18 +3176,13 @@ function drawPossibleMoves(
                     }
     
                 } else {
-    
-                    for (let key in initBoardGeneral){
-    
-                        if ( Object.keys(initBoardGeneral[key])[0] == piece_4
-                            && Object.values(initBoardGeneral[key])[0].color != turn
-                            && Object.values(initBoardGeneral[key])[0].kind != "king"
-                            && notKingAdjacent(col+1, row-1, turn, initBoardGeneral, boardInverseGeneral)
-                            && notEatable(col+1, row-1, turn, initBoardGeneral, boardInverseGeneral)){
-                        
-                                candidates[col+1][row-1] = true
-                                has_move = true
-                        }
+
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece_4 && piece_inside.color != turn && piece_inside.kind != "king"
+                                                                             && notKingAdjacent(col+1, row-1, turn, initBoardGeneral, boardInverseGeneral)
+                                                                             && notEatable(col+1, row-1, turn, initBoardGeneral, boardInverseGeneral)))
+                    if (piece_found){
+                        candidates[col+1][row-1] = true
+                        has_move = true
                     }
                 }
             }
@@ -3718,18 +3202,13 @@ function drawPossibleMoves(
                         }
                     }
                 } else {
-    
-                    for (let key in initBoardGeneral){
-    
-                        if ( Object.keys(initBoardGeneral[key])[0] == piece_5
-                            && Object.values(initBoardGeneral[key])[0].color != turn
-                            && Object.values(initBoardGeneral[key])[0].kind != "king"
-                            && notKingAdjacent(col-1, row+1, turn, initBoardGeneral, boardInverseGeneral)
-                            && notEatable(col-1, row+1, turn, initBoardGeneral, boardInverseGeneral)){
-                            
-                                candidates[col-1][row+1] = true
-                                has_move = true
-                        }
+
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece_5 && piece_inside.color != turn && piece_inside.kind != "king"
+                                                                             && notKingAdjacent(col-1, row+1, turn, initBoardGeneral, boardInverseGeneral)
+                                                                             && notEatable(col-1, row+1, turn, initBoardGeneral, boardInverseGeneral)))
+                    if (piece_found){
+                        candidates[col-1][row+1] = true
+                        has_move = true
                     }
                 }
             }
@@ -3750,34 +3229,23 @@ function drawPossibleMoves(
                     }
     
                 } else {
-    
-                    for (let key in initBoardGeneral){
-    
-                        if ( Object.keys(initBoardGeneral[key])[0] == piece_6
-                            && Object.values(initBoardGeneral[key])[0].color != turn
-                            && Object.values(initBoardGeneral[key])[0].kind != "king"
-                            && notKingAdjacent(col-1, row, turn, initBoardGeneral, boardInverseGeneral)
-                            && notEatable(col-1, row, turn, initBoardGeneral, boardInverseGeneral)){
-                        
-                                candidates[col-1][row] = true
-                                has_move = true
-                        }
+
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece_6 && piece_inside.color != turn && piece_inside.kind != "king"
+                                                                             && notKingAdjacent(col-1, row, turn, initBoardGeneral, boardInverseGeneral)
+                                                                             && notEatable(col-1, row, turn, initBoardGeneral, boardInverseGeneral)))
+                    if (piece_found){
+                        candidates[col-1][row] = true
+                        has_move = true
                     }
                 }
 
                 if (!has_moved){
 
                     let rook_1 = getPiece(0, 7, true, boardInverseGeneral, false)
-                    let rook_1_piece: Piece = nullPiece
+                    
+                    let rook_1_piece = initBoardGeneral.find(piece_inside => (piece_inside.name == rook_1 && piece_inside.color == turn))
 
-                    for (let key in initBoardGeneral){ // key is just index here
-        
-                        if (initBoardGeneral[key].name == rook_1 && initBoardGeneral[key].color == turn){
-                            rook_1_piece = initBoardGeneral[key];
-                        }
-                    }
-
-                    if (rook_1 && rook_1_piece.has_moved == false && noPieceBetween(col, row, 0, 7, boardInverseGeneral)){
+                    if (rook_1_piece && rook_1_piece.has_moved == false && noPieceBetween(col, row, 0, 7, boardInverseGeneral)){
 
                         // use opponentCantReach to check no threat for the path of king
                         let is_clear = true
@@ -3814,18 +3282,13 @@ function drawPossibleMoves(
                     }
     
                 } else {
-    
-                    for (let key in initBoardGeneral){
-    
-                        if ( Object.keys(initBoardGeneral[key])[0] == piece_7
-                            && Object.values(initBoardGeneral[key])[0].color != turn
-                            && Object.values(initBoardGeneral[key])[0].kind != "king"
-                            && notKingAdjacent(col-1, row-1, turn, initBoardGeneral, boardInverseGeneral)
-                            && notEatable(col-1, row-1, turn, initBoardGeneral, boardInverseGeneral)){
-                        
-                                candidates[col-1][row-1] = true
-                                has_move = true
-                        }
+
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece_7 && piece_inside.color != turn && piece_inside.kind != "king"
+                                                                             && notKingAdjacent(col-1, row-1, turn, initBoardGeneral, boardInverseGeneral)
+                                                                             && notEatable(col-1, row-1, turn, initBoardGeneral, boardInverseGeneral)))
+                    if (piece_found){
+                        candidates[col-1][row-1] = true
+                        has_move = true
                     }
                 }
             }
@@ -3844,18 +3307,13 @@ function drawPossibleMoves(
                     }
     
                 } else {
-    
-                    for (let key in initBoardGeneral){
-    
-                        if ( Object.keys(initBoardGeneral[key])[0] == piece_8
-                            && Object.values(initBoardGeneral[key])[0].color != turn
-                            && Object.values(initBoardGeneral[key])[0].kind != "king"
-                            && notKingAdjacent(col, row-1, turn, initBoardGeneral, boardInverseGeneral)
-                            && notEatable(col, row-1, turn, initBoardGeneral, boardInverseGeneral)){
-                        
-                                candidates[col][row-1] = true
-                                has_move = true
-                        }
+
+                    let piece_found = initBoardGeneral.some(piece_inside => (piece_inside.name == piece_8 && piece_inside.color != turn && piece_inside.kind != "king"
+                                                                             && notKingAdjacent(col, row-1, turn, initBoardGeneral, boardInverseGeneral)
+                                                                             && notEatable(col, row-1, turn, initBoardGeneral, boardInverseGeneral)))
+                    if (piece_found){
+                        candidates[col][row-1] = true
+                        has_move = true
                     }
                 }
             }
@@ -4591,31 +4049,23 @@ function isCheckCondition(col_id: number, row_id: number, playerTurn: string, in
 /*
    This function checks our rooks, bishops, and queen(s) if they can reach (or eat) opponent's king, then it's (indirect) check condition
 */
-function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], boardInverseGeneral: OneColumn[]){
+function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], boardInverseGeneral: OneColumn[]) : null | Piece{
 
     // get opponent's king
-    let opp_king: Piece = nullPiece
-    for (let key in initBoardGeneral){
-
-        if (initBoardGeneral[key].color != turn && initBoardGeneral[key].kind == "king"){
-            
-            opp_king = initBoardGeneral[key]
-            break;
-        }
-    }
+    let opp_king = initBoardGeneral.find(piece_inside => (piece_inside.color != turn && piece_inside.kind == "king"))
+    if (!opp_king) throw new Error("opp_king is not found in isIndirectCheckCondition")
 
     console.log("(isindirectCheck) turn is: ", turn)
     console.log("opp_king: ", opp_king) // col: 7, row: 3
 
-    // iterate on our pieces
-    for (let key in initBoardGeneral){
+    let to_return: null | Piece = null
 
-        let is_indirect_check_cause = true;
-        let may_return = false;
-        let piece: Piece = initBoardGeneral[key]
-        //console.log("piece in: ", piece.col, piece.row) // col: 4, row: 6
-        
+    // iterate on our pieces
+    initBoardGeneral.forEach(piece => {
+
         if (piece.color == turn){
+            let is_indirect_check_cause = true;
+            let may_return = false;
             
             if (piece.kind == "bishop"){
                 console.log("ok in bishop")
@@ -4907,11 +4357,12 @@ function isIndirectCheckCondition(turn: string, initBoardGeneral: Piece[], board
 
             if (may_return && is_indirect_check_cause == true){
 
-                return piece;
+                to_return = piece;
             }
-        }   
-    }
-    return null;
+        }
+    })
+
+    return to_return;
 }
 
 /*
@@ -5054,22 +4505,15 @@ function onclickSquare(col_id: number, row_id: number, setDrawState: Dispatch<Se
 
     } else { // we taking a piece or first selection
 
-        for (let key in initBoardGeneral.current){ // key is just index here
-        
-            
-            if (initBoardGeneral.current[key].name == piece){
-            
-                piece_in = initBoardGeneral.current[key]
-                console.log("piece_in here: ",piece_in)
-                break;
-            }
-        }
+        piece_in = initBoardGeneral.current.find(piece_inside => (piece_inside.name == piece))
 
         if (piece_in == null){
             console.log("current situation of initboardGeneral: ", initBoardGeneral.current)
             throw new Error("The piece is not found, it should've been found. Function: onClickSquare")
+
         } else if (piece_in.color != turn) { // opponent piece
 
+            console.log("piece_in here: ",piece_in)
             if (allDrawState[col_id][row_id] == true) {
 
                 let updated_piece = takePiece(col_id, row_id, selectedPiece, wsInstance, initBoardGeneral, 
@@ -5226,17 +4670,11 @@ function makeOpponentMove(move: Move, setIsCheck: Dispatch<SetStateAction<boolea
     console.log("Looking for ", move.from_col, move.from_row)
     console.log("Piece found is ", piece)
 
-    let piece_in = null
-    for (let key in initboardGeneral.current){ // key is just index here
-        
-        if (initboardGeneral.current[key].name == piece){
-            
-            piece_in = initboardGeneral.current[key]
-            console.log("piece_in here: ",piece_in)
-            break;
-        }
-    }
+    let piece_in = initboardGeneral.current.find(piece_inside => (piece_inside.name == piece))
+    console.log("piece_in here: ",piece_in)
+
     if (piece_in == null) {console.log("There should be an ERROR"); return;}
+
     let custom_selected_piece = {...piece_in}
     console.log("For opponent custom selected piece is: ", custom_selected_piece)
     console.log("moving to col:", move.to_col, " to row: ", move.to_row)
@@ -5252,7 +4690,6 @@ function makeOpponentMove(move: Move, setIsCheck: Dispatch<SetStateAction<boolea
     }
     
     if (move.type == "Upgrade"){
-        //setIsUpgradingMove(-1)
         move.to_row = old_to_row
     }
     
